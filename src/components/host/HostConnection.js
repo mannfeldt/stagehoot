@@ -5,16 +5,11 @@ import Button from '@material-ui/core/Button';
 class HostConnection extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-
-        };
-        this.startGame = this.startGame.bind(this);
+        this.nextPhase = this.nextPhase.bind(this);
     }
 
-    startGame() {
-        let game = this.props.game;
-        game.phase = "starting";
-        this.props.updateGame(game);
+    nextPhase() {
+        this.props.updateGame({phase: "starting"});
     }
     //add function to kick player
     render() {
@@ -32,7 +27,7 @@ class HostConnection extends Component {
                 {players.map((player, index) =>
                     <div key={player.key}>{player.name}</div>
                 )}
-                <Button onClick={this.startGame} variant="contained">Start</Button>
+                <Button onClick={this.nextPhase} variant="contained">Start</Button>
 
             </div>
         );

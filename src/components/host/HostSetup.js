@@ -39,18 +39,19 @@ class HostSetup extends Component {
         this.startGame(false);
     }
     startGame(teamMode) {
-        let game = this.props.game;
-        game.quiz = {
-            surveyPlayers: this.state.surveyPlayers,
-            answerStreak: this.state.answerStreak,
-            nameGenerator: this.state.nameGenerator,
-            useTeams: teamMode,
-            randomizeQuestionOrder: this.state.randomizeQuestionOrder,
-            autoPlayQuestions: this.state.autoPlayQuestions,
-        }
+        let game = {};
+        let quiz = this.props.game.quiz;
+        quiz.surveyPlayers = this.state.surveyPlayers;
+        quiz.answerStreak = this.state.answerStreak;
+        quiz.nameGenerator = this.state.nameGenerator;
+        quiz.useTeams = teamMode;
+        quiz.autoPlayQuestions = this.state.autoPlayQuestions;
+        quiz.randomizeQuestionOrder = this.state.randomizeQuestionOrder;
+        quiz.currentQuestion = 0;
+
+        game.quiz = quiz;
         game.phase = "connection";
         game.status = "IN_PROGRESS";
-        game.quiz.currentQuestion = 0;
         this.props.updateGame(game);
     }
 

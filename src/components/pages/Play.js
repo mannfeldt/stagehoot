@@ -21,7 +21,7 @@ class Play extends Component {
             player: '',
 
         };
-        this.updatePlayer = this.updatePlayer.bind(this);
+        this.saveAnswer = this.saveAnswer.bind(this);
         this.createPlayer = this.createPlayer.bind(this);
         this.fetchGame = this.fetchGame.bind(this);
     }
@@ -86,10 +86,10 @@ class Play extends Component {
             [name]: event.target.value,
         });
     };
-    updatePlayer(player) {
+    saveAnswer(answer) {
         let that = this;
-        //kolla om den är player.isNew isåfall gör en push/set
-        fire.database().ref('/games/' + that.state.game.key + '/players/' + player.key).update(player, function (error) {
+        let currentQuestionId = this.state.game.quiz.questions[this.state.game.quiz.currentQuestion].id;
+        fire.database().ref('/games/' + that.state.game.key + '/players/' + this.state.player + '/answers/'+ currentQuestionId).set(answer, function (error) {
             if (error) {
                 let snack = {
                     variant: "error",
@@ -163,7 +163,7 @@ class Play extends Component {
                 {this.state.game.phase === "starting" && <PlayStarting game={this.state.game} updatePlayer={this.updatePlayer} />}
                 {this.state.game.phase === "awaiting_question" && <PlayAwaitingQuestion game={this.state.game} updatePlayer={this.updatePlayer} />}
                 {this.state.game.phase === "show_question" && <PlayShowQuestion game={this.state.game} updatePlayer={this.updatePlayer} />}
-                {this.state.game.phase === "answer" && <PlayAnswer game={this.state.game} updatePlayer={this.updatePlayer} playerKey={this.state.player} />}
+                {this.state.game.phase === "answer" && <PlayAnswer game={this.state.game} saveAnswer={this.saveAnswer} playerKey={this.state.player} />}
                 {this.state.game.phase === "result_question" && <PlayResultQuestion game={this.state.game} updatePlayer={this.updatePlayer} playerKey={this.state.player} />}
                 {this.state.game.phase === "final_result" && <PlayFinalResult game={this.state.game} updatePlayer={this.updatePlayer} playerKey={this.state.player} />}
                 {this.state.game.phase === "end" && <PlayEnd game={this.state.game} updatePlayer={this.updatePlayer} playerKey={this.state.player} />}

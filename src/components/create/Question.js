@@ -47,7 +47,7 @@ class Question extends Component {
                         </IconButton>
                     }
                     title={this.props.question.question}
-                    subheader={this.props.question.timelimit ? this.props.question.timelimit + ' seconds' : 'unlimited time'}
+                    subheader={this.props.question.timelimit ? this.props.question.timelimit + ' seconds' : 'default timelimit'}
                 />
                 <CardContent>
                     <Typography variant="subtitle1" align="left">Correct answers</Typography>

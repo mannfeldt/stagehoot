@@ -33,6 +33,7 @@ class Create extends Component {
             gamePass: '',
         };
         this.addQuestion = this.addQuestion.bind(this);
+        this.addQuestions = this.addQuestions.bind(this);
         this.deleteQuestion = this.deleteQuestion.bind(this);
         this.validateGame = this.validateGame.bind(this);
         this.createQuiz = this.createQuiz.bind(this);
@@ -49,13 +50,26 @@ class Create extends Component {
     handleChangeSelect = event => {
         this.setState({ [event.target.name]: event.target.value });
     };
+    calculateDefaultTimeLimit(question) {
+        if (question.aType === 'multiple' || question.aType === 'boolean') {
+            return 10 + Math.floor(question.correctAnswers.join().length + question.wrongAnswers.join().length / 20);
+        } else if (question.aType === "free") {
+            return 20;
+        } else if (question.aType === "player") {
+            //answer blir 4-8 random utvalda till varje fråga
+            return 20;
+        }
+    }
     addQuestion(question) {
         let questions = this.state.questions;
-        if(questions.length===0){
+        if (questions.length === 0) {
             question.id = 1;
-        }else{
+        } else {
             //räknar ut ett id som det nuvarande högsta id+1. Kan då använda id både som unik identifierare och som index
-            question.id = Math.max.apply(Math, questions.map(function(o) { return o.id; })) +1;
+            question.id = Math.max.apply(Math, questions.map(function (o) { return o.id; })) + 1;
+        }
+        if (this.state.timelimit && !question.timelimit) {
+            question.timelimit = this.calculateDefaultTimeLimit(question);
         }
         questions.push(question);
         this.setState({
@@ -64,6 +78,29 @@ class Create extends Component {
         let snack = {
             variant: "success",
             message: "Added question"
+        }
+        this.props.showSnackbar(snack);
+    }
+    addQuestions(questions) {
+        let existingQuestions = this.state.questions;
+        for (let i = 0; i < questions.length; i++) {
+            let question = questions[i];
+            if (existingQuestions.length === 0) {
+                question.id = 1;
+            } else {
+                question.id = Math.max.apply(Math, existingQuestions.map(function (o) { return o.id; })) + 1;
+            }
+            if (this.state.timelimit && !question.timelimit) {
+                question.timelimit = this.calculateDefaultTimeLimit(question);
+            }
+            existingQuestions.push(question);
+        }
+        this.setState({
+            questions: existingQuestions
+        });
+        let snack = {
+            variant: "success",
+            message: "Added questions"
         }
         this.props.showSnackbar(snack);
     }
@@ -182,7 +219,7 @@ class Create extends Component {
                         </FormControl>
                         <Button onClick={this.createQuiz} variant="contained">Create</Button>
                     </form>
-                    <QuestionForm addQuestion={this.addQuestion} isTimelimit={!!this.state.timelimit} />
+                    <QuestionForm addQuestions={this.addQuestions} addQuestion={this.addQuestion} isTimelimit={!!this.state.timelimit} showSnackbar={this.props.showSnackbar} />
                     {this.state.questions.map((question, index) =>
                         <Question key={question.id} question={question} transitionDelay={index} deleteQuestion={this.deleteQuestion} />
                     )}
