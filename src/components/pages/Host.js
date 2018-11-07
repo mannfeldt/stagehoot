@@ -4,15 +4,7 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
-import HostSetup from '../host/HostSetup';
-import HostConnection from '../host/HostConnection';
-import HostStarting from '../host/HostStarting';
-import HostAwaitingQuestion from '../host/quiz/HostAwaitingQuestion';
-import HostShowQuestion from '../host/quiz/HostShowQuestion';
-import HostAnswer from '../host/quiz/HostAnswer';
-import HostFinalResult from '../host/HostFinalResult';
-import HostResultQuestion from '../host/quiz/HostResultQuestion';
-import HostEnd from '../host/HostEnd';
+import Quiz from '../quiz/host/Quiz';
 
 class Host extends Component {
     constructor(props) {
@@ -65,6 +57,7 @@ class Host extends Component {
                 });
                 if (game.password === that.state.password) {
                     that.initGameListiner(game.key);
+                    that.props.toggleHeader();
                 } else {
                     let snack = {
                         variant: "error",
@@ -119,9 +112,9 @@ class Host extends Component {
         //result_question sets phase to final_result if questions are all done.
         //final_result shows result of all players. top 3 and/or all. sets phase to end on action
         //end shows options for replay, export result, etc.
-        return (
-            <div className="page-container host-page">
-                {!this.state.game.phase &&
+        if (!this.state.game.phase) {
+            return (
+                <div className="page-container host-page">
                     <Grid container spacing={24}>
                         <form autoComplete="off">
                             <FormControl>
@@ -146,18 +139,15 @@ class Host extends Component {
                             <Button onClick={this.fetchGame} variant="contained">Fetch</Button>
                         </form>
                     </Grid>
-                }
-                {this.state.game.phase === "setup" && <HostSetup game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "connection" && <HostConnection game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "starting" && <HostStarting game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "awaiting_question" && <HostAwaitingQuestion game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "show_question" && <HostShowQuestion game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "answer" && <HostAnswer game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "result_question" && <HostResultQuestion game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "final_result" && <HostFinalResult game={this.state.game} updateGame={this.updateGame} />}
-                {this.state.game.phase === "end" && <HostEnd game={this.state.game} updateGame={this.updateGame} />}
-            </div>
-        );
+                </div>
+            );
+        } else {
+            return (
+                <div className="page-container host-page">
+                    {this.state.game.gametype === "quiz" && <Quiz game={this.state.game} updateGame={this.updateGame} />}
+                </div>
+            );
+        }
     }
 }
 

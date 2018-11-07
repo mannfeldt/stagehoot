@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { fire } from '../../../base';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import AnswerOption from '../AnswerOption';
+import Grid from '@material-ui/core/Grid';
 
 class HostSetup extends Component {
     constructor(props) {
@@ -34,12 +35,29 @@ class HostSetup extends Component {
             }, 1000);
         }
     }
+    componentDidUpdate(prevProps) {
+        let playerKeys = this.props.game.players ? Object.keys(this.props.game.players) : [];
+        let answersCollected = 0;
+
+        for (let i = 0; i < playerKeys.length; i++) {
+            if (this.props.game.players[playerKeys[i]].answers && this.props.game.players[playerKeys[i]].answers[this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].id]) {
+                answersCollected++;
+            }
+        }
+        if(answersCollected === playerKeys.length){
+            this.nextPhase();
+        }
+      }
     nextPhase() {
         this.props.updateGame({ phase: "result_question" });
     }
     render() {
+        let answers = [];
+        if (this.props.game) {
+            answers = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].answers;
+        }
         let answersCollected = 0;
-        let playerKeys = Object.keys(this.props.game.players);
+        let playerKeys = this.props.game.players ? Object.keys(this.props.game.players) : [];
         for (let i = 0; i < playerKeys.length; i++) {
             if (this.props.game.players[playerKeys[i]].answers && this.props.game.players[playerKeys[i]].answers[this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].id]) {
                 answersCollected++;
@@ -50,12 +68,13 @@ class HostSetup extends Component {
                 {!this.state.isTimelimited && <Button onClick={this.nextPhase}>Next</Button>}
                 {this.state.isTimelimited && <Typography variant="h2">{this.state.counter}</Typography>}
                 <Typography variant="h2">{this.state.question.question}</Typography>
-                {this.state.question.answers.map((answer, index) =>
-                    <div key={index}>
-                        <Typography variant="h3">{answer}</Typography>
-                    </div>
-                )}
                 <Typography variant="h3">Answers collected:{answersCollected}</Typography>
+                <Grid container spacing={8}>
+                    {answers.map((answer, index) =>
+                        <Grid key={index} item xs={6}>
+                            <AnswerOption answer={answer} index={index} />
+                        </Grid>)}
+                </Grid>
             </div>
         );
 

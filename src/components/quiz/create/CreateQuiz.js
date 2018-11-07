@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { fire } from '../../base';
 import QuestionForm from './QuestionForm';
 import Question from './Question';
 import Grid from '@material-ui/core/Grid';

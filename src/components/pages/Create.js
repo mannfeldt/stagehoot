@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { fire } from '../../base';
-import CreateQuiz from '../create/CreateQuiz';
+import CreateQuiz from '../quiz/create/CreateQuiz';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Typography } from '@material-ui/core';

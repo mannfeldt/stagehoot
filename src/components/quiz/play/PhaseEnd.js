@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { fire } from '../../base';
 
-class PlayStarting extends Component {
+class PhaseEnd extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -12,10 +11,10 @@ class PlayStarting extends Component {
     render() {
         return (
             <div className="phase-container">
-                PlayStarting
+                PlayEnd
             </div>
         );
     }
 }
 
-export default PlayStarting;
+export default PhaseEnd;

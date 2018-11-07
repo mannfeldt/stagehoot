@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { fire } from '../../../base';
 import { Typography } from '@material-ui/core';
 
 class HostAwaitingQuestion extends Component {
@@ -14,6 +13,8 @@ class HostAwaitingQuestion extends Component {
     componentDidMount() {
         let that = this;
         let counter = 6;
+        that.setState({ counter: 5, started: true });
+
         let i = setInterval(function () {
             counter--;
             that.setState({ counter: counter, started: true });
@@ -33,7 +34,7 @@ class HostAwaitingQuestion extends Component {
     render() {
         return (
             <div className="phase-container">
-                <Typography variant="h2">            {this.state.started ? this.state.counter : 'loading..'}
+                <Typography variant="h2">{this.state.counter}
                 </Typography>
                 HostAwaitingQuestion. 
             </div>

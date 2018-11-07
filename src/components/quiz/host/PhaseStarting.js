@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { fire } from '../../base';
 import { Typography } from '@material-ui/core';
 
 class HostStarting extends Component {

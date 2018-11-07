@@ -1,22 +1,9 @@
 import React, { Component } from 'react';
-import { fire } from '../../../base';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-const styles = theme => ({
-    root: {
-        flexGrow: 1,
-    },
-    paper: {
-        padding: theme.spacing.unit * 2,
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-    },
-});
+import AnswerOption from '../AnswerOption';
 
-class PlayAnswer extends Component {
+class PhaseAnswer extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -86,12 +73,13 @@ class PlayAnswer extends Component {
                     <Grid container spacing={8}>
                         {answers.map((answer, index) =>
                             <Grid key={index} item xs={6}>
-                                <Paper onClick={()=>{this.answerQuestion(answer)}} className={classes.paper}>{answer}</Paper>
+                                <AnswerOption answer={answer} index={index} answerQuestion={this.answerQuestion} />
                             </Grid>)}
+                        )}
                     </Grid>
                 </div>
             );
         }
     }
 }
-export default withStyles(styles)(PlayAnswer);
+export default PhaseAnswer;

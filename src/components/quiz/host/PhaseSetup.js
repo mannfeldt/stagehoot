@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { fire } from '../../base';
 import { Typography } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';

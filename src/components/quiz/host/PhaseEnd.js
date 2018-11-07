@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { fire } from '../../base';
 
 class HostEnd extends Component {
     constructor(props) {
@@ -13,6 +12,7 @@ class HostEnd extends Component {
         return (
             <div className="phase-container">
                 HostEnd
+                toggleHeader()
             </div>
         );
     }
