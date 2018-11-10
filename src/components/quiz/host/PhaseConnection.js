@@ -31,7 +31,7 @@ class PhaseConnection extends Component {
                     <Grid container>
                         {players.map((player, index) =>
                             <Grid key={index} item xs={3}>
-                                <Typography paragraph variant="caption">{player.name}</Typography>
+                                <Typography className="big-caption" paragraph variant="caption">{player.name}</Typography>
                             </Grid>)}
                     </Grid>
                 </div>

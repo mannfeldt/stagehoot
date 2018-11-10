@@ -25,6 +25,7 @@ class Leaderboard extends Component {
             rowsPerPage: 10,
         };
         this.startScoreCounter = this.startScoreCounter.bind(this);
+        this.getScoreCellWidth = this.getScoreCellWidth.bind(this);
 
     }
     componentDidMount() {
@@ -72,7 +73,6 @@ class Leaderboard extends Component {
                     let question = this.props.game.quiz.questions[j];
                     let answer = player.answers[question.id];
                     if (answer) {
-
                         if (answer.questionId === currentQuestion.id) {
                             playerScoreData.currentQuestionScore = answer.score;
                             playerScoreData.lastScore = answer.score;
@@ -87,13 +87,18 @@ class Leaderboard extends Component {
             playerScoreData.name = player.name;
             playerScoreData.key = player.key;
             playerList.push(playerScoreData);
+
+            playerList.push({lastScore: 999, currentQuestionScore: 999, totalScore: 88, name:'emil dfdsf', key: 'asd2'});
+            playerList.push({lastScore: 1, currentQuestionScore: 1, totalScore: 997, name:'olle karlsosn', key: 'asd3'});
+            playerList.push({lastScore: 99, currentQuestionScore: 99, totalScore: 909, name:'rabada dooo sco', key: 'asd4'});
+
+
         }
 
         playerList.sort(function (a, b) {
             return (b.totalScore < a.totalScore) ? -1 : (b.totalScore > a.totalScore) ? 1 : 0;
         });
         leaderboard.players = playerList;
-        leaderboard.currentQuestionId = currentQuestion.id;
         return leaderboard;
 
     }
@@ -105,6 +110,22 @@ class Leaderboard extends Component {
             //return player.totalScore + " (+" + player.currentQuestionScore + ")";
         }
     }
+
+    getScoreCellWidth(){
+        let length = 0;
+        let leaderboardData = this.getLeaderboardData();
+        for(let i = 0; i<leaderboardData.players.length; i++){
+            let player= leaderboardData.players[i];
+            let scoreWidth = player.totalScore + " (+" + player.lastScore + ")";
+            if(scoreWidth.length>length){
+                length = scoreWidth.length;
+            }
+        }
+
+
+        return (length*6)+65;
+    }
+
     handleChangePage = (event, page) => {
         this.setState({ page });
     };
@@ -120,9 +141,9 @@ class Leaderboard extends Component {
                     <TableBody>
                         {leaderboardData.players.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((player, index) =>
                             <TableRow key={player.key}>
-                                <TableCell padding="dense" numeric>{index + 1}</TableCell>
+                                <TableCell padding="dense">{index + 1}</TableCell>
                                 <TableCell>{player.name}</TableCell>
-                                <TableCell>{this.getLeaderboardScore(player)}</TableCell>
+                                <TableCell style={{width: this.getScoreCellWidth()}}>{this.getLeaderboardScore(player)}</TableCell>
                             </TableRow>
                         )}
                     </TableBody>

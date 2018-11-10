@@ -4,6 +4,7 @@ import CakeIcon from '@material-ui/icons/Cake';
 import FavoriteIcon from '@material-ui/icons/FavoriteBorder';
 import ExtensionIcon from '@material-ui/icons/ExtensionOutlined';
 import StarIcon from '@material-ui/icons/StarBorder';
+const PUBLIC_PATH = process.env.PUBLIC_URL;
 
 const answerStyles = [{
     icon: <CakeIcon />,
@@ -93,8 +94,6 @@ class AnswerChart extends Component {
                                 // Just naively convert to string for now
                                 let dataString = Math.floor(chart.data.datasets[0].data[index] * stepratio);
 
-
-                                let padding = 5;
                                 let position = element.tooltipPosition();
                                 ctx.fillStyle = answerStyles[index].color;
                                 ctx.fillText(dataString, position.x, position.y - 2);
@@ -104,7 +103,7 @@ class AnswerChart extends Component {
                                 if (answerData.correctAnswers.indexOf(index) > -1) {
 
                                     let img = new Image();
-                                    img.src = "/baseline-done_outline-24px.svg";
+                                    img.src = PUBLIC_PATH +"/baseline-done_outline-24px.svg";
                                     img.height = 100;
                                     img.width = 100;
                                     let ypos = chart.height - 34;

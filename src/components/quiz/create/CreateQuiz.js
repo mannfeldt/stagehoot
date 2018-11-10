@@ -51,7 +51,7 @@ class Create extends Component {
     };
     calculateDefaultTimeLimit(question) {
         if (question.aType === 'multiple' || question.aType === 'boolean') {
-            return 10 + Math.floor((question.correctAnswers.join().length + question.wrongAnswers.join().length)/ 50);
+            return 10 + Math.floor((question.correctAnswers.join().length + question.wrongAnswers.join().length) / 50);
         } else if (question.aType === "free") {
             return 20;
         } else if (question.aType === "player") {
@@ -139,91 +139,103 @@ class Create extends Component {
     render() {
         return (
             <div className="app-page create-page">
-                <Grid container spacing={24}>
+                <Grid container spacing={8}>
                     <form autoComplete="off">
-                        <FormControl required >
-                            <InputLabel htmlFor="gametype-required">Gametype</InputLabel>
-                            <Select
-                                value={this.state.gametype || ""}
-                                onChange={this.handleChangeSelect}
-                                name="gametype"
-                                inputProps={{
-                                    id: 'gametype-required',
-                                }}
-                            >
-                                <MenuItem value={"quiz"}>Quiz</MenuItem>
-                                <MenuItem value={"survey"}>Survey</MenuItem>
-                                <MenuItem value={"discussion"}>Discussion</MenuItem>
-                                <MenuItem value={"minigame"}>Mini game</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl required >
-                            <InputLabel htmlFor="gametype-required">Gamemode</InputLabel>
-                            <Select
-                                value={this.state.gamemode || ""}
-                                onChange={this.handleChangeSelect}
-                                name="gamemode"
-                                inputProps={{
-                                    id: 'gamemode-required',
-                                }}
-                            >
-                                <MenuItem value={"normal"}>Normal</MenuItem>
-                                <MenuItem value={"wild"}>Wild</MenuItem>
+                        <Grid item xs={4}>
+                            <FormControl required >
+                                <InputLabel htmlFor="gametype-required">Gametype</InputLabel>
+                                <Select
+                                    value={this.state.gametype || ""}
+                                    onChange={this.handleChangeSelect}
+                                    name="gametype"
+                                    inputProps={{
+                                        id: 'gametype-required',
+                                    }}
+                                >
+                                    <MenuItem value={"quiz"}>Quiz</MenuItem>
+                                    <MenuItem value={"survey"}>Survey</MenuItem>
+                                    <MenuItem value={"discussion"}>Discussion</MenuItem>
+                                    <MenuItem value={"minigame"}>Mini game</MenuItem>
+                                </Select>
+                            </FormControl>
 
-                            </Select>
-                        </FormControl>
-                        <FormControl component="fieldset">
-                            <FormLabel component="legend">Game options</FormLabel>
-                            <FormGroup>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={this.state.timelimit}
-                                            onChange={this.handleChangeBool('timelimit')}
-                                            value="timelimit"
-                                        />
-                                    }
-                                    label="Time limited questions"
+                            <FormControl required >
+                                <InputLabel htmlFor="gametype-required">Gamemode</InputLabel>
+                                <Select
+                                    value={this.state.gamemode || ""}
+                                    onChange={this.handleChangeSelect}
+                                    name="gamemode"
+                                    inputProps={{
+                                        id: 'gamemode-required',
+                                    }}
+                                >
+                                    <MenuItem value={"normal"}>Normal</MenuItem>
+                                    <MenuItem value={"wild"}>Wild</MenuItem>
+
+                                </Select>
+                            </FormControl>
+
+                            <FormControl component="fieldset">
+                                <FormLabel component="legend">Game options</FormLabel>
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={this.state.timelimit}
+                                                onChange={this.handleChangeBool('timelimit')}
+                                                value="timelimit"
+                                            />
+                                        }
+                                        label="Time limited questions"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={this.state.timescore}
+                                                onChange={this.handleChangeBool('timescore')}
+                                                value="timescore"
+                                            />
+                                        }
+                                        label="Time based score"
+                                    />
+                                </FormGroup>
+                            </FormControl>
+                            <FormControl>
+                                <TextField
+                                    label="Title"
+                                    name="title"
+                                    value={this.state.title}
+                                    margin="normal"
+                                    onChange={this.handleChange('title')}
                                 />
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={this.state.timescore}
-                                            onChange={this.handleChangeBool('timescore')}
-                                            value="timescore"
-                                        />
-                                    }
-                                    label="Time based score"
+                            </FormControl>
+                            <FormControl>
+                                <TextField
+                                    label="Password"
+                                    type="password"
+                                    name="gamePass"
+                                    margin="normal"
+                                    value={this.state.gamePass}
+                                    onChange={this.handleChange('gamePass')}
                                 />
-                            </FormGroup>
-                        </FormControl>
-                        <FormControl>
-                            <TextField
-                                label="Title"
-                                name="title"
-                                value={this.state.title}
-                                margin="normal"
-                                onChange={this.handleChange('title')}
-                            />
-                        </FormControl>
-                        <FormControl>
-                            <TextField
-                                label="Password"
-                                type="password"
-                                name="gamePass"
-                                margin="normal"
-                                value={this.state.gamePass}
-                                onChange={this.handleChange('gamePass')}
-                            />
-                        </FormControl>
-                        <Button onClick={this.createQuiz} variant="contained">Create</Button>
+                            </FormControl>
+
+                            <Button onClick={this.createQuiz} variant="contained">Create</Button>
+                        </Grid>
                     </form>
-                    <QuestionForm addQuestions={this.addQuestions} addQuestion={this.addQuestion} isTimelimit={!!this.state.timelimit} showSnackbar={this.props.showSnackbar} />
-                    {this.state.questions.map((question, index) =>
-                        <Question key={question.id} question={question} transitionDelay={index} deleteQuestion={this.deleteQuestion} />
-                    )}
+                    <Grid item xs={8}>
+
+                        <QuestionForm addQuestions={this.addQuestions} addQuestion={this.addQuestion} isTimelimit={!!this.state.timelimit} showSnackbar={this.props.showSnackbar} />
+                    </Grid>
+
+                        {this.state.questions.map((question, index) =>
+                            <Grid item xs={6} key={question.id}>
+
+                                <Question question={question} transitionDelay={index} deleteQuestion={this.deleteQuestion} />
+                            </Grid>
+                        )}
                 </Grid>
-            </div>
+            </div >
         );
     }
 }
