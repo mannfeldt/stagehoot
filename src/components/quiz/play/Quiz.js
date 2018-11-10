@@ -40,6 +40,7 @@ class Quiz extends Component {
     }
 
     render() {
+        let lastPhase = this.props.game.phase === "final_result" || this.props.game.phase === "end";
         return (
             <div className="play-container">
                 {this.props.game.phase === "connection" && <PhaseConnection game={this.props.game} addPlayer={this.props.createPlayer} playerKey={this.props.playerKey} />}
@@ -48,8 +49,7 @@ class Quiz extends Component {
                 {this.props.game.phase === "show_question" && <PhaseShowQuestion game={this.props.game} updatePlayer={this.props.updatePlayer} />}
                 {this.props.game.phase === "answer" && <PhaseAnswer game={this.props.game} saveAnswer={this.saveAnswer} playerKey={this.props.playerKey} />}
                 {this.props.game.phase === "result_question" && <PhaseResultQuestion game={this.props.game} updatePlayer={this.props.updatePlayer} playerKey={this.props.playerKey} />}
-                {this.props.game.phase === "final_result" && <PhaseFinalResult game={this.props.game} updatePlayer={this.props.updatePlayer} playerKey={this.props.playerKey} />}
-                {this.props.game.phase === "end" && <PhaseEnd game={this.props.game} updatePlayer={this.props.updatePlayer} playerKey={this.props.playerKey} />}
+                {lastPhase  && <PhaseFinalResult game={this.props.game} updatePlayer={this.props.updatePlayer} playerKey={this.props.playerKey} />}
             </div>
         );
     }

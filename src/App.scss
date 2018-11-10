@@ -1,0 +1,94 @@
+//skapa en array med answer-colors som jag kan komma åt i react? eller skapa 4 olika klasser och sen i react så ersätter där color står nu till class och styr color härifrån
+//tänk ut mer vad som är bra att ha som variabler, återanvänds, chart?
+$answer-color1: #80DEEA;
+$answer-color2: #EF9A9A;
+$answer-color3: #CE93D8;
+$answer-color4: #C5E1A5;
+.button-answer-icon svg {
+    width: 50%;
+    height: 100%;
+    opacity: 0.3;
+}
+
+.quiz-answercounter-container {
+    padding-top: 100px;
+}
+
+.quiz-top-section {
+    height: 25vh;
+    text-align: center;
+}
+
+.quiz-answer-chart {
+    max-width: 300px;
+    float: right;
+    padding-right: 20px;
+}
+
+.quiz-middle-section {
+    height: 60vh;
+    text-align: center;
+}
+
+.align-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.App {
+    text-align: center;
+}
+
+.App-logo {
+    animation: App-logo-spin infinite 20s linear;
+    height: 40vmin;
+}
+
+.App-header {
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+}
+
+.App-link {
+    color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 1279px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1280px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}

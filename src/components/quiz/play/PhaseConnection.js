@@ -17,7 +17,8 @@ class PhaseConnection extends Component {
         this.generateName = this.generateName.bind(this);
     }
     componentDidMount() {
-        if (this.props.game.quiz.nameGenerator) {
+        //problem vid restart så skapas en ny användare. test spara playerkey till localhost och testa använda den keyn om den passar
+        if (!this.props.playerKey && this.props.game.quiz.nameGenerator) {
             this.props.addPlayer(this.generatePlayer());
         }
     }
@@ -83,7 +84,17 @@ class PhaseConnection extends Component {
         return (
             <div className="phase-container">
                 {playerName &&
-                    <Typography variant="h2">Welcome {playerName}! Watch the screen, your name should show.</Typography>
+                    <div >
+                        <div className="quiz-top-section">
+                        </div>
+                        <div className='quiz-middle-section'>
+                            <Typography variant="h4">Welcome {playerName}! Watch the screen, your name should show.</Typography>
+
+
+                        </div>
+                        <div className="quiz-bottom-section">
+                        </div>
+                    </div>
                 }
                 {!playerName &&
                     <div>

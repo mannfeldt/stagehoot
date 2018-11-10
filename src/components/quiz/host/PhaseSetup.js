@@ -9,7 +9,7 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Switch from '@material-ui/core/Switch';
-class HostSetup extends Component {
+class PhaseSetup extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -51,7 +51,7 @@ class HostSetup extends Component {
         game.quiz = quiz;
         game.phase = "connection";
         game.status = "IN_PROGRESS";
-        this.props.updateGame(game);
+        this.props.gameFunc.update(game);
     }
 
     render() {
@@ -121,4 +121,4 @@ class HostSetup extends Component {
     }
 }
 
-export default HostSetup;
+export default PhaseSetup;

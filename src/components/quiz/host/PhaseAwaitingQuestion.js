@@ -1,32 +1,32 @@
 import React, { Component } from 'react';
 import { Typography } from '@material-ui/core';
+import CountdownAnimation from '../../common/CountdownAnimation';
 
-class HostAwaitingQuestion extends Component {
+class PhaseAwaitingQuestion extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            counter: 0,
-            started: false
+            counter: this.startCounter(),
         }
         this.nextPhase = this.nextPhase.bind(this);
     }
-    componentDidMount() {
+    startCounter() {
         let that = this;
-        let counter = 6;
-        that.setState({ counter: 5, started: true });
+        let counter = 5;
 
         let i = setInterval(function () {
             counter--;
-            that.setState({ counter: counter, started: true });
+            that.setState({ counter: counter });
             if (counter === 0) {
                 that.nextPhase();
                 clearInterval(i);
             }
         }, 1000);
+        return 5;
     }
 
     nextPhase() {
-        this.props.updateGame({ phase: "show_question" });
+        this.props.gameFunc.update({ phase: "show_question" });
     }
     //på componentDidMount så starta en timer eller liknande. koppla timern till något visuellt. typ en materialUI progressbar. 0-100 som visas.
     //när timern är klar så updateras phase till nästa
@@ -34,12 +34,12 @@ class HostAwaitingQuestion extends Component {
     render() {
         return (
             <div className="phase-container">
-                <Typography variant="h2">{this.state.counter}
-                </Typography>
-                HostAwaitingQuestion. 
+            <Typography variant="h2">Loading next question</Typography>
+                <CountdownAnimation speed="slow"/>
+
             </div>
         );
     }
 }
 
-export default HostAwaitingQuestion;
+export default PhaseAwaitingQuestion;

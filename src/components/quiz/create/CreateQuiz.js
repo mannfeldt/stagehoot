@@ -51,7 +51,7 @@ class Create extends Component {
     };
     calculateDefaultTimeLimit(question) {
         if (question.aType === 'multiple' || question.aType === 'boolean') {
-            return 10 + Math.floor(question.correctAnswers.join().length + question.wrongAnswers.join().length / 20);
+            return 10 + Math.floor((question.correctAnswers.join().length + question.wrongAnswers.join().length)/ 50);
         } else if (question.aType === "free") {
             return 20;
         } else if (question.aType === "player") {

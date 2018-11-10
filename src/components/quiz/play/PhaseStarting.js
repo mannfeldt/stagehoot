@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Typography } from '@material-ui/core';
 
 class PhaseStarting extends Component {
     constructor(props) {
@@ -11,7 +12,14 @@ class PhaseStarting extends Component {
     render() {
         return (
             <div className="phase-container">
-                PlayStarting
+                <div className="quiz-top-section">
+                </div>
+                <div className='quiz-middle-section'>
+                    <Typography variant="h3">Starting quiz...</Typography>
+
+                </div>
+                <div className="quiz-bottom-section">
+                </div>
             </div>
         );
     }

@@ -27,7 +27,7 @@ const styles = theme => ({
     },
     icon:{
         float: 'left',
-        fontSize: '24',
+        fontSize: '28',
         color: 'white',
         marginLeft: '10px'
     },
@@ -39,15 +39,15 @@ const styles = theme => ({
 
 const answerStyles = [{
     icon: <CakeIcon />,
-    color: '#EF9A9A',
+    color: '#80DEEA',
 },
 {
     icon: <ExtensionIcon />,
-    color: '#80DEEA'
+    color: '#EF9A9A',
 },
 {
     icon: <FavoriteIcon />,
-    color: '#CE93D8'
+    color: '#CE93D8',
 },
 {
     icon: <StarIcon />,
@@ -78,7 +78,7 @@ class AnswerOption extends Component {
         const { classes } = this.props;
         return (<div>
             {this.props.answerQuestion && <Paper onClick={() => { this.props.answerQuestion(this.props.answer) }} className={classes.playAnswer} style={{ backgroundColor: design.color }}>
-                {design.icon}
+            <div className="button-answer-icon">{design.icon}</div>
             </Paper>
             }
             {!this.props.answerQuestion && <Paper className={classes.paper} style={{ backgroundColor: design.color }}>

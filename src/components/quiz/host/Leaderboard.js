@@ -6,8 +6,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Table from '@material-ui/core/Table';
 import TablePagination from '@material-ui/core/TablePagination';
 
-
-
 const styles = theme => ({
     root: {
         width: '100%',
@@ -69,17 +67,19 @@ class Leaderboard extends Component {
             let playerScoreData = {};
             let player = this.props.game.players[playerKeys[i]];
             let score = 0;
-            for (let j = 0; j < Object.keys(player.answers).length; j++) {
-                let question = this.props.game.quiz.questions[j];
-                let answer = player.answers[question.id];
-                if (answer) {
+            if (player.answers) {
+                for (let j = 0; j < Object.keys(player.answers).length; j++) {
+                    let question = this.props.game.quiz.questions[j];
+                    let answer = player.answers[question.id];
+                    if (answer) {
 
-                    if (answer.questionId === currentQuestion.id) {
-                        playerScoreData.currentQuestionScore = answer.score;
-                        playerScoreData.lastScore = answer.score;
+                        if (answer.questionId === currentQuestion.id) {
+                            playerScoreData.currentQuestionScore = answer.score;
+                            playerScoreData.lastScore = answer.score;
 
-                    } else {
-                        score += answer.score;
+                        } else {
+                            score += answer.score;
+                        }
                     }
                 }
             }
@@ -101,7 +101,7 @@ class Leaderboard extends Component {
         if (player.currentQuestionScore === 0) {
             return player.totalScore + " (+" + player.lastScore + ")";
         } else {
-            return player.totalScore;
+            return player.totalScore + "           ";
             //return player.totalScore + " (+" + player.currentQuestionScore + ")";
         }
     }

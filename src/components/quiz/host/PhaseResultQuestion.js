@@ -3,33 +3,11 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import AnswerOption from '../AnswerOption';
 import { Typography } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
 import AnswerChart from './AnswerChart';
 import Leaderboard from './Leaderboard';
 
-const styles = theme => ({
-    root: {
-        flexGrow: 1,
-    },
-    topSection: {
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-        height: '20vw',
-    },
-    middleSection: {
-        maxWidth: '300px',
-        height: '58vh',
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-    },
-    bottomSection: {
-    },
-    table: {
-        maxWidth: 700,
-    },
-});
 
-class HostResultQuestion extends Component {
+class PhaseResultQuestion extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -69,17 +47,31 @@ ha en enkel tabell för leaderboard? men fixa så poängen strömas in. alt en h
 https://stackoverflow.com/questions/31631354/how-to-display-data-values-on-chart-js
 axis.display=false;
 detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
+
+                                3. fixa finalResultHost: podium.js + leaderboard(?) (tänker mig att podium är en barchart med top 3 eller 10 players?)
+                                yaxeln är baserad på totalscore. ovanför eller i baren verticalt så skrivs namnet. score visas också och räknas upp likt answerChart.
+                                Det hela är väldigt likt answerChart. informationen som ska visas på varje bar är totalscore, position, playername,
+                                Vinnarens namn ska presenteras nedan i större text och med guldkrona? istället för att hålla på med baren.
+                                playerPodium visas på playerFinalResult: den innehåller bara en stapel för playern själv och namnet visas inte?
+                                finalresult kan även innehålla lite rolig fakta som vem som svarade snabbast, 
+                                playerfinalresult kan innehålla en hel tabell där man kan se alla sina svar! 
+                                frågenummer, score, time (grön eller röd rad), klickar man på en rad får man se hela frågan med alla alternativ, vilket som var rätt och vilket man själv svarade 
+                                5. phaseEndHost: action för restart, create new game, save result(export), 
+                                
+                                6.phaseEndPlay: thanks for playing, creat your own game here..
+                                7. testa ha en "chat" i finalresult/connecting. en ruta där varje Play kan skriva ett meddelande som sedan visas upp i host :)
+                                7. kolla på snake. test hur reaktionstiden är i quiz från när play klickar till host skriver ut answers collected:
     */
     nextQuestion() {
         let game = {};
         game.quiz = this.props.game.quiz;
         game.quiz.currentQuestion = game.quiz.currentQuestion + 1;
         game.phase = "awaiting_question";
-        this.props.updateGame(game);
+        this.props.gameFunc.update(game);
 
     }
     finalizeQuiz() {
-        this.props.updateGame({ phase: "final_result" });
+        this.props.gameFunc.update({ phase: "final_result" });
 
     }
 
@@ -97,6 +89,9 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
         let currentQuestion = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
         for (let i = 0; i < playerKeys.length; i++) {
             let player = this.props.game.players[playerKeys[i]];
+            if (!player.answers) {
+                continue;
+            }
             let answer = player.answers[currentQuestion.id];
             if (answer) {
 
@@ -135,7 +130,6 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
     }
 
     render() {
-        const { classes } = this.props;
         let answers = [];
         let currentQuestion = "";
         if (this.props.game) {
@@ -146,26 +140,37 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
         let isLastQuestion = typeof nextQuestion === "undefined";
         return (
             <div className="phase-container">
-                <div className={classes.topSection}>
+                <div className="quiz-top-section">
                     <Typography variant="h2">{currentQuestion.question}</Typography>
                 </div>
-                <div className={classes.middleSection}>
-                    <div>
-                        finns lite problem med leaderboard och kanske chart också när det gäller true/false frågor.
-                        få till så att true/false alltid hamnar med true till vänster och byt plats så att röd är färg 2.
-                        gör mer tester på olika frågor och vad som händer när man inte svarar etc.
-                        <AnswerChart getAnswerData={this.getAnswerData} />
-                    </div>
-                    <div>
-                        <Leaderboard game={this.props.game} />
-                    </div>
-                    <Typography variant="h3">{this.getTopScorerString()}</Typography>
-
-                </div>
-                {isLastQuestion && <Button onClick={this.finalizeQuiz}>Finalize result</Button>}
-                {!isLastQuestion && <Button onClick={this.nextQuestion}>Next question</Button>}
-                <div className={classes.bottomSection}>
+                <div className='quiz-middle-section'>
                     <Grid container>
+                        <Grid item xs={6}>
+                            <div className="quiz-answer-chart">
+                                <AnswerChart getAnswerData={this.getAnswerData} />
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div>
+                                <Leaderboard game={this.props.game} />
+                            </div>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <div>
+                                {isLastQuestion && <Button onClick={this.finalizeQuiz}>Finalize result</Button>}
+                                {!isLastQuestion && <Button onClick={this.nextQuestion}>Next question</Button>}
+
+                                <Button onClick={this.props.gameFunc.restart}>Restart quiz</Button>
+                                <Button onClick={this.props.gameFunc.quit}>Quit quiz</Button>
+                                <Button onClick={this.props.gameFunc.end}>End quiz</Button>
+
+
+                            </div>
+                        </Grid>
+                    </Grid>
+                </div>
+                <div className="quiz-bottom-section">
+                    <Grid className="align-bottom" container>
                         {answers.map((answer, index) =>
                             <Grid key={index} item xs={6}>
                                 <AnswerOption answer={answer} index={index} />
@@ -178,4 +183,4 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
     }
 }
 
-export default withStyles(styles)(HostResultQuestion);
+export default PhaseResultQuestion;

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './App.css';
+import './App.scss';
 import { fire } from './base';
 import Header from './components/common/Header';
 import Create from './components/pages/Create';
@@ -38,8 +38,8 @@ class App extends Component {
       snack: snack,
     });
   }
-  toggleHeader() {
-    this.setState({ showHeader: !this.state.showHeader });
+  toggleHeader(value) {
+    this.setState({ showHeader: value });
   }
   render() {
     return (

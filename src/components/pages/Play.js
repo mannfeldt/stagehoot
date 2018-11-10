@@ -26,14 +26,20 @@ class Play extends Component {
                 snapshot.forEach(function (child) {
                     game = child.val();
                 });
+                //får skapa en ny attribut, canPlayerJoin true/false om det begövs
                 if (game.phase === "connection") {
+                    let storedPlayerKey = localStorage.getItem('RecentPlayerKey');
+                    if (storedPlayerKey && game.players && game.players[storedPlayerKey]) {
+                        that.setState({ playerKey: storedPlayerKey });
+                    }
+
                     that.initGameListiner(game.key);
                     let snack = {
                         variant: "success",
                         message: "Connected to game"
                     }
                     that.props.showSnackbar(snack);
-                    that.props.toggleHeader();
+                    that.props.toggleHeader(false);
                 } else if (game.phase === "setup") {
                     let snack = {
                         variant: "error",
@@ -41,11 +47,23 @@ class Play extends Component {
                     }
                     that.props.showSnackbar(snack);
                 } else {
-                    let snack = {
-                        variant: "error",
-                        message: "Game is in progress"
+                    let storedPlayerKey = localStorage.getItem('RecentPlayerKey');
+                    if (storedPlayerKey && game.players && game.players[storedPlayerKey]) {
+                        that.setState({ playerKey: storedPlayerKey });
+                        that.initGameListiner(game.key);
+                        let snack = {
+                            variant: "success",
+                            message: "Connected to game"
+                        }
+                        that.props.showSnackbar(snack);
+                        that.props.toggleHeader(false);
+                    } else {
+                        let snack = {
+                            variant: "error",
+                            message: "Game is in progress"
+                        }
+                        that.props.showSnackbar(snack);
                     }
-                    that.props.showSnackbar(snack);
                 }
             } else {
                 let snack = {
@@ -95,7 +113,8 @@ class Play extends Component {
             else {
                 that.setState({
                     playerKey: player.key,
-                })
+                });
+                localStorage.setItem('RecentPlayerKey', player.key);
 
             }
         })

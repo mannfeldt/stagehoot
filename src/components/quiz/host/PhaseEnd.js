@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class HostEnd extends Component {
+class PhaseEnd extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -18,4 +18,4 @@ class HostEnd extends Component {
     }
 }
 
-export default HostEnd;
+export default PhaseEnd;

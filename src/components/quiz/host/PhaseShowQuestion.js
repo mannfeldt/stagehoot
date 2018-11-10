@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Typography } from '@material-ui/core';
 
-class HostShowQuestion extends Component {
+class PhaseShowQuestion extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -17,19 +17,21 @@ class HostShowQuestion extends Component {
     }
     nextPhase() {
         let answers = [];
-        if (this.state.question.aType === 'multiple' || this.state.question.aType === 'boolean') {
+        if (this.state.question.aType === 'multiple') {
             answers = this.state.question.wrongAnswers.concat(this.state.question.correctAnswers);
             answers = this.shuffle(answers);
+        } else if (this.state.question.aType === 'boolean') {
+            answers = ['True', 'False'];
         }
-        if(answers.length){
+        if (answers.length) {
             let game = {};
             game.phase = "answer";
             game.quiz = this.props.game.quiz;
             game.quiz.questions[game.quiz.currentQuestion].answers = answers;
-            this.props.updateGame(game);
+            this.props.gameFunc.update(game);
 
-        }else{
-            this.props.updateGame({ phase: "answer" });
+        } else {
+            this.props.gameFunc.update({ phase: "answer" });
         }
     }
     shuffle(array) {
@@ -46,10 +48,18 @@ class HostShowQuestion extends Component {
     render() {
         return (
             <div className="phase-container">
-                <Typography variant="h2">{this.state.question.question}</Typography>
+                <div className="quiz-top-section">
+
+                </div>
+                <div className='quiz-middle-section'>
+                    <Typography variant="h2">{this.state.question.question}</Typography>
+                </div>
+                <div className="quiz-bottom-section">
+
+                </div>
             </div>
         );
     }
 }
 
-export default HostShowQuestion;
+export default PhaseShowQuestion;

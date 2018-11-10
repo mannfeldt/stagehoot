@@ -7,15 +7,15 @@ import StarIcon from '@material-ui/icons/StarBorder';
 
 const answerStyles = [{
     icon: <CakeIcon />,
-    color: '#EF9A9A',
+    color: '#80DEEA',
 },
 {
     icon: <ExtensionIcon />,
-    color: '#80DEEA'
+    color: '#EF9A9A',
 },
 {
     icon: <FavoriteIcon />,
-    color: '#CE93D8'
+    color: '#CE93D8',
 },
 {
     icon: <StarIcon />,
@@ -41,13 +41,9 @@ class AnswerChart extends Component {
             }]
         };
         let data = this.props.getAnswerData();
-        let topvalue = Math.max(...data.data);
-        let cheatPixels = 10;
-        let cheatValue = (topvalue * 100 / cheatPixels) / 100;
         chartData.datasets[0].borderColor = [];
-        chartData.datasets[0].borderWidth = 2;
+        chartData.datasets[0].data = data.data;
         for (let i = 0; i < data.data.length; i++) {
-            chartData.datasets[0].data[i] = data.data[i] + cheatValue;
             chartData.labels.push("");
             chartData.datasets[0].backgroundColor.push(answerStyles[i].color);
         }
@@ -57,10 +53,15 @@ class AnswerChart extends Component {
     getChartHeight() {
         let answerData = this.props.getAnswerData();
         let topvalue = Math.max(...answerData.data);
-        if (topvalue >= 2) {
-            return 300;
+        let incrementHeightPerAnswer = 25;
+        //räcker 65?
+        let minHeight = 65;
+        let maxHeight = 300;
+        let height = minHeight + (topvalue * incrementHeightPerAnswer);
+        if (height > maxHeight) {
+            return maxHeight;
         }
-        return topvalue * 100;
+        return height;
     }
 
     getChartOptions() {
@@ -74,48 +75,83 @@ class AnswerChart extends Component {
                 duration: '2000',
                 onProgress: function (animation) {
                     let answerData = that.props.getAnswerData();
-
                     animation.animationObject.onAnimationProgress = function () {
-                        //optimer så jag inte behöver gör getanswedata arje fång?
                         let ctx = this.chart.ctx;
-                        ctx.font = "24px Roboto";
+                        let chart = this.chart;
                         ctx.textAlign = "center";
                         ctx.fillStyle = "black";
                         ctx.textBaseline = "bottom";
+                        ctx.font = "24px Roboto";
+
                         let stepratio = animation.animationObject.currentStep / animation.animationObject.numSteps;
-                        for (let i = 0; i < answerData.data.length; i++) {
-                            let value = Math.floor(answerData.data[i] * stepratio);
-                            let metadata = this.chart.config.data.datasets[0]._meta[0].data[i];
 
-                            ctx.fillText(value, metadata._view.x, metadata._view.y - 2);
+                        let meta = chart.getDatasetMeta(0);
+                        if (!meta.hidden) {
+                            meta.data.forEach(function (element, index) {
+                                // Draw the text in black, with the specified font
 
-                        }
-                    }
+                                // Just naively convert to string for now
+                                let dataString = Math.floor(chart.data.datasets[0].data[index] * stepratio);
 
-                    animation.animationObject.onAnimationComplete = function () {
-                        //1. visa en ikon för rätt svar under rätt stapel. använd answerdata för att göra dett helt utanför chart. 
-                        //2. fixa finare färger, ta bort border på rätt svar etc?
-                        let ctx = this.chart.ctx;
-                        for (let i = 0; i < answerData.data.length; i++) {
-                            let metadata = this.chart.config.data.datasets[0]._meta[0].data[i];
-                            ctx.beginPath();
-                            ctx.fillStyle = "white";
-                            ctx.rect(metadata._view.x - metadata._view.width / 2, this.chart.height - 27, metadata._view.width, 4);
-                            ctx.fill();
-                            if (answerData.correctAnswers.indexOf(i) > -1) {
 
-                                let img = new Image();
-                                img.src = "/baseline-done_outline-24px.svg";
-                                img.height = 100;
-                                img.width = 100;
-                                img.color = "red";
-                                let ypos = this.chart.height - 23;
-                                img.onload = function () {
-                                    ctx.drawImage(img, metadata._view.x - 12, ypos);
+                                let padding = 5;
+                                let position = element.tooltipPosition();
+                                ctx.fillStyle = answerStyles[index].color;
+                                ctx.fillText(dataString, position.x, position.y - 2);
+                                ctx.beginPath();
+                                ctx.rect(position.x - element._view.width / 2, chart.height - 32, element._view.width, 22);
+                                ctx.fill();
+                                if (answerData.correctAnswers.indexOf(index) > -1) {
+
+                                    let img = new Image();
+                                    img.src = "/baseline-done_outline-24px.svg";
+                                    img.height = 100;
+                                    img.width = 100;
+                                    let ypos = chart.height - 34;
+                                    //ta bort onlead wrapper för att göra det instant
+                                    ctx.drawImage(img, position.x - 12, ypos);
+
                                 }
-                            }
+                            });
                         }
+
+
+
+
+
+
+
+
+                        /*
+                                                for (let i = 0; i < answerData.data.length; i++) {
+                                                    let value = Math.floor(answerData.data[i] * stepratio);
+                                                    //om det inte är någon som svarar så blir meta[0] undefined första gången. går jag in på nytt på gamet som host så fungerar det
+                                                    //ha någon specifik hantering för om ingen har svarat alls
+                                                    var meta = this.chart.getDatasetMeta(0);
+                                                    let metadata = meta.data[i];
+                        
+                                                    ctx.fillStyle = answerStyles[i].color;
+                                                    ctx.fillText(value, metadata._view.x, metadata._view.y - 2);
+                                                    ctx.beginPath();
+                                                    ctx.rect(metadata._view.x - metadata._view.width / 2, this.chart.height - 32, metadata._view.width, 22);
+                                                    ctx.fill();
+                                                    if (answerData.correctAnswers.indexOf(i) > -1) {
+                        
+                                                        let img = new Image();
+                                                        img.src = "/baseline-done_outline-24px.svg";
+                                                        img.height = 100;
+                                                        img.width = 100;
+                                                        let ypos = this.chart.height - 34;
+                                                        //ta bort onlead wrapper för att göra det instant
+                                                        ctx.drawImage(img, metadata._view.x - 12, ypos);
+                        
+                                                    }
+                                                }
+                        
+                                                */
                     }
+
+
                 },
             },
             scales: {
@@ -141,8 +177,8 @@ class AnswerChart extends Component {
                 padding: {
                     left: 0,
                     right: 0,
-                    top: 20,
-                    bottom: 0,
+                    top: 25,
+                    bottom: 40,
                 }
             }
         }

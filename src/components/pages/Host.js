@@ -18,6 +18,9 @@ class Host extends Component {
         this.updateGame = this.updateGame.bind(this);
         this.fetchGame = this.fetchGame.bind(this);
         this.initGameListiner = this.initGameListiner.bind(this);
+        this.restartGame = this.restartGame.bind(this);
+        this.quitGame = this.quitGame.bind(this);
+        this.endGame = this.endGame.bind(this);
     }
     handleChange = name => event => {
         this.setState({
@@ -38,14 +41,26 @@ class Host extends Component {
                 that.props.showSnackbar(snack);
             }
             else {
-                let snack = {
-                    variant: "success",
-                    message: "Successfully updated game!"
-                }
-                that.props.showSnackbar(snack);
             }
         })
     }
+    restartGame(){
+       let game = {};
+        game.players = [];
+       game.phase = "setup";
+       this.updateGame(game);
+    }
+
+    quitGame(){
+        this.updateGame({phase: null});
+        this.props.toggleHeader(true);
+
+
+    }
+    endGame(){
+        this.updateGame({phase: "final_result"});
+    }
+
 
     fetchGame() {
         let that = this;
@@ -112,6 +127,12 @@ class Host extends Component {
         //result_question sets phase to final_result if questions are all done.
         //final_result shows result of all players. top 3 and/or all. sets phase to end on action
         //end shows options for replay, export result, etc.
+        let gameFunctions = {
+            update: this.updateGame,
+            restart: this.restartGame,
+            end: this.endGame,
+            quit: this.quitGame,
+        }
         if (!this.state.game.phase) {
             return (
                 <div className="page-container host-page">
@@ -144,7 +165,7 @@ class Host extends Component {
         } else {
             return (
                 <div className="page-container host-page">
-                    {this.state.game.gametype === "quiz" && <Quiz game={this.state.game} updateGame={this.updateGame} />}
+                    {this.state.game.gametype === "quiz" && <Quiz game={this.state.game} gameFunc={gameFunctions} />}
                 </div>
             );
         }
