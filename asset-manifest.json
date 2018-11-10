@@ -1,13 +1,13 @@
 {
-  "main.css": "/stagehoot/static/css/main.74b13e3b.chunk.css",
-  "main.js": "/stagehoot/static/js/main.2c05bc17.chunk.js",
-  "main.js.map": "/stagehoot/static/js/main.2c05bc17.chunk.js.map",
+  "main.css": "/stagehoot/static/css/main.cb674a13.chunk.css",
+  "main.js": "/stagehoot/static/js/main.75a3065d.chunk.js",
+  "main.js.map": "/stagehoot/static/js/main.75a3065d.chunk.js.map",
   "static/js/1.7f81f033.chunk.js": "/stagehoot/static/js/1.7f81f033.chunk.js",
   "static/js/1.7f81f033.chunk.js.map": "/stagehoot/static/js/1.7f81f033.chunk.js.map",
   "runtime~main.js": "/stagehoot/static/js/runtime~main.a27241d7.js",
   "runtime~main.js.map": "/stagehoot/static/js/runtime~main.a27241d7.js.map",
-  "static/css/main.74b13e3b.chunk.css.map": "/stagehoot/static/css/main.74b13e3b.chunk.css.map",
+  "static/css/main.cb674a13.chunk.css.map": "/stagehoot/static/css/main.cb674a13.chunk.css.map",
   "index.html": "/stagehoot/index.html",
-  "precache-manifest.57bac7164cef9ee34fab2bdb1917df34.js": "/stagehoot/precache-manifest.57bac7164cef9ee34fab2bdb1917df34.js",
+  "precache-manifest.8abed92cdb77def21a4c43648aa856de.js": "/stagehoot/precache-manifest.8abed92cdb77def21a4c43648aa856de.js",
   "service-worker.js": "/stagehoot/service-worker.js"
 }
