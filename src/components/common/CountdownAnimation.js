@@ -8,7 +8,7 @@ class CountdownAnimation extends Component {
 
         };
     }
-
+//jag skulle kunna lägga en counter här som rendrerar null efter några sekunder så att är säkert att den inte hinner loopa 
     render() {
       if(this.props.speed === "slow"){
 

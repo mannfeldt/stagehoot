@@ -16,6 +16,7 @@ class PhaseSetup extends Component {
             surveyPlayers: false,
             answerStreak: true,
             nameGenerator: false,
+            remoteMode: false,
             useTeams: false,
             randomizeQuestionOrder: false,
             autoPlayQuestions: false,
@@ -43,6 +44,7 @@ class PhaseSetup extends Component {
         quiz.surveyPlayers = this.state.surveyPlayers;
         quiz.answerStreak = this.state.answerStreak;
         quiz.nameGenerator = this.state.nameGenerator;
+        quiz.remoteMode = this.state.remoteMode;
         quiz.useTeams = teamMode;
         quiz.autoPlayQuestions = this.state.autoPlayQuestions;
         quiz.randomizeQuestionOrder = this.state.randomizeQuestionOrder;
@@ -72,6 +74,16 @@ class PhaseSetup extends Component {
                                 />
                             }
                             label="Generate names for players"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={this.state.remoteMode}
+                                    onChange={this.handleChangeBool('remoteMode')}
+                                    value="remoteMode"
+                                />
+                            }
+                            label="Remote playmode"
                         />
                         <FormControlLabel
                             control={

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Typography } from '@material-ui/core';
+import CountdownAnimation from '../../common/CountdownAnimation';
 
 class PhaseAwaitingQuestion extends Component {
     constructor(props) {
@@ -10,18 +11,33 @@ class PhaseAwaitingQuestion extends Component {
     }
 
     render() {
-        return (
-            <div className="phase-container">
-                <div className="quiz-top-section">
+        if (this.props.game.quiz.remoteMode) {
+            return (
+                <div className="phase-container">
+                    <div className="quiz-top-section">
+                        <Typography variant="h3">Loading question</Typography>
+                    </div>
+                    <div className='quiz-middle-section'>
+                        <CountdownAnimation speed="slow" />
+                    </div>
+                    <div className="quiz-bottom-section">
+                    </div>
                 </div>
-                <div className='quiz-middle-section'>
-                    <Typography variant="h3">Look at the screen.</Typography>
+            );
+        } else {
 
+            return (
+                <div className="phase-container">
+                    <div className="quiz-top-section">
+                    </div>
+                    <div className='quiz-middle-section'>
+                        <Typography variant="h3">Look at the screen.</Typography>
+                    </div>
+                    <div className="quiz-bottom-section">
+                    </div>
                 </div>
-                <div className="quiz-bottom-section">
-                </div>
-            </div>
-        );
+            );
+        }
     }
 }
 

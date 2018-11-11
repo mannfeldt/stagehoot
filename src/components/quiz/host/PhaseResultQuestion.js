@@ -3,8 +3,8 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import AnswerOption from '../AnswerOption';
 import { Typography } from '@material-ui/core';
-import AnswerChart from './AnswerChart';
-import Leaderboard from './Leaderboard';
+import AnswerChart from '../AnswerChart';
+import Leaderboard from '../Leaderboard';
 
 
 class PhaseResultQuestion extends Component {
@@ -14,9 +14,6 @@ class PhaseResultQuestion extends Component {
         };
         this.nextQuestion = this.nextQuestion.bind(this);
         this.finalizeQuiz = this.finalizeQuiz.bind(this);
-        this.getAnswerData = this.getAnswerData.bind(this);
-        this.getTopScorerString = this.getTopScorerString.bind(this);
-
     }
     //om jag vill försvåra fusk så gömmer jag correctanswer/wronganswers från Play.js och gör rättningen i Host genom att play bara anger vilket svarsalternativ de valt
     //i host när jag kommer hit så rättar jag alla svar och updaterar varje players score
@@ -61,6 +58,18 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
                                 6.phaseEndPlay: thanks for playing, creat your own game here..
                                 7. testa ha en "chat" i finalresult/connecting. en ruta där varje Play kan skriva ett meddelande som sedan visas upp i host :)
                                 7. kolla på snake. test hur reaktionstiden är i quiz från när play klickar till host skriver ut answers collected:
+
+
+                                                 generalisera så att answerchart bara tar in ett gameobj. lägg getnaswerdata i answerchart.js då kan jag använda answerchart enkelt från Playsidan. 
+                            samma sak med leaderboard. de är komponenter som tar in ett obj och spottar ut en visualisering.
+                            1. mobilanpassa hela host.
+                            2. skapa remote mode. där man ska kunna klara sig genom spelet utan att kolla på hosten.
+                            3. man ska se frågorna, se resultaten. i princip allt som hosten ser men inte några actionknappar.
+                            players invididuella information kan visas i bottom eller top i liten text.
+                            lyft även in countdown i start och waiting på play i remote mode.
+                            styr allt genom if stats i render()?
+                            4. ta fram bättre classer / variants på typohraphy som funkar i mobilen. lägg till någon rolig färg/annan variant på dynamisk information:
+                            t.ex. welcome player.name ska namnet sticka ut lite från welcome styls.
     */
     nextQuestion() {
         let game = {};
@@ -73,60 +82,6 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
     finalizeQuiz() {
         this.props.gameFunc.update({ phase: "final_result" });
 
-    }
-
-    getAnswerData() {
-        let answerData = {
-            data: [],
-            topPlayer: {
-                score: 0,
-                playerKey: ''
-            },
-            correctAnswers: [],
-        };
-        let playerAnswers = [];
-        let playerKeys = this.props.game.players ? Object.keys(this.props.game.players) : [];
-        let currentQuestion = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
-        for (let i = 0; i < playerKeys.length; i++) {
-            let player = this.props.game.players[playerKeys[i]];
-            if (!player.answers) {
-                continue;
-            }
-            let answer = player.answers[currentQuestion.id];
-            if (answer) {
-
-                playerAnswers.push(answer.answer);
-                if (answer.score > answerData.topPlayer.score) {
-                    answerData.topPlayer.score = answer.score;
-                    answerData.topPlayer.playerKey = player.key;
-                }
-            }
-        }
-        for (let j = 0; j < currentQuestion.answers.length; j++) {
-            let nrOfAnswers = 0;
-            for (let i = 0; i < playerAnswers.length; i++) {
-                if (currentQuestion.answers.indexOf(playerAnswers[i]) === j) {
-                    nrOfAnswers++;
-                }
-            }
-            answerData.data.push(nrOfAnswers);
-
-            if (currentQuestion.correctAnswers.indexOf(currentQuestion.answers[j]) > -1) {
-                answerData.correctAnswers.push(j);
-            }
-        }
-
-        return answerData;
-    }
-    getTopScorerString() {
-        let result = "";
-        let answerData = this.getAnswerData();
-        if (answerData.topPlayer.score === 0) {
-            return null;
-        }
-        let topPlayer = this.props.game.players[answerData.topPlayer.playerKey];
-        result = topPlayer.name + " Scored " + answerData.topPlayer.score + " points!";
-        return result;
     }
 
     render() {
@@ -145,12 +100,12 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
                 </div>
                 <div className='quiz-middle-section'>
                     <Grid container>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <div className="quiz-answer-chart">
-                                <AnswerChart getAnswerData={this.getAnswerData} />
+                                <AnswerChart game={this.props.game} />
                             </div>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item md={6} xs={12}>
                             <div>
                                 <Leaderboard game={this.props.game} />
                             </div>
@@ -163,7 +118,6 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
                                 <Button onClick={this.props.gameFunc.restart}>Restart quiz</Button>
                                 <Button onClick={this.props.gameFunc.quit}>Quit quiz</Button>
                                 <Button onClick={this.props.gameFunc.end}>End quiz</Button>
-
 
                             </div>
                         </Grid>

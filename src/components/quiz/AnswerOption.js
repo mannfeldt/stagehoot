@@ -21,17 +21,17 @@ const styles = theme => ({
     },
     playAnswer: {
         width: '50vw',
-        height: '50vh',
+        height: '100%',
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
-    icon:{
+    icon: {
         float: 'left',
         fontSize: '28',
         color: 'white',
         marginLeft: '10px'
     },
-    answer:{
+    answer: {
         fontSize: '24',
         color: 'white',
     }
@@ -76,19 +76,21 @@ class AnswerOption extends Component {
     render() {
         let design = answerStyles[this.props.index];
         const { classes } = this.props;
-        return (<div>
-            {this.props.answerQuestion && <Paper onClick={() => { this.props.answerQuestion(this.props.answer) }} className={classes.playAnswer} style={{ backgroundColor: design.color }}>
-            <div className="button-answer-icon">{design.icon}</div>
-            </Paper>
-            }
-            {!this.props.answerQuestion && <Paper className={classes.paper} style={{ backgroundColor: design.color }}>
-                <div className={classes.icon}>{design.icon}</div>
-                <div className={classes.answer}>{this.props.answer}</div>
-            </Paper>
-            }
-        </div>
-        );
 
+        return (
+            <div className="full-height">
+                {this.props.answerQuestion && <Paper onClick={() => { this.props.answerQuestion(this.props.answer) }} className={classes.playAnswer} style={{ backgroundColor: design.color }}>
+                    <div className="button-answer-icon">{design.icon}</div>
+                    {this.props.remoteMode && <div className={classes.answer}>{this.props.answer}</div>}
+                </Paper>
+                }
+                {!this.props.answerQuestion && <Paper className={classes.paper} style={{ backgroundColor: design.color }}>
+                    <div className={classes.icon}>{design.icon}</div>
+                    <div className={classes.answer}>{this.props.answer}</div>
+                </Paper>
+                }
+            </div>
+        );
     }
 }
 

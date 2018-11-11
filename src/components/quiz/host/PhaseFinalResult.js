@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Podium from './Podium';
+import Podium from '../Podium';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 

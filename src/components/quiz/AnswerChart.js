@@ -29,8 +29,53 @@ class AnswerChart extends Component {
         this.getChartData = this.getChartData.bind(this);
         this.getChartOptions = this.getChartOptions.bind(this);
         this.getChartHeight = this.getChartHeight.bind(this);
+        this.getAnswerData = this.getAnswerData.bind(this);
 
     }
+    getAnswerData() {
+        let answerData = {
+            data: [],
+            topPlayer: {
+                score: 0,
+                playerKey: ''
+            },
+            correctAnswers: [],
+        };
+        let playerAnswers = [];
+        let playerKeys = this.props.game.players ? Object.keys(this.props.game.players) : [];
+        let currentQuestion = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
+        for (let i = 0; i < playerKeys.length; i++) {
+            let player = this.props.game.players[playerKeys[i]];
+            if (!player.answers) {
+                continue;
+            }
+            let answer = player.answers[currentQuestion.id];
+            if (answer) {
+
+                playerAnswers.push(answer.answer);
+                if (answer.score > answerData.topPlayer.score) {
+                    answerData.topPlayer.score = answer.score;
+                    answerData.topPlayer.playerKey = player.key;
+                }
+            }
+        }
+        for (let j = 0; j < currentQuestion.answers.length; j++) {
+            let nrOfAnswers = 0;
+            for (let i = 0; i < playerAnswers.length; i++) {
+                if (currentQuestion.answers.indexOf(playerAnswers[i]) === j) {
+                    nrOfAnswers++;
+                }
+            }
+            answerData.data.push(nrOfAnswers);
+
+            if (currentQuestion.correctAnswers.indexOf(currentQuestion.answers[j]) > -1) {
+                answerData.correctAnswers.push(j);
+            }
+        }
+
+        return answerData;
+    }
+
     getChartData() {
         let chartData = {
             labels: [],
@@ -41,21 +86,20 @@ class AnswerChart extends Component {
                 borderWidth: 1,
             }]
         };
-        let data = this.props.getAnswerData();
+        let data = this.getAnswerData();
         chartData.datasets[0].borderColor = [];
         chartData.datasets[0].data = data.data;
         for (let i = 0; i < data.data.length; i++) {
             chartData.labels.push("");
             chartData.datasets[0].backgroundColor.push(answerStyles[i].color);
         }
-
         return chartData;
     }
+
     getChartHeight() {
-        let answerData = this.props.getAnswerData();
+        let answerData = this.getAnswerData();
         let topvalue = Math.max(...answerData.data);
         let incrementHeightPerAnswer = 25;
-        //räcker 65?
         let minHeight = 65;
         let maxHeight = 300;
         let height = minHeight + (topvalue * incrementHeightPerAnswer);
@@ -75,7 +119,7 @@ class AnswerChart extends Component {
                 easing: 'easeInOutCubic',
                 duration: '2000',
                 onProgress: function (animation) {
-                    let answerData = that.props.getAnswerData();
+                    let answerData = that.getAnswerData();
                     animation.animationObject.onAnimationProgress = function () {
                         let ctx = this.chart.ctx;
                         let chart = this.chart;
@@ -89,9 +133,7 @@ class AnswerChart extends Component {
                         let meta = chart.getDatasetMeta(0);
                         if (!meta.hidden) {
                             meta.data.forEach(function (element, index) {
-                                // Draw the text in black, with the specified font
 
-                                // Just naively convert to string for now
                                 let dataString = Math.floor(chart.data.datasets[0].data[index] * stepratio);
 
                                 let position = element.tooltipPosition();
@@ -103,24 +145,15 @@ class AnswerChart extends Component {
                                 if (answerData.correctAnswers.indexOf(index) > -1) {
 
                                     let img = new Image();
-                                    img.src = PUBLIC_PATH +"/baseline-done_outline-24px.svg";
+                                    img.src = PUBLIC_PATH + "/baseline-done_outline-24px.svg";
                                     img.height = 100;
                                     img.width = 100;
                                     let ypos = chart.height - 34;
                                     //ta bort onlead wrapper för att göra det instant
                                     ctx.drawImage(img, position.x - 12, ypos);
-
                                 }
                             });
                         }
-
-
-
-
-
-
-
-
                         /*
                                                 for (let i = 0; i < answerData.data.length; i++) {
                                                     let value = Math.floor(answerData.data[i] * stepratio);

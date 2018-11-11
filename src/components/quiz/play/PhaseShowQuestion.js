@@ -10,18 +10,31 @@ class PhaseShowQuestion extends Component {
     }
 
     render() {
-        return (
-            <div className="phase-container">
-                <div className="quiz-top-section">
+        if (this.props.game.quiz.remoteMode) {
+            return (
+                <div className="phase-container">
+                    <div className="quiz-top-section">
+                    </div>
+                    <div className='quiz-middle-section'>
+                        <Typography variant="h4">{this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}</Typography>
+                    </div>
+                    <div className="quiz-bottom-section">
+                    </div>
                 </div>
-                <div className='quiz-middle-section'>
-                    <Typography variant="h3">Question is displayed on the screen.</Typography>
-
+            );
+        } else {
+            return (
+                <div className="phase-container">
+                    <div className="quiz-top-section">
+                    </div>
+                    <div className='quiz-middle-section'>
+                        <Typography variant="h4">Look at the question on the screen!</Typography>
+                    </div>
+                    <div className="quiz-bottom-section">
+                    </div>
                 </div>
-                <div className="quiz-bottom-section">
-                </div>
-            </div>
-        );
+            );
+        }
     }
 }
 

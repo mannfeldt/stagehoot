@@ -57,28 +57,77 @@ class PhaseAnswer extends Component {
     };
 
     render() {
-        const { classes } = this.props;
         let answers = [];
         if (this.props.game) {
             answers = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].answers;
         }
-        if (this.state.hasAnswered) {
-            return (<div className="phase-container">
-                You answered: {this.state.selectedAnswer}
-            </div>
-            );
+
+        if (this.props.game.quiz.remoteMode) {
+            if (this.state.hasAnswered) {
+                return (
+                    <div className="phase-container">
+                        <div className="quiz-top-section">
+                            <Typography variant="h4">
+                                {this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}
+                            </Typography>
+                        </div>
+                        <div className='quiz-middle-section'>
+                            <Typography variant="h4">
+                                You answered: {this.state.selectedAnswer}
+                            </Typography>
+                        </div>
+                        <div className="quiz-bottom-section">
+                        </div>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="phase-container">
+                        <div className="quiz-top-section">
+                            <Typography variant="h4">
+                                {this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}
+                            </Typography>
+                        </div>
+                        <div className="quiz-middle-and-bottom-section">
+                            <Grid container spacing={8} className="full-height">
+                                {answers.map((answer, index) =>
+                                    <Grid key={index} item xs={6}>
+                                        <AnswerOption answer={answer} index={index} answerQuestion={this.answerQuestion} remoteMode={true} />
+                                    </Grid>)}
+                            </Grid>
+                        </div>
+                    </div>
+                );
+            }
         } else {
-            return (
-                <div className="phase-container">
-                    <Grid container spacing={8}>
-                        {answers.map((answer, index) =>
-                            <Grid key={index} item xs={6}>
-                                <AnswerOption answer={answer} index={index} answerQuestion={this.answerQuestion} />
-                            </Grid>)}
-                        )}
-                    </Grid>
-                </div>
-            );
+            if (this.state.hasAnswered) {
+                return (
+                    <div className="phase-container">
+                        <div className="quiz-top-section">
+                        </div>
+                        <div className='quiz-middle-section'>
+                            <Typography variant="h4">
+                                You answered: {this.state.selectedAnswer}
+                            </Typography>
+                        </div>
+                        <div className="quiz-bottom-section">
+                        </div>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="phase-container">
+                        <div className="quiz-complete-section">
+                            <Grid container spacing={8} className="full-height">
+                                {answers.map((answer, index) =>
+                                    <Grid key={index} item xs={6}>
+                                        <AnswerOption answer={answer} index={index} answerQuestion={this.answerQuestion} />
+                                    </Grid>)}
+                            </Grid>
+                        </div>
+                    </div>
+                );
+            }
         }
     }
 }

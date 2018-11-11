@@ -87,12 +87,6 @@ class Leaderboard extends Component {
             playerScoreData.name = player.name;
             playerScoreData.key = player.key;
             playerList.push(playerScoreData);
-
-            playerList.push({lastScore: 999, currentQuestionScore: 999, totalScore: 88, name:'emil dfdsf', key: 'asd2'});
-            playerList.push({lastScore: 1, currentQuestionScore: 1, totalScore: 997, name:'olle karlsosn', key: 'asd3'});
-            playerList.push({lastScore: 99, currentQuestionScore: 99, totalScore: 909, name:'rabada dooo sco', key: 'asd4'});
-
-
         }
 
         playerList.sort(function (a, b) {
