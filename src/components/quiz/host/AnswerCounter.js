@@ -21,7 +21,7 @@ class AnswerCounter extends Component {
 
         return (
             <div>
-                <Typography variant="h4">Answers collected</Typography>
+                <Typography variant="h5">Answers collected</Typography>
                 <LinearProgress className={classes.bar} variant="determinate" value={this.props.value} />
             </div>
         );

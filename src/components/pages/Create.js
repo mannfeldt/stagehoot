@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import CreateMinigame from '../minigame/create/CreateMinigame';
 
 class Create extends Component {
 
@@ -98,9 +99,10 @@ class Create extends Component {
                     <Button onClick={this.setGameType("discussion")} variant="contained">Discussion</Button>
                 </Grid>}
                 {this.state.gametype === "quiz" && <CreateQuiz createQuiz={this.createGame} showSnackbar={this.props.showSnackbar} />}
+                {this.state.gametype === "minigame" && <CreateMinigame createGame={this.createGame} showSnackbar={this.props.showSnackbar} />}
                 {this.state.gametype === "done" &&
                     <div>
-                        <Typography variant="h3">Created game ID: {this.state.gameId}</Typography>
+                        <Typography variant="h2">Created game ID:  <span className="dynamic-text">{this.state.gameId}</span></Typography>
                         <Link to={'/host'}>Host game</Link>
                     </div>
                 }

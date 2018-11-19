@@ -15,7 +15,7 @@ class PhaseAwaitingQuestion extends Component {
             return (
                 <div className="phase-container">
                     <div className="quiz-top-section">
-                        <Typography variant="h3">Loading question</Typography>
+                        <Typography variant="h5">Loading question</Typography>
                     </div>
                     <div className='quiz-middle-section'>
                         <CountdownAnimation speed="slow" />
@@ -31,7 +31,7 @@ class PhaseAwaitingQuestion extends Component {
                     <div className="quiz-top-section">
                     </div>
                     <div className='quiz-middle-section'>
-                        <Typography variant="h3">Look at the screen.</Typography>
+                        <Typography variant="h5">Look at the screen.</Typography>
                     </div>
                     <div className="quiz-bottom-section">
                     </div>

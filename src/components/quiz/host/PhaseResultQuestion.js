@@ -70,6 +70,8 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
                             styr allt genom if stats i render()?
                             4. ta fram bättre classer / variants på typohraphy som funkar i mobilen. lägg till någon rolig färg/annan variant på dynamisk information:
                             t.ex. welcome player.name ska namnet sticka ut lite från welcome styls.
+                            display1/4 ser bra ut men räcker inte till. Behöver några mindre och varierade. leta upp färdiga headers online för h1/h6?
+                            eller skapa bara egna klasser. vanlig paragraph, header1, header2, header3, header4, med egen color, fontsize, font, typ som display fast mindre
     */
     nextQuestion() {
         let game = {};
@@ -96,7 +98,7 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
         return (
             <div className="phase-container">
                 <div className="quiz-top-section">
-                    <Typography variant="h2">{currentQuestion.question}</Typography>
+                    <Typography variant="h5">{currentQuestion.question}</Typography>
                 </div>
                 <div className='quiz-middle-section'>
                     <Grid container>

@@ -82,21 +82,21 @@ class PhaseResultQuestion extends Component {
             return (
                 <div className="phase-container">
                     <div className="quiz-top-section">
-                        {correctAnswer > 0 && <Typography variant="h4">Correct answer!</Typography>}
-                        {wrongAnswer && <Typography variant="h4">Wrong answer!</Typography>}
-                        {noAnswer && <Typography variant="h4">You did not answer the question</Typography>}
+                        {correctAnswer > 0 && <Typography variant="h5">Correct answer!</Typography>}
+                        {wrongAnswer && <Typography variant="h5">Wrong answer!</Typography>}
+                        {noAnswer && <Typography variant="h5">You did not answer the question</Typography>}
                         {!noAnswer &&
                             <div>
-                                <Typography>Score:{playerData.totalScore} Time:{playerData.answerTime / 1000} seconds</Typography>
+                                <Typography variant="body1">Score:  <span className="dynamic-text">{playerData.totalScore}</span> Time:  <span className="dynamic-text">{playerData.answerTime / 1000}</span> seconds</Typography>
                             </div>
                         }
                         {playerData.oldLeaderboardPosition !== playerData.newLeaderboardPosition &&
                             <div>
-                                <Typography>Old position:{playerData.oldLeaderboardPosition} New position:{playerData.newLeaderboardPosition}</Typography>
+                                <Typography variant="body1">Old position:{playerData.oldLeaderboardPosition} New position:{playerData.newLeaderboardPosition}</Typography>
                             </div>
                         }
                         {playerData.oldLeaderboardPosition === playerData.newLeaderboardPosition &&
-                            <Typography>Position:{playerData.newLeaderboardPosition}</Typography>
+                            <Typography variant="body1">Position:{playerData.newLeaderboardPosition}</Typography>
                         }
                     </div>
                     <div className='quiz-middle-section'>
@@ -128,82 +128,31 @@ class PhaseResultQuestion extends Component {
             return (
                 <div className="phase-container">
                     <div className="quiz-top-section">
-                        {correctAnswer > 0 && <Typography variant="h3">Correct answer!</Typography>}
-                        {wrongAnswer && <Typography variant="h3">Wrong answer!</Typography>}
-                        {noAnswer && <Typography variant="h3">You did not answer the question</Typography>}
+                        {correctAnswer > 0 && <Typography paragraph variant="h5">Correct answer!</Typography>}
+                        {wrongAnswer && <Typography paragraph variant="h5">Wrong answer!</Typography>}
+                        {noAnswer && <Typography paragraph variant="h5">You did not answer the question</Typography>}
 
                     </div>
                     <div className='quiz-middle-section'>
                         {!noAnswer &&
                             <div>
-                                <Typography>Score:{playerData.totalScore}</Typography>
-                                <Typography>Time:{playerData.answerTime / 1000} seconds</Typography>
+                                <Typography variant="body1">Score:{playerData.totalScore}</Typography>
+                                <Typography variant="body1">Time:{playerData.answerTime / 1000} seconds</Typography>
                             </div>
                         }
                         {playerData.oldLeaderboardPosition !== playerData.newLeaderboardPosition &&
                             <div>
-                                <Typography>Old position:{playerData.oldLeaderboardPosition}</Typography>
-                                <Typography>New position:{playerData.newLeaderboardPosition}</Typography>
+                                <Typography variant="body1">Old position:{playerData.oldLeaderboardPosition}</Typography>
+                                <Typography variant="body1">New position:{playerData.newLeaderboardPosition}</Typography>
                             </div>
                         }
                         {playerData.oldLeaderboardPosition === playerData.newLeaderboardPosition &&
-                            <Typography>Position:{playerData.newLeaderboardPosition}</Typography>
+                            <Typography variant="body1">Position:{playerData.newLeaderboardPosition}</Typography>
                         }
 
                     </div>
                     <div className="quiz-bottom-section">
-                        <Typography>Look at the screen to se overall player results</Typography>
-                    </div>
-                </div>
-            );
-        }
-
-
-
-
-
-
-        if (playerData.hasAnswered) {
-
-            return (
-                <div className="phase-container">
-                    <div className="quiz-top-section">
-                        {playerData.currentQuestionScore > 0 && <Typography variant="h3">Correct answer!</Typography>}
-                        {playerData.currentQuestionScore === 0 && <Typography variant="h3">Wrong answer!</Typography>}
-
-                    </div>
-                    <div className='quiz-middle-section'>
-                        <Typography>Score:{playerData.totalScore}</Typography>
-                        <Typography>Time:{playerData.answerTime / 1000} seconds</Typography>
-                        {playerData.oldLeaderboardPosition !== playerData.newLeaderboardPosition &&
-                            <div>
-                                <Typography>Old position:{playerData.oldLeaderboardPosition}</Typography>
-                                <Typography>New position:{playerData.newLeaderboardPosition}</Typography>
-                            </div>
-                        }
-                        {playerData.oldLeaderboardPosition === playerData.newLeaderboardPosition &&
-                            <Typography>Position:{playerData.newLeaderboardPosition}</Typography>
-                        }
-
-                    </div>
-                    <div className="quiz-bottom-section">
-                        <Typography>Look at the screen to se overall player results</Typography>
-                    </div>
-                </div>
-            );
-        } else {
-            return (
-                <div className="phase-container">
-                    <div className="quiz-top-section">
-                        <Typography variant="h3">You did not answer the question</Typography>
-
-                    </div>
-                    <div className='quiz-middle-section'>
-                        <Typography>Score:{playerData.totalScore}</Typography>
-                        <Typography>Position:{playerData.newLeaderboardPosition}</Typography>
-                    </div>
-                    <div className="quiz-bottom-section">
-
+                        <Typography variant="subtitle1">Look at the screen to se overall player results</Typography>
                     </div>
                 </div>
             );

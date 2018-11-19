@@ -67,13 +67,13 @@ class PhaseAnswer extends Component {
                 return (
                     <div className="phase-container">
                         <div className="quiz-top-section">
-                            <Typography variant="h4">
+                            <Typography paragraph variant="h5">
                                 {this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}
                             </Typography>
                         </div>
                         <div className='quiz-middle-section'>
-                            <Typography variant="h4">
-                                You answered: {this.state.selectedAnswer}
+                            <Typography variant="body1">
+                                You answered: <span className="dynamic-text">{this.state.selectedAnswer}</span> 
                             </Typography>
                         </div>
                         <div className="quiz-bottom-section">
@@ -84,7 +84,7 @@ class PhaseAnswer extends Component {
                 return (
                     <div className="phase-container">
                         <div className="quiz-top-section">
-                            <Typography variant="h4">
+                            <Typography variant="h5">
                                 {this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}
                             </Typography>
                         </div>
@@ -106,8 +106,8 @@ class PhaseAnswer extends Component {
                         <div className="quiz-top-section">
                         </div>
                         <div className='quiz-middle-section'>
-                            <Typography variant="h4">
-                                You answered: {this.state.selectedAnswer}
+                            <Typography variant="body1">
+                                You answered: <span className="dynamic-text">{this.state.selectedAnswer}</span>
                             </Typography>
                         </div>
                         <div className="quiz-bottom-section">

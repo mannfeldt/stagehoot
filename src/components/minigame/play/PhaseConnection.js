@@ -18,7 +18,7 @@ class PhaseConnection extends Component {
     }
     componentDidMount() {
         //problem vid restart så skapas en ny användare. test spara playerkey till localhost och testa använda den keyn om den passar
-        if (!this.props.playerKey && this.props.game.quiz.nameGenerator) {
+        if (!this.props.playerKey && this.props.game.minigame.nameGenerator) {
             this.props.addPlayer(this.generatePlayer());
         }
     }
@@ -81,86 +81,36 @@ class PhaseConnection extends Component {
         if (players && this.props.playerKey) {
             playerName = players[this.props.playerKey].name;
         }
-        let playersInLobby = [];
-        if (players) {
-            playersInLobby = Object.values(players);
-        }
-
-        if (this.props.game.quiz.remoteMode) {
-            return (
-                <div className="phase-container">
-                    {playerName &&
-                        <div >
-                            <div className="quiz-top-section">
-                                <Typography variant="h5">Welcome <span className="dynamic-text">{playerName}</span>! </Typography>
-
-                            </div>
-                            <div className='quiz-middle-section'>
-                                <Typography paragraph variant="subtitle1">Players in lobby</Typography>
-                                <Grid container>
-                                    {playersInLobby.map((player, index) =>
-                                        <Grid key={player.key} item md={3} xs={6}>
-                                            <Typography paragraph variant="body1">{player.name}</Typography>
-                                        </Grid>)}
-                                </Grid>
-
-                            </div>
-                            <div className="quiz-bottom-section">
-                                <Typography paragraph variant="subtitle1">Waiting for the host to start the game</Typography>
-
-                            </div>
+        return (
+            <div className="phase-container">
+                {playerName &&
+                    <div >
+                        <div className="quiz-top-section">
                         </div>
-                    }
-                    {!playerName &&
-                        <div>
-                            <FormControl>
-                                <TextField
-                                    label="Name"
-                                    name="name"
-                                    value={this.state.name}
-                                    margin="normal"
-                                    onChange={this.handleChange('name')}
-                                />
-                            </FormControl>
-                            <Button onClick={this.createPlayer} variant="contained">done</Button>
+                        <div className='quiz-middle-section'>
+                            <Typography variant="h5">Welcome <span className="dynamic-text">{playerName}</span>!</Typography>
+                            <Typography variant="subtitle1"> Watch the screen, your name should show.</Typography>
                         </div>
-                    }
-                </div>
-            );
-        } else {
-            return (
-                <div className="phase-container">
-                    {playerName &&
-                        <div >
-                            <div className="quiz-top-section">
-                            </div>
-                            <div className='quiz-middle-section'>
-                                <Typography variant="h5">Welcome <span className="dynamic-text">{playerName}</span>!</Typography>
-                                <Typography variant="subtitle1"> Watch the screen, your name should show.</Typography>
-
-
-                            </div>
-                            <div className="quiz-bottom-section">
-                            </div>
+                        <div className="quiz-bottom-section">
                         </div>
-                    }
-                    {!playerName &&
-                        <div>
-                            <FormControl>
-                                <TextField
-                                    label="Name"
-                                    name="name"
-                                    value={this.state.name}
-                                    margin="normal"
-                                    onChange={this.handleChange('name')}
-                                />
-                            </FormControl>
-                            <Button onClick={this.createPlayer} variant="contained">done</Button>
-                        </div>
-                    }
-                </div>
-            );
-        }
+                    </div>
+                }
+                {!playerName &&
+                    <div>
+                        <FormControl>
+                            <TextField
+                                label="Name"
+                                name="name"
+                                value={this.state.name}
+                                margin="normal"
+                                onChange={this.handleChange('name')}
+                            />
+                        </FormControl>
+                        <Button onClick={this.createPlayer} variant="contained">done</Button>
+                    </div>
+                }
+            </div>
+        );
     }
 }
 

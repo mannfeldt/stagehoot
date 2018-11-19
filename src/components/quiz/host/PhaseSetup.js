@@ -59,7 +59,7 @@ class PhaseSetup extends Component {
     render() {
         return (
             <div className="phase-container">
-                <Typography variant="h2">Game Settings</Typography>
+                <Typography variant="h4">Game Settings</Typography>
                 <Button onClick={this.createClassicGame} variant="contained">Classic</Button>
                 <Button onClick={this.createTeamGame} variant="contained">Team mode</Button>
 

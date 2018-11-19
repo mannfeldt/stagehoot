@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Podium from '../Podium';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import {Link} from 'react-router-dom';
@@ -17,12 +16,10 @@ class PhaseFinalResult extends Component {
             <div className="phase-container">
                 <div className='quiz-middle-section'>
                     <Typography variant="h2">Final score</Typography>
-
-                    <Podium game={this.props.game} />
+                    podium
                 </div>
                 <div className="align-bottom ">
                     <div>
-
                         <Button onClick={this.props.gameFunc.restart}>Replay quiz</Button>
                         <Button onClick={this.props.gameFunc.quit}>Quit quiz</Button>
                         <Button onClick={() => alert('show results')}>Show results</Button>
@@ -31,7 +28,6 @@ class PhaseFinalResult extends Component {
                             <Link to={'/create'}>Host game</Link>
                         </Button>
                     </div>
-
                 </div>
             </div>
         );

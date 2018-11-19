@@ -143,7 +143,7 @@ class Podium extends Component {
             <div style={{maxHeight: MAX_HEIGHT_PODIUM}}>
                 <HorizontalBar data={this.getChartData} height={MAX_HEIGHT_PODIUM}
                     options={this.getChartOptions()} />
-                <Typography variant="caption">{this.getWinnerString()}</Typography>
+                <Typography variant="subtitle1">{this.getWinnerString()}</Typography>
             </div>
         );
     }

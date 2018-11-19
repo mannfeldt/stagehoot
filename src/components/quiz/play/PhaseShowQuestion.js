@@ -16,7 +16,7 @@ class PhaseShowQuestion extends Component {
                     <div className="quiz-top-section">
                     </div>
                     <div className='quiz-middle-section'>
-                        <Typography variant="h4">{this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}</Typography>
+                        <Typography variant="h5">{this.props.game.quiz.questions[this.props.game.quiz.currentQuestion].question}</Typography>
                     </div>
                     <div className="quiz-bottom-section">
                     </div>
@@ -28,7 +28,7 @@ class PhaseShowQuestion extends Component {
                     <div className="quiz-top-section">
                     </div>
                     <div className='quiz-middle-section'>
-                        <Typography variant="h4">Look at the question on the screen!</Typography>
+                        <Typography variant="h5">Look at the question on the screen!</Typography>
                     </div>
                     <div className="quiz-bottom-section">
                     </div>

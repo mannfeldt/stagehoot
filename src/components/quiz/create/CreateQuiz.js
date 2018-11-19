@@ -17,7 +17,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Switch from '@material-ui/core/Switch';
 
-class Create extends Component {
+class CreateQuiz extends Component {
 
     constructor(props) {
         super(props);
@@ -240,4 +240,4 @@ class Create extends Component {
     }
 }
 
-export default Create;
+export default CreateQuiz;

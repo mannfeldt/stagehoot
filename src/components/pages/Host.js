@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
 import Quiz from '../quiz/host/Quiz';
+import Minigame from '../minigame/host/Minigame';
 
 class Host extends Component {
     constructor(props) {
@@ -166,6 +167,10 @@ class Host extends Component {
             return (
                 <div className="page-container host-page">
                     {this.state.game.gametype === "quiz" && <Quiz game={this.state.game} gameFunc={gameFunctions} />}
+                    {this.state.game.gametype === "snake" && <Minigame game={this.state.game} gameFunc={gameFunctions} />}
+                    {this.state.game.gametype === "tetris" && <Minigame game={this.state.game} gameFunc={gameFunctions} />}
+
+
                 </div>
             );
         }

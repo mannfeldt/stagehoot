@@ -4,6 +4,49 @@ $answer-color1: #80DEEA;
 $answer-color2: #EF9A9A;
 $answer-color3: #CE93D8;
 $answer-color4: #C5E1A5;
+.player-controlls-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas: ". up ." "left center right" ". down .";
+}
+
+.player-controlls-icon {
+    font-size: 20vw !important;
+}
+
+.player-controlls-action {
+    height: 33vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-controlls-left {
+    grid-area: left;
+}
+
+.player-controlls-right {
+    grid-area: right;
+}
+.player-controlls-middle{
+    grid-area: center;
+}
+
+.player-controlls-up {
+    grid-area: up;
+}
+
+.player-controlls-down {
+    grid-area: down;
+}
+
+@media (orientation:landscape) {
+    .player-controlls-action {
+        height: 33vh;
+    }
+}
+
 .button-answer-icon svg {
     width: 50%;
     height: 100%;
@@ -12,6 +55,11 @@ $answer-color4: #C5E1A5;
 
 .big-caption {
     font-size: 28px;
+}
+
+.dynamic-text {
+    font-size: 1.1em;
+    font-weight: 400;
 }
 
 .full-height {

@@ -15,7 +15,7 @@ class PhaseStarting extends Component {
             return (
                 <div className="phase-container">
                     <div className="quiz-top-section">
-                        <Typography variant="h3">Starting quiz</Typography>
+                        <Typography variant="h5">Starting quiz</Typography>
                     </div>
                     <div className='quiz-middle-section'>
                         <CountdownAnimation speed="slow" />
@@ -30,7 +30,7 @@ class PhaseStarting extends Component {
                     <div className="quiz-top-section">
                     </div>
                     <div className='quiz-middle-section'>
-                        <Typography variant="h3">Starting quiz...</Typography>
+                        <Typography variant="h5">Starting quiz...</Typography>
                     </div>
                     <div className="quiz-bottom-section">
                     </div>
