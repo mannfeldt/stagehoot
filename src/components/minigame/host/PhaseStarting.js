@@ -33,7 +33,7 @@ class PhaseStarting extends Component {
     render() {
         return (
             <div className="phase-container">
-                <Typography variant="h2">Starting quiz</Typography>
+                <Typography variant="h2">Starting game</Typography>
                 <CountdownAnimation speed="slow" />
             </div>
         );

@@ -43,7 +43,7 @@ class SnakeStarting extends Component {
         super(props);
         this.state = {
             counter: this.startCounter(),
-            snakesize: 30,
+            snakesize: 10,
         }
         this.nextPhase = this.nextPhase.bind(this);
         this.createSnakes = this.createSnakes.bind(this);
@@ -62,36 +62,24 @@ class SnakeStarting extends Component {
         }, 1000);
         return 5;
     }
+
     createSnakes() {
         let playerKeys = Object.keys(this.props.game.players);
         let startingY = 90;
         let startingX = 300;
         let snakes = [];
-        for (let i = 0; i < playerKeys.length; i++) {
+        //mocka flera spelare genom att loopa på x och sen byt player.key till playerKeys[0]
+        for (let i = 0; i < 17; i++) {
             let player = this.props.game.players[playerKeys[i]];
             let snake = {
-                playerKeys: [player.key],
-                direction: 'right',
-                nextDirection: 'right',
+                playerKeys: [playerKeys[0]],
                 actions: ['up', 'down', 'right', 'left'],
                 score: 0,
-                color: SNAKE_COLORS[i],
-                name: SNAKE_NAMES[i],
+                color: SNAKE_COLORS[i % SNAKE_COLORS.length],
+                name: SNAKE_NAMES[i % SNAKE_NAMES.length],
+                //start positioner ska randomas helt, inklusive direction, varanan ska starta nereifrån upp, uppifrån ner, höger till vänster, vänster till göger..
+                //fyra olika random metoder och y måste vara unikt för de som kör horizontelt och x måste vara unikt för som kör vertikalt, kanske även ett mellanrum mellan varje snake
                 id: i,
-                body: [{
-                    x: startingX,
-                    y: startingY + (i * 90),
-                }, {
-                    x: startingX - this.state.snakesize,
-                    y: startingY + (i * 90),
-                }, {
-                    x: startingX - (this.state.snakesize * 2),
-                    y: startingY + (i * 90),
-                }, {
-                    x: startingX - (this.state.snakesize * 3),
-                    y: startingY + (i * 90),
-                }]
-
             }
             snakes.push(snake);
             //här ska jag lägga till såd et finns en food per player?
@@ -99,7 +87,7 @@ class SnakeStarting extends Component {
         }
         return snakes;
     }
-    createCoopSnakes() {
+    createTeamSnakes() {
         let playerKeys = Object.keys(this.props.game.players);
         let startingY = 100;
         let startingX = 300;
@@ -114,20 +102,19 @@ class SnakeStarting extends Component {
             let snake = {
                 playerKeys: [player.key],
                 direction: 'right',
-                nextDirection: 'right',
                 id: i,
                 score: 0,
                 body: [{
                     x: startingX,
                     y: startingY,
                 }, {
-                    x: startingX - this.state.settings.snake.size,
+                    x: startingX - this.state.snakesize,
                     y: startingY,
                 }, {
-                    x: startingX - (this.state.settings.snake.size * 2),
+                    x: startingX - (this.state.snakesize * 2),
                     y: startingY,
                 }, {
-                    x: startingX - (this.state.settings.snake.size * 3),
+                    x: startingX - (this.state.snakesize * 3),
                     y: startingY,
                 }]
 
@@ -136,6 +123,38 @@ class SnakeStarting extends Component {
             //här ska jag lägga till såd et finns en food per player?
             //foods.push(food);
         }
+        return snakes;
+    }
+    createCoopSnakes() {
+        //alla players kontrollerar samma snake. antingen med en knapp var, eller så har alla alla knappar?
+        //kanske en spelare får bara 1 klick? samarbetesövning.
+        let playerKeys = Object.keys(this.props.game.players);
+        let startingY = 90;
+        let startingX = 300;
+        let snakes = [];
+        let snake = {
+            playerKeys: playerKeys,
+            direction: 'right',
+            actions: ['up', 'down', 'right', 'left'],
+            score: 0,
+            color: SNAKE_COLORS[Math.floor(Math.random() * SNAKE_COLORS.length)],
+            name: SNAKE_NAMES[Math.floor(Math.random() * SNAKE_NAMES.length)],
+            id: 0,
+            body: [{
+                x: startingX,
+                y: startingY,
+            }, {
+                x: startingX - this.state.snakesize,
+                y: startingY,
+            }, {
+                x: startingX - (this.state.snakesize * 2),
+                y: startingY,
+            }, {
+                x: startingX - (this.state.snakesize * 3),
+                y: startingY,
+            }]
+        }
+        snakes.push(snake);
         return snakes;
     }
 
@@ -166,11 +185,21 @@ class SnakeStarting extends Component {
 
     nextPhase() {
         let snakes = [];
-        if (this.props.game.minigame.useTeams) {
-            snakes = this.createCoopSnakes();
-        } else {
-            snakes = this.createSnakes();
+
+        switch (this.props.game.minigame.multiplayerMode) {
+            case 'classic':
+                snakes = this.createSnakes();
+                break;
+            case 'coop':
+                snakes = this.createCoopSnakes();
+                break;
+            case 'team':
+                snakes = this.createTeamSnakes();
+                break;
+            default:
+                break;
         }
+
         let players = this.props.game.players;
         for (let i = 0; i < snakes.length; i++) {
             let actionChunks = this.chunkify(snakes[i].actions, snakes[i].playerKeys.length);
@@ -196,7 +225,7 @@ class SnakeStarting extends Component {
     render() {
         return (
             <div className="phase-container">
-                <Typography variant="h2">Starting quiz</Typography>
+                <Typography variant="h2">Starting game</Typography>
                 <CountdownAnimation speed="slow" />
             </div>
         );
