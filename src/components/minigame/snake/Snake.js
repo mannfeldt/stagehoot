@@ -12,9 +12,12 @@ class Snake extends Component {
         this.state = {
             gameTicker: null,
             ticks: 0,
+            winners: [],
+            paused: true,
+            overlay: false,
             settings: {
                 snake: {
-                    size: 10,
+                    size: 20,
                     speed: this.props.game.minigame.difficulty,
                     border: '#000',
                     respawntime: 3,
@@ -24,16 +27,16 @@ class Snake extends Component {
                     border: '#73AA24',
                 },
                 canvas: {
-                    width: window.innerWidth,
-                    height: window.innerHeight,
                     background: '#F5F5F5',
-                    border: '#000'
+                    border: '#000',
                 },
             }
         };
+        this.state.settings.canvas.height = Math.round(window.innerHeight / this.state.settings.snake.size) * this.state.settings.snake.size;
+        this.state.settings.canvas.width = Math.round(window.innerWidth / this.state.settings.snake.size) * this.state.settings.snake.size;
         this.state.snakes = this.getSnakesInStartingPosition(this.props.game.minigame.snakes, this.state.settings);
         let initialFoods = [];
-        for (let i = 0; i < this.props.game.minigame.snakes.length*3; i++) {
+        for (let i = 0; i < this.props.game.minigame.snakes.length * 3; i++) {
             let food = {
                 index: i,
                 active: false,
@@ -48,12 +51,15 @@ class Snake extends Component {
         this.resetCanvas = this.resetCanvas.bind(this);
         this.drawFood = this.drawFood.bind(this);
         this.detectCollisions = this.detectCollisions.bind(this);
-        this.endGame = this.endGame.bind(this);
         this.initControllerListener = this.initControllerListener.bind(this);
         this.generateFoods = this.generateFoods.bind(this);
         this.isEndGame = this.isEndGame.bind(this);
         this.detectOpponentCollision = this.detectOpponentCollision.bind(this);
         this.detectSelfCollision = this.detectSelfCollision.bind(this);
+        this.detectWallCollision = this.detectWallCollision.bind(this);
+        this.togglePausGame = this.togglePausGame.bind(this);
+        this.renderOverlay = this.renderOverlay.bind(this);
+        this.nextPhase = this.nextPhase.bind(this);
 
     }
     //vissa snakes lyckas inte äta foods? är det en bugg med konstiga synkningar mot state när det är så många?
@@ -143,7 +149,7 @@ class Snake extends Component {
         for (let i = 0; i < snakes.length; i++) {
             let snake = snakes[i];
             if (snake.direction === "down" && snake.body) {
-                existingValues.push(snake.body[0].y);
+                existingValues.push(snake.body[0].x);
             }
         }
 
@@ -160,7 +166,7 @@ class Snake extends Component {
         for (let i = 0; i < snakes.length; i++) {
             let snake = snakes[i];
             if (snake.direction === "up" && snake.body) {
-                existingValues.push(snake.body[0].y);
+                existingValues.push(snake.body[0].x);
             }
         }
 
@@ -220,19 +226,27 @@ class Snake extends Component {
 
         canvas = app.querySelector('canvas');
         ctx = canvas.getContext('2d');
-        ctx.globalCompositeOperation = "screen"
 
-        //problem vid restart så skapas en ny användare. test spara playerkey till localhost och testa använda den keyn om den passar
         this.generateSnakes();
 
+        let that = this;
         let gameTicker = setInterval(() => {
-            if (!this.isEndGame()) {
-                this.detectCollisions();
-                this.generateSnakes();
-            } else {
-                this.endGame();
+            if (that.state.paused) {
+                if (that.state.overlay) {
+                    return;
+                }
+                that.renderOverlay();
+                return;
             }
-        }, this.state.settings.snake.speed);
+            if (!that.state.winners.length > 0) {
+                that.generateSnakes();
+                that.detectCollisions();
+                that.isEndGame();
+
+            } else {
+                that.nextPhase();
+            }
+        }, that.state.settings.snake.speed);
 
         this.setState({ gameTicker: gameTicker });
 
@@ -246,7 +260,7 @@ class Snake extends Component {
         let that = this;
         snakeRef.on('value', function (snapshot) {
             let snake = snapshot.val();
-            if (snake) {
+            if (snake && !that.state.paused) {
                 //kan blir problem med asynch setstate?
                 that.setState(function (state, props) {
                     let snakes = [...state.snakes];
@@ -268,39 +282,115 @@ class Snake extends Component {
         //ett alt är att lyfta ut Players till en egen root? kan lägga phase och currentq i en game.state och sen är det allt som Player lyssnar på?
         //men play behöver också behöva synca sin egna player.
     }
+    renderOverlay() {
+        this.setState(function (state, props) {
+            return {
+                overlay: true,
+            };
+        });
+        ctx.globalAlpha = 0.4;
+        ctx.textAlign = "center";
+        ctx.font = "100px roboto";
+        ctx.fillStyle = "#000000";
+        if (this.state.ticks === 1) {
+            ctx.fillText("Click to start", canvas.width / 2, canvas.height / 2);
+        } else if (this.state.winners.length > 0) {
+            ctx.fillText("Game over", canvas.width / 2, canvas.height / 2);
+        } else {
+            ctx.fillText("Paused", canvas.width / 2, canvas.height / 2);
+        }
+        ctx.globalAlpha = 1;
+        ctx.font = "20px roboto";
+        let snakes = this.state.snakes;
+        let gridSize = this.state.settings.snake.size;
+        for (let i = 0; i < snakes.length; i++) {
+            let snake = snakes[i];
+            if (!snake.body[0]) {
+                continue;
+            }
+            let headX = Math.max(gridSize, snake.body[0].x);
+            let headY = Math.max(gridSize, snake.body[0].y);
+            if (headX >= canvas.width) {
+                headX = canvas.width - (gridSize *2);
+            }
+            if (headY >= canvas.height) {
+                headY = canvas.height - (gridSize *2);
+            }
+            let snakeName = snake.playerKeys.length === 1 ? this.props.game.players[snake.playerKeys[0]].name : snake.name;
+            ctx.fillStyle = snake.color;
+            switch (snake.direction) {
+                case 'right':
+                    ctx.textAlign = "center";
+                    ctx.fillText(snakeName, headX, headY - (gridSize / 5));
+                    break;
+                case 'left':
+                    ctx.textAlign = "start";
+                    ctx.fillText(snakeName, headX, headY - (gridSize / 5));
+                    break;
+                case 'up':
+                    ctx.textAlign = "start";
+
+                    ctx.fillText(snakeName, headX, headY - (gridSize / 5));
+                    break;
+                case 'down':
+                    ctx.textAlign = "start";
+                    ctx.fillText(snakeName, headX, headY + gridSize * 2);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     isEndGame() {
-        //om det är survival så returnera true om det bara finns en snake kvar in game
-
-        //om det är reace så returnera true som någon snake har nått winning score/length,
-
+        let winners = [];
+        let snakes = [...this.state.snakes];
         if (this.props.game.minigame.gamemode === "survival") {
-            if (this.state.snakes.length === 1) {
-                return this.state.snakes[0].dead;
-            }
-            let snakesRemaining = 0;
-            for (let i = 0; i < this.state.snakes.length; i++) {
-                if (!this.state.snakes[i].dead) {
-                    snakesRemaining += 1;
+            if (snakes.length === 1 && snakes[0].dead) {
+                winners.push(snakes[0]);
+            } else {
+                for (let i = 0; i < snakes.length; i++) {
+                    if (!snakes[i].dead) {
+                        winners.push(snakes[i]);
+                    }
+                    if (winners.length > 1) {
+                        return;
+                    }
                 }
-                if (snakesRemaining > 1) {
-                    return false;
+                //om det inte finns någon levande alla så betyder det att de sista tog samtidigt. då vinner den som är längst av alla 
+                if (winners.length === 0) {
+                    let winnerIndex = 0;
+                    let highestScore = 0;
+                    for (let i = 0; i < snakes.length; i++) {
+                        if (snakes[i].score > highestScore) {
+                            winnerIndex = i;
+                            highestScore = snakes[i].score;
+                        }
+                    }
+                    winners.push(snakes[winnerIndex]);
                 }
             }
-            return true;
 
         } else if (this.props.game.minigame.gamemode === "race") {
-            for (let i = 0; i < this.state.snakes.length; i++) {
-                if (this.state.snakes[i].body.length >= this.props.game.minigame.racetarget) {
-                    return true;
+            for (let i = 0; i < snakes.length; i++) {
+                if (snakes[i].body.length >= this.props.game.minigame.racetarget) {
+                    winners.push(snakes[i]);
                 }
             }
-            return false;
         }
-        return false;
+        if (winners.length > 0) {
+            this.setState(function (state, props) {
+                return {
+                    winners: winners,
+                    paused: true,
+                    overlay: false,
+                };
+            });
+        }
     }
 
-    shouldComponentUpdate(){
+    shouldComponentUpdate(nextProps, nextState) {
         //kan jag ha det här?
+
         return false;
     }
 
@@ -328,6 +418,9 @@ class Snake extends Component {
     generateSnakes() {
         //i alla såna här dpelarspecifika metoder måste jag ta in vilken snake/player det gäller
         let snakes = [];
+        let foods = [...this.state.foods];
+        const gridSize = this.state.settings.snake.size;
+
         for (let i = 0; i < this.state.snakes.length; i++) {
             //behöver jag göra en copy? spelar det någon roll?
             let snake = this.state.snakes[i];
@@ -345,7 +438,6 @@ class Snake extends Component {
                     snakes.push(snake);
                     continue;
                 } else if (this.props.game.minigame.gamemode === "race") {
-                    const gridSize = this.state.settings.snake.size;
                     const xMax = this.state.settings.canvas.width - gridSize;
                     const yMax = this.state.settings.canvas.height - gridSize;
                     let startPos = this.getRandomCanvasPositionMargin(gridSize, yMax, xMax);
@@ -374,30 +466,30 @@ class Snake extends Component {
 
             let body = snake.body;
             let coordinate;
-
+            let teleportSnakes = !this.props.game.minigame.wallCollision;
             switch (snake.direction) {
                 case 'right':
                     coordinate = {
-                        x: body[0].x + this.state.settings.snake.size,
+                        x: teleportSnakes && (body[0].x >= canvas.width - gridSize) ? 0 : body[0].x + gridSize,
                         y: body[0].y
                     };
                     break;
                 case 'up':
                     coordinate = {
                         x: body[0].x,
-                        y: body[0].y - this.state.settings.snake.size
+                        y: teleportSnakes && (body[0].y === 0) ? canvas.height - gridSize : body[0].y - gridSize,
                     };
                     break;
                 case 'left':
                     coordinate = {
-                        x: body[0].x - this.state.settings.snake.size,
+                        x: teleportSnakes && (body[0].x === 0) ? canvas.width - gridSize : body[0].x - gridSize,
                         y: body[0].y
                     };
                     break;
                 case 'down':
                     coordinate = {
                         x: body[0].x,
-                        y: body[0].y + this.state.settings.snake.size
+                        y: teleportSnakes && (body[0].y >= canvas.height - gridSize) ? 0 : body[0].y + gridSize,
                     };
                     break;
                 default:
@@ -411,11 +503,11 @@ class Snake extends Component {
 
             this.resetCanvas();
             let eatenFood;
-            let foods = [...this.state.foods];
             for (let j = 0; j < foods.length; j++) {
                 let food = foods[j];
                 if (body[0].x === food.x && body[0].y === food.y) {
-                    eatenFood = food;
+                    eatenFood = true;
+                    food.active = false;
                     break;
                 }
             }
@@ -423,13 +515,6 @@ class Snake extends Component {
 
 
             if (eatenFood) {
-                this.setState(function (state, props) {
-                    let foods = [...state.foods];
-                    foods[eatenFood.index].active = false;
-                    return {
-                        foods: foods,
-                    };
-                });
                 snake.score += 10;
             } else {
                 body.pop();
@@ -441,6 +526,7 @@ class Snake extends Component {
             let ticks = state.ticks;
             return {
                 snakes: snakes,
+                foods: foods,
                 ticks: ticks + 1,
             };
         });
@@ -451,7 +537,8 @@ class Snake extends Component {
 
     drawSnakes() {
         const size = this.state.settings.snake.size;
-        //ctx.globalCompositeOperation = "multiply";
+        ctx.globalCompositeOperation = "multiply";
+        ctx.strokestyle = this.state.settings.snake.border;
 
         for (let i = 0; i < this.state.snakes.length; i++) {
             let snake = this.state.snakes[i];
@@ -460,7 +547,6 @@ class Snake extends Component {
             } else {
                 ctx.fillStyle = snake.color;
             }
-            ctx.strokestyle = this.state.settings.snake.border;
             let body = snake.body;
             // Draw each piece
 
@@ -492,6 +578,7 @@ class Snake extends Component {
         for (let i = 0; i < foods.length; i++) {
             let food = foods[i];
             this.generateFood(food);
+
         }
         this.setState(function (state, props) {
             //state.ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -524,7 +611,7 @@ class Snake extends Component {
             snake.body.forEach(coordinate => {
                 const foodSnakeConflict = coordinate.x === food.x && coordinate.y === food.y;
                 if (foodSnakeConflict) {
-                    this.generateFood();
+                    this.generateFood(food);
                 } else {
                     this.drawFood(food);
                 }
@@ -532,6 +619,10 @@ class Snake extends Component {
         }
 
     }
+    togglePausGame() {
+        this.setState({ paused: !this.state.paused, overlay: false });
+    }
+
 
     drawFood(food) {
         //denna metod kallas lite väl många gånger?? ioptimera?
@@ -577,6 +668,9 @@ class Snake extends Component {
 
                 //this.handleDeath(snake);
             }
+            if (this.props.game.minigame.wallCollision && this.detectWallCollision(snakes[i])) {
+                snakes[i].dead = true;
+            }
         }
 
         if (this.props.game.minigame.opponentCollision) {
@@ -599,29 +693,35 @@ class Snake extends Component {
                 //om den redan är död så fortsätt. t.ex. en headon så kör jag båda två till dead direkt.
                 continue;
             }
-            let currentSnakeBody = snakes[i].body;
+            let currentSnake = snakes[i];
             for (let j = 0; j < snakes.length; j++) {
                 //om opponents är död så ska man inte kunna krocka med den. döda snakes har ju fortfarande coordinater. alt är att ta bort coordinaterna
                 if (j === i || snakes[j].dead) {
                     continue;
                 }
-                let opponentSnakeBody = snakes[j].body;
+                let opponentSnake = snakes[j];
                 //lägga till en function där om man äter body[1] så där opponent?
-                for (let k = 0; k < opponentSnakeBody.length; k++) {
-                    const collision = opponentSnakeBody[k].x === currentSnakeBody[0].x && opponentSnakeBody[k].y === currentSnakeBody[0].y;
+                for (let k = 0; k < opponentSnake.body.length; k++) {
+                    const collision = opponentSnake.body[k].x === currentSnake.body[0].x && opponentSnake.body[k].y === currentSnake.body[0].y;
                     if (collision) {
                         if (k === 0) {
-                            snakes[i].dead = true;
-                            snakes[j].dead = true;
+                            currentSnake.dead = true;
+                            opponentSnake.dead = true;
                             //collision head>head
                         } else if (this.props.game.minigame.eatOpponents) {
                             //snakes
-                            snakes[j].body.length = k;
+                            if (k === 1) {
+                                opponentSnake.dead = true;
+                            } else {
+                                opponentSnake.body.length = k;
+
+                                //snakes[j].body.length = k;
+                            }
                             //kan jag använda opponentSnakeBody istället för snakes[j].body
                             //opponentSnakeBody.length = k;?
 
                         } else {
-                            snakes[i].dead = true;
+                            currentSnake.dead = true;
                         }
                     }
                 }
@@ -640,34 +740,35 @@ class Snake extends Component {
         let body = snake.body;
         for (let i = 4; i < body.length; i++) {
             const selfCollison = body[i].x === body[0].x && body[i].y === body[0].y;
-
             if (selfCollison) {
                 return true;
             }
         }
-
-        // Wall collison
-        const leftCollison = body[0].x < 0;
-        const topCollison = body[0].y < 0;
-        const rightCollison = body[0].x > canvas.width - this.state.settings.snake.size;
-        const bottomCollison = body[0].y > canvas.height - this.state.settings.snake.size;
-
-        if (leftCollison || topCollison || rightCollison || bottomCollison) {
-            //this.handleDeath(snake);
-            return true;
-        }
         return false;
     }
+    detectWallCollision(snake) {
+        let body = snake.body;
+        let gridsize = this.state.settings.snake.size;
+        const leftCollison = body[0].x < 0;
+        const topCollison = body[0].y < 0;
+        const rightCollison = body[0].x > canvas.width - gridsize;
+        const bottomCollison = body[0].y > canvas.height - gridsize;
+        return leftCollison || topCollison || rightCollison || bottomCollison;
 
-    endGame() {
+    }
+    nextPhase() {
 
         clearInterval(this.state.gameTicker);
-        alert("game over");
-        //this.setUpGame();
+        let game = this.props.game;
+        game.minigame.snakes = this.state.snakes;
+        game.minigame.winners = this.state.winners;
+        game.minigame.ticks = this.state.ticks;
+        game.phase = "final_result";
+        this.props.gameFunc.update(game);
     }
     render() {
         return (
-            <div className="phase-container" id="snakeboard">
+            <div className="phase-container" id="snakeboard" onClick={() => this.togglePausGame()}>
                 <canvas></canvas>
             </div>
         );

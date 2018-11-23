@@ -52,6 +52,8 @@ class SnakeController extends Component {
 
         let controlActions = currentPlayer.controlActions;
         let allControlActions = playerSnake.actions;
+        let displayName = playerSnake.playerKeys.length === 1 ? currentPlayer.name : playerSnake.name;
+
         return (
             <div className="phase-container">
                 <div className='player-controlls-container'>
@@ -76,7 +78,7 @@ class SnakeController extends Component {
                         </Fragment>
                     )}
                     <div className='player-controlls-action player-controlls-middle'>
-                        <Typography variant="body1">{playerSnake.name}</Typography>
+                        <Typography variant="body1">{displayName}</Typography>
                     </div>
                 </div>
             </div>

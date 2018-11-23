@@ -43,7 +43,7 @@ class SnakeStarting extends Component {
         super(props);
         this.state = {
             counter: this.startCounter(),
-            snakesize: 10,
+            snakesize: 20,
         }
         this.nextPhase = this.nextPhase.bind(this);
         this.createSnakes = this.createSnakes.bind(this);
@@ -65,14 +65,12 @@ class SnakeStarting extends Component {
 
     createSnakes() {
         let playerKeys = Object.keys(this.props.game.players);
-        let startingY = 90;
-        let startingX = 300;
         let snakes = [];
         //mocka flera spelare genom att loopa på x och sen byt player.key till playerKeys[0]
-        for (let i = 0; i < 17; i++) {
+        for (let i = 0; i < playerKeys.length; i++) {
             let player = this.props.game.players[playerKeys[i]];
             let snake = {
-                playerKeys: [playerKeys[0]],
+                playerKeys: [player.key],
                 actions: ['up', 'down', 'right', 'left'],
                 score: 0,
                 color: SNAKE_COLORS[i % SNAKE_COLORS.length],

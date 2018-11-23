@@ -37,10 +37,6 @@ class PhaseConnection extends Component {
                             </Grid>)}
                     </Grid>
                 </div>
-                använd en annan klass, minigame-middle-section typ
-                https://codepen.io/niorad/pen/xmfza bara runt varje namn eller hela lobbyn.
-                jag skulle kunna bygga en random ai och visa den här men det är mycket jobb
-lägg till någon rolig animation? typ en snake som åker över skärmen? en för varje spelare kanske rent av? om det blir väldigt mycket kan jag skapa en specifik phase Connection för snake?
                 <div className="quiz-bottom-section">
                     <Button onClick={this.nextPhase} variant="contained">Start</Button>
 
