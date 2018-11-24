@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { Typography } from '@material-ui/core';
+import PropTypes from 'prop-types';
 import CountdownAnimation from '../../common/CountdownAnimation';
 
 class PhaseStarting extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-    };
     this.nextPhase = this.nextPhase.bind(this);
     this.startCounter();
   }
@@ -19,7 +18,6 @@ class PhaseStarting extends Component {
         counter: state.counter + 1,
       }));
 
-
       if (counter === 0) {
         that.nextPhase();
         clearInterval(i);
@@ -29,7 +27,8 @@ class PhaseStarting extends Component {
   }
 
   nextPhase() {
-    this.props.gameFunc.update({ phase: 'gameplay' });
+    const { gameFunc } = this.props;
+    gameFunc.update({ phase: 'gameplay' });
   }
 
   render() {
@@ -41,5 +40,7 @@ class PhaseStarting extends Component {
     );
   }
 }
-
+PhaseStarting.propTypes = {
+  gameFunc: PropTypes.func.isRequired,
+};
 export default PhaseStarting;
