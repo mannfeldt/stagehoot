@@ -5,7 +5,9 @@ module.exports = {
         "react/jsx-filename-extension": 0,
         "react/forbid-prop-types": 0,
         "react/require-default-props": 0,
-        "max-len": ["warn", { "code": 100 },{ "ignoreComments": true }]
+        "max-len": ["warn", { "code": 100, "ignoreComments": true }],
+        "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+        "no-continue": 0,
 
 
     }
