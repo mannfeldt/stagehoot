@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import PhaseSetup from './PhaseSetup';
 import PhaseConnection from './PhaseConnection';
 import PhaseStarting from './PhaseStarting';
@@ -8,36 +9,30 @@ import PhaseFinalResult from './PhaseFinalResult';
 import PhaseEnd from './PhaseEnd';
 import SnakeStarting from '../snake/SnakeStarting';
 
-class Minigame extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-
+class Minigame extends PureComponent {
   render() {
-    switch (this.props.game.gametype) {
+    const { game, gameFunc } = this.props;
+    switch (game.gametype) {
       case 'snake':
         return (
           <div className="host-container">
-            {this.props.game.phase === 'setup' && <PhaseSetup game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'connection' && <PhaseConnection game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'starting' && <SnakeStarting game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'gameplay' && <Snake game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'final_result' && <PhaseFinalResult game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'end' && <PhaseEnd game={this.props.game} gameFunc={this.props.gameFunc} />}
+            {game.phase === 'setup' && <PhaseSetup game={game} gameFunc={gameFunc} />}
+            {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
+            {game.phase === 'starting' && <SnakeStarting game={game} gameFunc={gameFunc} />}
+            {game.phase === 'gameplay' && <Snake game={game} gameFunc={gameFunc} />}
+            {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
+            {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
           </div>
         );
       case 'tetris':
         return (
           <div className="host-container">
-            {this.props.game.phase === 'setup' && <PhaseSetup game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'connection' && <PhaseConnection game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'starting' && <PhaseStarting game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'gameplay' && <Tetris game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'final_result' && <PhaseFinalResult game={this.props.game} gameFunc={this.props.gameFunc} />}
-            {this.props.game.phase === 'end' && <PhaseEnd game={this.props.game} gameFunc={this.props.gameFunc} />}
+            {game.phase === 'setup' && <PhaseSetup game={game} gameFunc={gameFunc} />}
+            {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
+            {game.phase === 'starting' && <PhaseStarting game={game} gameFunc={gameFunc} />}
+            {game.phase === 'gameplay' && <Tetris game={game} gameFunc={gameFunc} />}
+            {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
+            {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
           </div>
         );
       default:
@@ -45,5 +40,8 @@ class Minigame extends Component {
     }
   }
 }
-
+Minigame.propTypes = {
+  game: PropTypes.object.isRequired,
+  gameFunc: PropTypes.func.isRequired,
+};
 export default Minigame;

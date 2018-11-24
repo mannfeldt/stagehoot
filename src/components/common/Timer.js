@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Typography } from '@material-ui/core';
@@ -15,14 +15,7 @@ const styles = theme => ({
 
   },
 });
-class Timer extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-
+class Timer extends PureComponent {
   render() {
     const {
       classes, text, value, startValue,
