@@ -188,6 +188,6 @@ class PhaseSetup extends Component {
 }
 PhaseSetup.propTypes = {
   game: PropTypes.object.isRequired,
-  gameFunc: PropTypes.func.isRequired,
+  gameFunc: PropTypes.object.isRequired,
 };
 export default PhaseSetup;

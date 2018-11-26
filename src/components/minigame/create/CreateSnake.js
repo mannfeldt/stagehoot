@@ -25,7 +25,6 @@ class CreateSnake extends Component {
       difficulty: '300',
     };
 
-    this.validateGame = this.validateGame.bind(this);
     this.createGame = this.createGame.bind(this);
   }
 

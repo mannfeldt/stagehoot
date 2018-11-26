@@ -9,7 +9,7 @@ import TetrisController from '../tetris/TetrisController';
 class Minigame extends PureComponent {
   render() {
     const {
-      game, updatePlayer, playerKey, createPlayer,
+      game, playerKey, createPlayer,
     } = this.props;
     const lastPhase = game.phase === 'final_result' || game.phase === 'end';
     switch (game.gametype) {
@@ -17,18 +17,18 @@ class Minigame extends PureComponent {
         return (
           <div className="play-container">
             {game.phase === 'connection' && <PhaseConnection game={game} addPlayer={createPlayer} playerKey={playerKey} />}
-            {game.phase === 'starting' && <PhaseStarting game={game} updatePlayer={updatePlayer} />}
-            {game.phase === 'gameplay' && <SnakeController game={game} updatePlayer={updatePlayer} playerKey={playerKey} />}
-            {lastPhase && <PhaseFinalResult game={game} updatePlayer={updatePlayer} playerKey={playerKey} />}
+            {game.phase === 'starting' && <PhaseStarting game={game} />}
+            {game.phase === 'gameplay' && <SnakeController game={game} playerKey={playerKey} />}
+            {lastPhase && <PhaseFinalResult game={game} playerKey={playerKey} />}
           </div>
         );
       case 'tetris':
         return (
           <div className="play-container">
             {game.phase === 'connection' && <PhaseConnection game={game} addPlayer={createPlayer} playerKey={playerKey} />}
-            {game.phase === 'starting' && <PhaseStarting game={game} updatePlayer={updatePlayer} />}
-            {game.phase === 'gameplay' && <TetrisController game={game} updatePlayer={updatePlayer} />}
-            {lastPhase && <PhaseFinalResult game={game} updatePlayer={updatePlayer} playerKey={playerKey} />}
+            {game.phase === 'starting' && <PhaseStarting game={game} />}
+            {game.phase === 'gameplay' && <TetrisController game={game} />}
+            {lastPhase && <PhaseFinalResult game={game} playerKey={playerKey} />}
           </div>
         );
       default:
@@ -38,7 +38,6 @@ class Minigame extends PureComponent {
 }
 Minigame.propTypes = {
   game: PropTypes.object.isRequired,
-  updatePlayer: PropTypes.func.isRequired,
   createPlayer: PropTypes.func.isRequired,
   playerKey: PropTypes.string.isRequired,
 };

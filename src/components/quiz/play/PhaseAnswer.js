@@ -4,56 +4,58 @@ import Grid from '@material-ui/core/Grid';
 import AnswerOption from '../AnswerOption';
 
 class PhaseAnswer extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            counter: 0,
-            question: {},
-            hasAnswered: false,
-            selectedAnswer: ''
-        };
-        this.answerQuestion = this.answerQuestion.bind(this);
-    }
-    componentDidMount() {
-        let question = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
-        this.setState({ question: question, startTime: Date.now() });
+  constructor(props) {
+    super(props);
+    this.state = {
+      counter: 0,
+      question: {},
+      hasAnswered: false,
+      selectedAnswer: '',
+    };
+    this.answerQuestion = this.answerQuestion.bind(this);
+  }
 
-    }
-    answerQuestion = answer => {
-        this.setState({ selectedAnswer: answer, hasAnswered: true });
-        let answerTime = Date.now() - this.state.startTime;
-        let correct = this.state.question.correctAnswers.indexOf(answer) > -1;
-        let score = 0;
-        if (correct) {
-            switch (this.state.question.difficulty) {
-                case "easy":
-                    score += 100;
-                    break;
-                case "medium":
-                    score += 200;
-                    break;
-                case "hard":
-                    score += 300;
-                    break;
-                case undefined:
-                    score += 200;
-                    break;
-                default:
-                    break;
-            }
-            if (this.props.game.quiz.timelimit && this.state.question.timelimit) {
-                //let timeRemaining = this.state.question.timelimit - answerTime;
-                let timeFactorUsed = answerTime / (this.state.question.timelimit * 1000);
-                score += Math.floor((score / timeFactorUsed) / 10);
-            }
+  componentDidMount() {
+    const question = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
+    this.setState({ question, startTime: Date.now() });
+  }
+
+    answerQuestion = (answer) => {
+      this.setState({ selectedAnswer: answer, hasAnswered: true });
+      const answerTime = Date.now() - this.state.startTime;
+      const correct = this.state.question.correctAnswers.indexOf(answer) > -1;
+      let score = 0;
+      // använd object speed={easy: 100, medium: 200, hard:300} score += speed[question.difficulty]
+      if (correct) {
+        switch (this.state.question.difficulty) {
+          case 'easy':
+            score += 100;
+            break;
+          case 'medium':
+            score += 200;
+            break;
+          case 'hard':
+            score += 300;
+            break;
+          case undefined:
+            score += 200;
+            break;
+          default:
+            break;
         }
-        let playerAnswer = {
-            answer: answer,
-            score: score,
-            answerTime: answerTime,
-            questionId: this.state.question.id,
+        if (this.props.game.quiz.timelimit && this.state.question.timelimit) {
+          // let timeRemaining = this.state.question.timelimit - answerTime;
+          const timeFactorUsed = answerTime / (this.state.question.timelimit * 1000);
+          score += Math.floor((score / timeFactorUsed) / 10);
         }
-        this.props.saveAnswer(playerAnswer);
+      }
+      const playerAnswer = {
+        answer,
+        score,
+        answerTime,
+        questionId: this.state.question.id,
+      };
+      this.props.saveAnswer(playerAnswer);
     };
 
     render() {
@@ -99,7 +101,7 @@ class PhaseAnswer extends Component {
                     </div>
                 );
             }
-        } else {
+        } 
             if (this.state.hasAnswered) {
                 return (
                     <div className="phase-container">
@@ -128,7 +130,7 @@ class PhaseAnswer extends Component {
                     </div>
                 );
             }
-        }
+        
     }
 }
 export default PhaseAnswer;

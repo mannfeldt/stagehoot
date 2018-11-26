@@ -49,6 +49,6 @@ podium
 }
 PhaseFinalResult.propTypes = {
   game: PropTypes.object.isRequired,
-  gameFunc: PropTypes.func.isRequired,
+  gameFunc: PropTypes.object.isRequired,
 };
 export default PhaseFinalResult;

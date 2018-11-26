@@ -50,6 +50,6 @@ class PhaseConnection extends Component {
 }
 PhaseConnection.propTypes = {
   game: PropTypes.object.isRequired,
-  gameFunc: PropTypes.func.isRequired,
+  gameFunc: PropTypes.object.isRequired,
 };
 export default PhaseConnection;

@@ -41,6 +41,6 @@ class PhaseStarting extends Component {
   }
 }
 PhaseStarting.propTypes = {
-  gameFunc: PropTypes.func.isRequired,
+  gameFunc: PropTypes.object.isRequired,
 };
 export default PhaseStarting;

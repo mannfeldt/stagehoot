@@ -42,6 +42,6 @@ class Minigame extends PureComponent {
 }
 Minigame.propTypes = {
   game: PropTypes.object.isRequired,
-  gameFunc: PropTypes.func.isRequired,
+  gameFunc: PropTypes.object.isRequired,
 };
 export default Minigame;
