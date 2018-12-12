@@ -9,6 +9,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import { Typography } from '@material-ui/core';
 
 class CreateSnake extends Component {
   constructor(props) {
@@ -84,13 +85,17 @@ class CreateSnake extends Component {
       } = this.state;
       return (
         <div className="app-page create-page">
-          <Grid container spacing={8}>
+          <Grid container spacing={24}>
             <form autoComplete="off">
-              <Grid item xs={4}>
-                <FormControl required>
+              <Grid item xs={12}>
+                <Typography variant="h4">New Snake game</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl required fullWidth>
                   <InputLabel htmlFor="gametype-required">Game mode</InputLabel>
                   <Select
                     value={gamemode || ''}
+                    fullWidth
                     onChange={this.handleChangeSelect}
                     name="gamemode"
                     inputProps={{
@@ -101,6 +106,27 @@ class CreateSnake extends Component {
                     <MenuItem value="race">Race</MenuItem>
                   </Select>
                 </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl required fullWidth>
+                  <InputLabel htmlFor="gametype-required">difficulty</InputLabel>
+                  <Select
+                    value={difficulty || ''}
+                    fullWidth
+                    onChange={this.handleChangeSelect}
+                    name="difficulty"
+                    inputProps={{
+                      id: 'difficulty-required',
+                    }}
+                  >
+                    <MenuItem value="500">Easy</MenuItem>
+                    <MenuItem value="300">Medium</MenuItem>
+                    <MenuItem value="100">Hard</MenuItem>
+                    <MenuItem value="75">Pro</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
 
                 {gamemode === 'race'
                                 && (
@@ -116,22 +142,8 @@ class CreateSnake extends Component {
                                 </FormControl>
                                 )
                             }
-                <FormControl required>
-                  <InputLabel htmlFor="gametype-required">difficulty</InputLabel>
-                  <Select
-                    value={difficulty || ''}
-                    onChange={this.handleChangeSelect}
-                    name="difficulty"
-                    inputProps={{
-                      id: 'difficulty-required',
-                    }}
-                  >
-                    <MenuItem value="500">Easy</MenuItem>
-                    <MenuItem value="300">Medium</MenuItem>
-                    <MenuItem value="100">Hard</MenuItem>
-                    <MenuItem value="75">Pro</MenuItem>
-                  </Select>
-                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
                 <FormControl component="fieldset">
                   <FormControlLabel
                     control={(
@@ -170,6 +182,8 @@ class CreateSnake extends Component {
                     label="Eat opponent on collision"
                   />
                 </FormControl>
+              </Grid>
+              <Grid item xs={12}>
                 <FormControl>
                   <TextField
                     label="Title"
@@ -189,7 +203,8 @@ class CreateSnake extends Component {
                     onChange={this.handleChange('password')}
                   />
                 </FormControl>
-
+              </Grid>
+              <Grid item xs={12}>
                 <Button onClick={this.createGame} variant="contained">Create</Button>
               </Grid>
             </form>

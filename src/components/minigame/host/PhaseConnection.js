@@ -36,7 +36,7 @@ class PhaseConnection extends Component {
           <Grid container>
             {players.map(player => (
               <Grid key={player.key} item xs={3}>
-                <Typography paragraph variant="body1">{player.name}</Typography>
+                <Typography paragraph variant="body1" className="dynamic-text">{player.name}</Typography>
               </Grid>
             ))}
           </Grid>

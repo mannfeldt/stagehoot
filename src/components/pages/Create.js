@@ -1,114 +1,129 @@
 import React, { Component } from 'react';
-import { fire } from '../../base';
-import CreateQuiz from '../quiz/create/CreateQuiz';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { Typography } from '@material-ui/core';
+import { Typography, Card } from '@material-ui/core';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardContent from '@material-ui/core/CardContent';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import CreateQuiz from '../quiz/create/CreateQuiz';
+import { fire } from '../../base';
 import CreateMinigame from '../minigame/create/CreateMinigame';
+import { generateGameId } from '../common/utils/appUtil';
 
 class Create extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gametype: '',
+      gameId: '',
+    };
+    this.createGame = this.createGame.bind(this);
+    // this.validateGame = this.validateGame.bind(this);
+  }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            gametype: '',
-            gameId: '',
-        };
-        this.createGame = this.createGame.bind(this);
-        this.validateGame = this.validateGame.bind(this);
-        this.generateGameId = this.generateGameId.bind(this);
-
-    }
-
-    setGameType = name => event => {
-        this.setState({ gametype: name });
+    setGameType = name => () => {
+      this.setState({ gametype: name });
     };
 
-    createGame(game) {
-        game.gameId = this.generateGameId();
-        game.created = Date.now();
-        game.status = "CREATED";
-        game.phase = "setup";
-        if (!this.validateGame(game)) {
-            return;
+    createGame(g) {
+      const game = g;
+      game.gameId = generateGameId();
+      game.created = Date.now();
+      game.status = 'CREATED';
+      game.phase = 'setup';
+
+      const that = this;
+      // game push få ett id.
+      const gameRef = fire.database().ref('/games').push();
+      game.key = gameRef.key;
+      gameRef.set(game, (error) => {
+        if (error) {
+          that.setState({
+            errorText: `Error: ${error}`,
+          });
+          const snack = {
+            variant: 'error',
+            message: 'Unexpected internal error',
+          };
+          that.props.showSnackbar(snack);
+        } else {
+          const snack = {
+            variant: 'success',
+            message: 'Successfully created!',
+          };
+          that.props.showSnackbar(snack);
+          that.setState({
+            gameId: game.gameId,
+            gametype: 'done',
+          });
+          localStorage.setItem('RecentGameId', game.gameId);
+
+          // show gameid and password
+          // show button to start game / navigate to host
         }
-
-        let that = this;
-        //game push få ett id.
-        let gameRef = fire.database().ref('/games').push();
-        game.key = gameRef.key;
-        gameRef.set(game, function (error) {
-            if (error) {
-                that.setState({
-                    errorText: 'Error: ' + error,
-                });
-                let snack = {
-                    variant: "error",
-                    message: "Unexpected internal error"
-                }
-                that.props.showSnackbar(snack);
-            }
-            else {
-                let snack = {
-                    variant: "success",
-                    message: "Successfully created!"
-                }
-                that.props.showSnackbar(snack);
-                that.setState({
-                    gameId: game.gameId,
-                    gametype: 'done'
-                });
-                localStorage.setItem('RecentGameId', game.gameId);
-
-                //show gameid and password
-                //show button to start game / navigate to host
-            }
-        });
-    }
-    validateGame(game) {
-        //validera lösenord är tillräckligt starkt här eller direkt efter input om det finns någon smart lösning.
-        //kolla på gametype hur ha en secifik validering för varje type
-        let snack = {
-            variant: "error",
-            message: "explain error or errors/"
-        }
-        //this.props.showSnackbar(snack);
-        return true;
-
-    }
-
-    generateGameId() {
-        let id = "";
-        let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (var i = 0; i < 6; i++) {
-            id += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-
-        return id;
+      });
     }
 
     render() {
-        return (
-            <div className="app-page create-page">
-                {!this.state.gametype && <Grid container spacing={24}>
-                    <Button onClick={this.setGameType("quiz")} variant="contained">Quiz</Button>
-                    <Button onClick={this.setGameType("survey")} variant="contained">Survey</Button>
-                    <Button onClick={this.setGameType("minigame")} variant="contained">Mini game</Button>
-                    <Button onClick={this.setGameType("discussion")} variant="contained">Discussion</Button>
-                </Grid>}
-                {this.state.gametype === "quiz" && <CreateQuiz createQuiz={this.createGame} showSnackbar={this.props.showSnackbar} />}
-                {this.state.gametype === "minigame" && <CreateMinigame createGame={this.createGame} showSnackbar={this.props.showSnackbar} />}
-                {this.state.gametype === "done" &&
+      const { gametype, gameId } = this.state;
+      const { showSnackbar } = this.props;
+      return (
+        <div className="app-page create-page">
+          {!gametype && (
+          <Grid container spacing={24}>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('quiz')}>
+                <CardHeader title="Quiz" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Create your own quiz or generate one fast and easy</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('minigame')}>
+                <CardHeader title="Mini Game" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Create a game to play just for fun or team building purposes</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('survey')}>
+                <CardHeader title="Survey" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Survey your audience</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('discussion')}>
+                <CardHeader title="Discussion" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Create a discussion on a sppecified topic</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          )}
+          {gametype === 'quiz' && <CreateQuiz createQuiz={this.createGame} showSnackbar={showSnackbar} />}
+          {gametype === 'minigame' && <CreateMinigame createGame={this.createGame} showSnackbar={showSnackbar} />}
+          {gametype === 'done'
+                    && (
                     <div>
-                        <Typography variant="h2">Created game ID:  <span className="dynamic-text">{this.state.gameId}</span></Typography>
-                        <Link to={'/host'}>Host game</Link>
+                      <Typography variant="h2">
+                        <span>Created game ID: </span>
+                        {' '}
+                        <span className="dynamic-text">{gameId}</span>
+                      </Typography>
+                      <Link to="/host">Host game</Link>
                     </div>
+                    )
                 }
-            </div>
-        );
+        </div>
+      );
     }
 }
-
+Create.propTypes = {
+  showSnackbar: PropTypes.func.isRequired,
+};
 export default Create;

@@ -21,6 +21,15 @@ $answer-color4: #C5E1A5;
     align-items: center;
     justify-content: center;
 }
+.card-button{
+    cursor:pointer;
+}
+.home-page a, .toolbar a{
+    text-decoration: none;
+}
+.toolbar a {
+    color:white;
+}
 
 .player-controlls-left {
     grid-area: left;
@@ -58,7 +67,7 @@ $answer-color4: #C5E1A5;
 }
 
 .dynamic-text {
-    font-size: 1.1em;
+    font-size: 1.1em !important;
     font-weight: 400;
 }
 

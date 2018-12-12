@@ -46,7 +46,8 @@ class PhaseAnswer extends Component {
         if (this.props.game.quiz.timelimit && this.state.question.timelimit) {
           // let timeRemaining = this.state.question.timelimit - answerTime;
           const timeFactorUsed = answerTime / (this.state.question.timelimit * 1000);
-          score += Math.floor((score / timeFactorUsed) / 10);
+          const timeBonus = Math.floor((score / Math.max(0.2, timeFactorUsed)) / 10);
+          score += timeBonus;
         }
       }
       const playerAnswer = {
@@ -82,7 +83,7 @@ class PhaseAnswer extends Component {
                         </div>
                     </div>
                 );
-            } else {
+            } 
                 return (
                     <div className="phase-container">
                         <div className="quiz-top-section">
@@ -100,7 +101,7 @@ class PhaseAnswer extends Component {
                         </div>
                     </div>
                 );
-            }
+            
         } 
             if (this.state.hasAnswered) {
                 return (
@@ -116,7 +117,7 @@ class PhaseAnswer extends Component {
                         </div>
                     </div>
                 );
-            } else {
+            } 
                 return (
                     <div className="phase-container">
                         <div className="quiz-complete-section">
@@ -129,7 +130,7 @@ class PhaseAnswer extends Component {
                         </div>
                     </div>
                 );
-            }
+            
         
     }
 }

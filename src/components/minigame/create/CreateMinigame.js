@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import CreateSnake from './CreateSnake';
+import {
+  Typography, Card,
+} from '@material-ui/core';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardContent from '@material-ui/core/CardContent';
 import CreateTetris from './CreateTetris';
+import CreateSnake from './CreateSnake';
 
 class CreateMinigame extends Component {
   constructor(props) {
@@ -23,9 +27,24 @@ class CreateMinigame extends Component {
       return (
         <div className="app-page create-page">
           {!gametype && (
+
           <Grid container spacing={24}>
-            <Button onClick={this.setGameType('snake')} variant="contained">Snake</Button>
-            <Button onClick={this.setGameType('tetris')} variant="contained">Tetris</Button>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('snake')}>
+                <CardHeader title="Snake" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Create a classic game of snake or change the modes to fit your audience</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('tetris')}>
+                <CardHeader title="Tetris" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Game is not available yet</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
           )}
           {gametype === 'snake' && <CreateSnake createGame={createGame} />}
