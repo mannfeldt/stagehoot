@@ -111,7 +111,7 @@ class Create extends Component {
                     && (
                     <div>
                       <Typography variant="h2">
-                        <span>Created game ID: </span>
+                        <span>Created game PIN: </span>
                         {' '}
                         <span className="dynamic-text">{gameId}</span>
                       </Typography>

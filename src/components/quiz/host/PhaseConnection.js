@@ -26,7 +26,12 @@ class PhaseConnection extends Component {
 
         <div className="quiz-top-section">
           <Typography variant="h2">
-            <span>Join game with Game ID: </span>
+            <span>Join game at: </span>
+            <span className="dynamic-text">mannfeldt.github.io/stagehoot</span>
+
+          </Typography>
+          <Typography variant="h2">
+            <span>Enter game PIN: </span>
             <span className="dynamic-text">{this.props.game.gameId}</span>
 
           </Typography>

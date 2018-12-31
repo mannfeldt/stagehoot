@@ -4,121 +4,121 @@ import CakeIcon from '@material-ui/icons/Cake';
 import FavoriteIcon from '@material-ui/icons/FavoriteBorder';
 import ExtensionIcon from '@material-ui/icons/ExtensionOutlined';
 import StarIcon from '@material-ui/icons/StarBorder';
+
 const PUBLIC_PATH = process.env.PUBLIC_URL;
 
 const answerStyles = [{
-    icon: <CakeIcon />,
-    color: '#80DEEA',
+  icon: <CakeIcon />,
+  color: '#80DEEA',
 },
 {
-    icon: <ExtensionIcon />,
-    color: '#EF9A9A',
+  icon: <ExtensionIcon />,
+  color: '#EF9A9A',
 },
 {
-    icon: <FavoriteIcon />,
-    color: '#CE93D8',
+  icon: <FavoriteIcon />,
+  color: '#CE93D8',
 },
 {
-    icon: <StarIcon />,
-    color: '#C5E1A5'
+  icon: <StarIcon />,
+  color: '#C5E1A5',
 }];
 
 class AnswerChart extends Component {
-    constructor(props) {
-        super(props);
-        this.getChartData = this.getChartData.bind(this);
-        this.getChartOptions = this.getChartOptions.bind(this);
-        this.getChartHeight = this.getChartHeight.bind(this);
-        this.getAnswerData = this.getAnswerData.bind(this);
+  constructor(props) {
+    super(props);
+    this.getChartData = this.getChartData.bind(this);
+    this.getChartOptions = this.getChartOptions.bind(this);
+    this.getChartHeight = this.getChartHeight.bind(this);
+    this.getAnswerData = this.getAnswerData.bind(this);
+  }
 
+  getAnswerData() {
+    const answerData = {
+      data: [],
+      topPlayer: {
+        score: 0,
+        playerKey: '',
+      },
+      correctAnswers: [],
+    };
+    const playerAnswers = [];
+    const playerKeys = this.props.game.players ? Object.keys(this.props.game.players) : [];
+    const currentQuestion = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
+    for (let i = 0; i < playerKeys.length; i++) {
+      const player = this.props.game.players[playerKeys[i]];
+      if (!player.answers) {
+        continue;
+      }
+      const answer = player.answers[currentQuestion.id];
+      if (answer) {
+        playerAnswers.push(answer.answer);
+        if (answer.score > answerData.topPlayer.score) {
+          answerData.topPlayer.score = answer.score;
+          answerData.topPlayer.playerKey = player.key;
+        }
+      }
     }
-    getAnswerData() {
-        let answerData = {
-            data: [],
-            topPlayer: {
-                score: 0,
-                playerKey: ''
-            },
-            correctAnswers: [],
-        };
-        let playerAnswers = [];
-        let playerKeys = this.props.game.players ? Object.keys(this.props.game.players) : [];
-        let currentQuestion = this.props.game.quiz.questions[this.props.game.quiz.currentQuestion];
-        for (let i = 0; i < playerKeys.length; i++) {
-            let player = this.props.game.players[playerKeys[i]];
-            if (!player.answers) {
-                continue;
-            }
-            let answer = player.answers[currentQuestion.id];
-            if (answer) {
-
-                playerAnswers.push(answer.answer);
-                if (answer.score > answerData.topPlayer.score) {
-                    answerData.topPlayer.score = answer.score;
-                    answerData.topPlayer.playerKey = player.key;
-                }
-            }
+    for (let j = 0; j < currentQuestion.answers.length; j++) {
+      let nrOfAnswers = 0;
+      for (let i = 0; i < playerAnswers.length; i++) {
+        if (currentQuestion.answers.indexOf(playerAnswers[i]) === j) {
+          nrOfAnswers++;
         }
-        for (let j = 0; j < currentQuestion.answers.length; j++) {
-            let nrOfAnswers = 0;
-            for (let i = 0; i < playerAnswers.length; i++) {
-                if (currentQuestion.answers.indexOf(playerAnswers[i]) === j) {
-                    nrOfAnswers++;
-                }
-            }
-            answerData.data.push(nrOfAnswers);
+      }
+      answerData.data.push(nrOfAnswers);
 
-            if (currentQuestion.correctAnswers.indexOf(currentQuestion.answers[j]) > -1) {
-                answerData.correctAnswers.push(j);
-            }
-        }
-
-        return answerData;
+      if (currentQuestion.correctAnswers.indexOf(currentQuestion.answers[j]) > -1) {
+        answerData.correctAnswers.push(j);
+      }
     }
 
-    getChartData() {
-        let chartData = {
-            labels: [],
-            datasets: [{
-                data: [],
-                label: 'asdf',
-                backgroundColor: [],
-                borderWidth: 1,
-            }]
-        };
-        let data = this.getAnswerData();
-        chartData.datasets[0].borderColor = [];
-        chartData.datasets[0].data = data.data;
-        for (let i = 0; i < data.data.length; i++) {
-            chartData.labels.push("");
-            chartData.datasets[0].backgroundColor.push(answerStyles[i].color);
-        }
-        return chartData;
-    }
+    return answerData;
+  }
 
-    getChartHeight() {
-        let answerData = this.getAnswerData();
-        let topvalue = Math.max(...answerData.data);
-        let incrementHeightPerAnswer = 25;
-        let minHeight = 65;
-        let maxHeight = 300;
-        let height = minHeight + (topvalue * incrementHeightPerAnswer);
-        if (height > maxHeight) {
-            return maxHeight;
-        }
-        return height;
+  getChartData() {
+    const chartData = {
+      labels: [],
+      datasets: [{
+        data: [],
+        label: 'asdf',
+        backgroundColor: [],
+        borderWidth: 1,
+      }],
+    };
+    const data = this.getAnswerData();
+    chartData.datasets[0].borderColor = [];
+    chartData.datasets[0].data = data.data;
+    for (let i = 0; i < data.data.length; i++) {
+      chartData.labels.push('');
+      chartData.datasets[0].backgroundColor.push(answerStyles[i].color);
     }
+    return chartData;
+  }
 
-    getChartOptions() {
-        let that = this;
-        let options = {
-            maintainAspectRatio: false,
-            showTooltips: false,
-            responsiveAnimationDuration: 1000,
-            animation: {
-                easing: 'easeInOutCubic',
-                duration: '2000',
-                onProgress: function (animation) {
+  getChartHeight() {
+    const answerData = this.getAnswerData();
+    const topvalue = Math.max(...answerData.data);
+    const incrementHeightPerAnswer = 25;
+    const minHeight = 65;
+    const maxHeight = 300;
+    const height = minHeight + (topvalue * incrementHeightPerAnswer);
+    if (height > maxHeight) {
+      return maxHeight;
+    }
+    return height;
+  }
+
+  getChartOptions() {
+    const that = this;
+    const options = {
+      maintainAspectRatio: false,
+      showTooltips: false,
+      responsiveAnimationDuration: 1000,
+      animation: {
+        easing: 'easeInOutCubic',
+        duration: '2000',
+        onProgress (animation) {
                     let answerData = that.getAnswerData();
                     animation.animationObject.onAnimationProgress = function () {
                         let ctx = this.chart.ctx;
@@ -185,45 +185,47 @@ class AnswerChart extends Component {
 
 
                 },
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    },
-                    display: false,
-                    beginAtZero: true,
-                }],
-                xAxes: [{
-                    display: false,
-                }]
-            },
-            legend: {
-                display: false,
-            },
-            tooltips: {
-                enabled: false
-            },
-            events: [],
-            layout: {
-                padding: {
-                    left: 0,
-                    right: 0,
-                    top: 25,
-                    bottom: 40,
-                }
-            }
-        }
-        return options;
-    }
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+          },
+          display: false,
+          beginAtZero: true,
+        }],
+        xAxes: [{
+          display: false,
+        }],
+      },
+      legend: {
+        display: false,
+      },
+      tooltips: {
+        enabled: false,
+      },
+      events: [],
+      layout: {
+        padding: {
+          left: 0,
+          right: 0,
+          top: 25,
+          bottom: 40,
+        },
+      },
+    };
+    return options;
+  }
 
-    render() {
-
-        return (
-            <Bar data={this.getChartData} height={this.getChartHeight()}
-                options={this.getChartOptions()} />
-        );
-    }
+  render() {
+    return (
+          <Bar
+data={this.getChartData}
+height={this.getChartHeight()}
+              options={this.getChartOptions()}
+            />
+    );
+  }
 }
 
 export default AnswerChart;

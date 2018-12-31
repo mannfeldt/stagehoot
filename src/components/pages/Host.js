@@ -98,6 +98,9 @@ class Host extends Component {
       const that = this;
       gameRef.on('value', (snapshot) => {
         const game = snapshot.val();
+        if (!game.phase) {
+          game.phase = 'setup';
+        }
         if (game) {
           // kan blir problem med asynch setstate?
           that.setState({
@@ -142,7 +145,7 @@ class Host extends Component {
           <div className="page-container host-page">
             <FormControl>
               <TextField
-                label="Game ID"
+                label="Game PIN"
                 name="Game ID"
                 value={this.state.gameId}
                 margin="normal"

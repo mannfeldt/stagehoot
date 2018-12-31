@@ -10,7 +10,7 @@ function generateGameId() {
 }
 function calculateDefaultTimeLimit(question) {
   if (question.aType === 'multiple' || question.aType === 'boolean') {
-    return 10 + Math.floor((question.correctAnswers.join().length + question.wrongAnswers.join().length) / 50);
+    return 10 + Math.floor((question.correctAnswers.join().length + question.wrongAnswers.join().length) / 30);
   } if (question.aType === 'free') {
     return 20;
   } if (question.aType === 'player') {

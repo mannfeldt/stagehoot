@@ -97,7 +97,7 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
     return (
       <div className="phase-container">
         <div className="quiz-top-section">
-          <Typography variant="h6" style={{ float: 'right' }}>{`GameID:${this.props.game.gameId}`}</Typography>
+          <Typography variant="h6" style={{ float: 'right' }}>{`Game PIN:${this.props.game.gameId} `}</Typography>
           <Typography variant="h5">{currentQuestion.question}</Typography>
         </div>
         <div className="quiz-middle-section">
@@ -112,20 +112,16 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
                 <Leaderboard game={this.props.game} />
               </div>
             </Grid>
-            <Grid item xs={12}>
-              <div>
-                {isLastQuestion && <Button onClick={this.finalizeQuiz}>Finalize result</Button>}
-                {!isLastQuestion && <Button onClick={this.nextQuestion}>Next question</Button>}
-
-                <Button onClick={this.props.gameFunc.restart}>Restart quiz</Button>
-                <Button onClick={this.props.gameFunc.quit}>Quit quiz</Button>
-                <Button onClick={this.props.gameFunc.end}>End quiz</Button>
-
-              </div>
-            </Grid>
           </Grid>
         </div>
         <div className="quiz-bottom-section">
+          <div>
+            {isLastQuestion && <Button onClick={this.finalizeQuiz}>Finalize result</Button>}
+            {!isLastQuestion && <Button onClick={this.nextQuestion}>Next question</Button>}
+            <Button onClick={this.props.gameFunc.restart}>Restart quiz</Button>
+            <Button onClick={this.props.gameFunc.quit}>Quit quiz</Button>
+            <Button onClick={this.props.gameFunc.end}>End quiz</Button>
+          </div>
           <Grid className="align-bottom" container>
             {answers.map((answer, index) => (
               <Grid key={index} item xs={6}>

@@ -27,7 +27,7 @@ class PhaseConnection extends Component {
       <div className="phase-container">
         <div className="quiz-top-section">
           <Typography variant="h2">
-            <span>Join game with Game ID: </span>
+            <span>Join game with Game PIN: </span>
             <span className="dynamic-text">{game.gameId}</span>
           </Typography>
           <Typography variant="subtitle1">{game.title}</Typography>

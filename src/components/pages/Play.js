@@ -128,7 +128,7 @@ class Play extends Component {
           <div className="page-container play-page">
             <FormControl>
               <TextField
-                label="Game ID"
+                label="Game PIN"
                 name="Game ID"
                 value={this.state.gameId}
                 margin="normal"
