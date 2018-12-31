@@ -113,8 +113,6 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
               </div>
             </Grid>
           </Grid>
-        </div>
-        <div className="quiz-bottom-section">
           <div>
             {isLastQuestion && <Button onClick={this.finalizeQuiz}>Finalize result</Button>}
             {!isLastQuestion && <Button onClick={this.nextQuestion}>Next question</Button>}
@@ -122,6 +120,8 @@ detta + rätt färg + en extra symbol på det rätta svaret så är vi hemma!
             <Button onClick={this.props.gameFunc.quit}>Quit quiz</Button>
             <Button onClick={this.props.gameFunc.end}>End quiz</Button>
           </div>
+        </div>
+        <div className="quiz-bottom-section">
           <Grid className="align-bottom" container>
             {answers.map((answer, index) => (
               <Grid key={index} item xs={6}>
