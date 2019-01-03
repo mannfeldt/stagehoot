@@ -18,6 +18,7 @@ const styles = theme => ({
     paddingBottom: theme.spacing.unit * 2,
     textAlign: 'center',
     color: theme.palette.text.secondary,
+    height: '100%',
   },
   playAnswer: {
     width: '50vw',
@@ -32,26 +33,27 @@ const styles = theme => ({
     marginLeft: '10px',
   },
   answer: {
-    fontSize: '24',
+    fontSize: 18,
+    fontWeight: 500,
     color: 'white',
   },
 });
 
 const answerStyles = [{
   icon: <CakeIcon />,
-  color: '#80DEEA',
+  color: '#73c7d2',
 },
 {
   icon: <ExtensionIcon />,
-  color: '#EF9A9A',
+  color: '#d78a8a',
 },
 {
   icon: <FavoriteIcon />,
-  color: '#CE93D8',
+  color: '#b984c2',
 },
 {
   icon: <StarIcon />,
-  color: '#C5E1A5',
+  color: '#b1ca94',
 }];
 
 class AnswerOption extends Component {
@@ -78,22 +80,22 @@ class AnswerOption extends Component {
     const { classes } = this.props;
 
     return (
-          <div className="full-height">
-              {this.props.answerQuestion && (
-<Paper onClick={() => { this.props.answerQuestion(this.props.answer) }} className={classes.playAnswer} style={{ backgroundColor: design.color }}>
-                    <div className="button-answer-icon">{design.icon}</div>
-                    {this.props.remoteMode && <div className={classes.answer}>{this.props.answer}</div>}
-                </Paper>
-)
+      <div className="full-height">
+        {this.props.answerQuestion && (
+        <Paper onClick={() => { this.props.answerQuestion(this.props.answer); }} className={classes.playAnswer} style={{ backgroundColor: design.color }}>
+          <div className="button-answer-icon">{design.icon}</div>
+          {this.props.remoteMode && <div className={classes.answer}>{this.props.answer}</div>}
+        </Paper>
+        )
                 }
-              {!this.props.answerQuestion && (
-<Paper className={classes.paper} style={{ backgroundColor: design.color }}>
-                    <div className={classes.icon}>{design.icon}</div>
-                    <div className={classes.answer}>{this.props.answer}</div>
-                </Paper>
-)
+        {!this.props.answerQuestion && (
+        <Paper className={classes.paper} style={{ backgroundColor: design.color }}>
+          <div className={classes.icon}>{design.icon}</div>
+          <div className={classes.answer}>{this.props.answer}</div>
+        </Paper>
+        )
                 }
-            </div>
+      </div>
     );
   }
 }

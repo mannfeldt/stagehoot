@@ -128,7 +128,7 @@ class CreateQuiz extends Component {
 
     render() {
       const {
-        timelimit, gamePass, gametype, title, timescore, gamemode, questions,
+        timelimit, gamePass, title, timescore, gamemode, questions,
       } = this.state;
       const { showSnackbar } = this.props;
       return (
@@ -139,24 +139,6 @@ class CreateQuiz extends Component {
             </Grid>
             <Grid item xs={12} md={6}>
               <form autoComplete="off">
-                <Grid item xs={12}>
-                  <FormControl required fullWidth>
-                    <InputLabel htmlFor="gametype-required">Gametype</InputLabel>
-                    <Select
-                      value={gametype || ''}
-                      onChange={this.handleChangeSelect}
-                      name="gametype"
-                      inputProps={{
-                        id: 'gametype-required',
-                      }}
-                    >
-                      <MenuItem value="quiz">Quiz</MenuItem>
-                      <MenuItem value="survey">Survey</MenuItem>
-                      <MenuItem value="discussion">Discussion</MenuItem>
-                      <MenuItem value="minigame">Mini game</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={12}>
 
                   <FormControl required fullWidth>
