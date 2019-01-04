@@ -31,13 +31,13 @@ class Host extends Component {
       });
     };
 
-    updateGame(game) {
+    updateGame(gameupdate) {
       const { showSnackbar } = this.props;
       const { game } = this.state;
       // se till att inte updatera game.players...
       // game som kommer in här ska bara innehålla det som ska uppdateras.
       // updateras med gamesettings, phasechanges, currenquestionId etc
-      fire.database().ref(`games/${game.key}`).update(game, (error) => {
+      fire.database().ref(`games/${game.key}`).update(gameupdate, (error) => {
         if (error) {
           const snack = {
             variant: 'error',
