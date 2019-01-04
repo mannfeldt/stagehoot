@@ -3,6 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
+import PropTypes from 'prop-types';
 import { fire } from '../../base';
 import Quiz from '../quiz/host/Quiz';
 import Minigame from '../minigame/host/Minigame';
@@ -31,18 +32,18 @@ class Host extends Component {
     };
 
     updateGame(game) {
-      const that = this;
+      const { showSnackbar } = this.props;
+      const { game } = this.state;
       // se till att inte updatera game.players...
       // game som kommer in här ska bara innehålla det som ska uppdateras.
       // updateras med gamesettings, phasechanges, currenquestionId etc
-      fire.database().ref(`games/${that.state.game.key}`).update(game, (error) => {
+      fire.database().ref(`games/${game.key}`).update(game, (error) => {
         if (error) {
           const snack = {
             variant: 'error',
             message: 'Unexpected internal error',
           };
-          that.props.showSnackbar(snack);
-        } else {
+          showSnackbar(snack);
         }
       });
     }
@@ -55,8 +56,9 @@ class Host extends Component {
     }
 
     quitGame() {
+      const { toggleHeader } = this.props;
       this.updateGame({ phase: null });
-      this.props.toggleHeader(true);
+      toggleHeader(true);
     }
 
     endGame() {
@@ -65,30 +67,32 @@ class Host extends Component {
 
 
     fetchGame() {
+      const { gameId, password } = this.state;
+      const { showSnackbar, toggleHeader } = this.props;
       const that = this;
-      fire.database().ref('games').orderByChild('gameId').equalTo(that.state.gameId)
+      fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
         .once('value', (snapshot) => {
           if (snapshot.val()) {
             let game;
             snapshot.forEach((child) => {
               game = child.val();
             });
-            if (game.password === that.state.password) {
+            if (game.password === password) {
               that.initGameListiner(game.key);
-              that.props.toggleHeader();
+              toggleHeader();
             } else {
               const snack = {
                 variant: 'error',
                 message: 'Could not find matching game',
               };
-              that.props.showSnackbar(snack);
+              showSnackbar(snack);
             }
           } else {
             const snack = {
               variant: 'info',
               message: 'No game found',
             };
-            that.props.showSnackbar(snack);
+            showSnackbar(snack);
           }
         });
     }
@@ -112,7 +116,7 @@ class Host extends Component {
           });
         }
       });
-      // koppla this.state.game till gameKey
+      // koppla game till gameKey
       // lägg till en likadan listener i Play.
       // hosts gamelistiner ska lyssna på alla ändringar. Play ska inte lyssna på andra players ändringar om det går. något att optimera i framtiden.
       // ett alt är att lyfta ut Players till en egen root? kan lägga phase och currentq i en game.state och sen är det allt som Player lyssnar på?
@@ -134,20 +138,22 @@ class Host extends Component {
       // result_question sets phase to final_result if questions are all done.
       // final_result shows result of all players. top 3 and/or all. sets phase to end on action
       // end shows options for replay, export result, etc.
+      const { gameId, password, game } = this.state;
+      const { showSnackbar, toggleHeader } = this.props;
       const gameFunctions = {
         update: this.updateGame,
         restart: this.restartGame,
         end: this.endGame,
         quit: this.quitGame,
       };
-      if (!this.state.game.phase) {
+      if (!game.phase) {
         return (
           <div className="page-container host-page">
             <FormControl>
               <TextField
                 label="Game PIN"
                 name="Game ID"
-                value={this.state.gameId}
+                value={gameId}
                 margin="normal"
                 onChange={this.handleChange('gameId')}
               />
@@ -158,7 +164,7 @@ class Host extends Component {
                 type="password"
                 name="password"
                 margin="normal"
-                value={this.state.password}
+                value={password}
                 onChange={this.handleChange('password')}
               />
             </FormControl>
@@ -168,14 +174,16 @@ class Host extends Component {
       }
       return (
         <div className="page-container host-page">
-          {this.state.game.gametype === 'quiz' && <Quiz game={this.state.game} gameFunc={gameFunctions} />}
-          {this.state.game.gametype === 'snake' && <Minigame game={this.state.game} gameFunc={gameFunctions} />}
-          {this.state.game.gametype === 'tetris' && <Minigame game={this.state.game} gameFunc={gameFunctions} />}
-
-
+          {game.gametype === 'quiz' && <Quiz game={game} gameFunc={gameFunctions} />}
+          {game.gametype === 'snake' && <Minigame game={game} gameFunc={gameFunctions} />}
+          {game.gametype === 'tetris' && <Minigame game={game} gameFunc={gameFunctions} />}
+          {game.gametype === 'golf' && <Minigame game={game} gameFunc={gameFunctions} />}
         </div>
       );
     }
 }
-
+Host.propTypes = {
+  showSnackbar: PropTypes.func.isRequired,
+  toggleHeader: PropTypes.func.isRequired,
+};
 export default Host;

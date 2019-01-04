@@ -7,6 +7,7 @@ import {
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import CreateTetris from './CreateTetris';
+import CreateGolf from './CreateGolf';
 import CreateSnake from './CreateSnake';
 
 class CreateMinigame extends Component {
@@ -45,10 +46,19 @@ class CreateMinigame extends Component {
                 </CardContent>
               </Card>
             </Grid>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('golf')}>
+                <CardHeader title="Golf" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Create a multiplayer golf simulation game</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
           )}
           {gametype === 'snake' && <CreateSnake createGame={createGame} />}
           {gametype === 'tetris' && <CreateTetris createGame={createGame} />}
+          {gametype === 'golf' && <CreateGolf createGame={createGame} />}
         </div>
       );
     }

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
+import PropTypes from 'prop-types';
 import { fire } from '../../base';
 import Quiz from '../quiz/play/Quiz';
 import Minigame from '../minigame/play/Minigame';
@@ -14,15 +14,22 @@ class Play extends Component {
       game: {},
       gameId: '',
       playerKey: '',
-
     };
     this.createPlayer = this.createPlayer.bind(this);
     this.fetchGame = this.fetchGame.bind(this);
   }
 
+  handleChange = name => (event) => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
   fetchGame() {
+    const { gameId } = this.state;
+    const { showSnackbar, toggleHeader } = this.props;
     const that = this;
-    fire.database().ref('games').orderByChild('gameId').equalTo(that.state.gameId)
+    fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
       .once('value', (snapshot) => {
         if (snapshot.val()) {
           let game;
@@ -41,14 +48,14 @@ class Play extends Component {
               variant: 'success',
               message: 'Connected to game',
             };
-            that.props.showSnackbar(snack);
-            that.props.toggleHeader(false);
+            showSnackbar(snack);
+            toggleHeader(false);
           } else if (game.phase === 'setup') {
             const snack = {
               variant: 'error',
               message: 'Game is not yet started',
             };
-            that.props.showSnackbar(snack);
+            showSnackbar(snack);
           } else {
             const storedPlayerKey = localStorage.getItem('RecentPlayerKey');
             if (storedPlayerKey && game.players && game.players[storedPlayerKey]) {
@@ -58,14 +65,14 @@ class Play extends Component {
                 variant: 'success',
                 message: 'Connected to game',
               };
-              that.props.showSnackbar(snack);
-              that.props.toggleHeader(false);
+              showSnackbar(snack);
+              toggleHeader(false);
             } else {
               const snack = {
                 variant: 'error',
                 message: 'Game is in progress',
               };
-              that.props.showSnackbar(snack);
+              showSnackbar(snack);
             }
           }
         } else {
@@ -73,7 +80,7 @@ class Play extends Component {
             variant: 'info',
             message: 'No game found',
           };
-          that.props.showSnackbar(snack);
+          showSnackbar(snack);
         }
       });
   }
@@ -96,58 +103,60 @@ class Play extends Component {
     });
   }
 
-    handleChange = name => (event) => {
-      this.setState({
-        [name]: event.target.value,
-      });
-    };
-
-    createPlayer(player) {
-      const playerRef = fire.database().ref(`/games/${this.state.game.key}/players`).push();
-      player.key = playerRef.key;
-      const that = this;
-      playerRef.set(player, (error) => {
-        if (error) {
-          const snack = {
-            variant: 'error',
-            message: 'Unexpected internal error',
-          };
-          that.props.showSnackbar(snack);
-        } else {
-          that.setState({
-            playerKey: player.key,
-          });
-          localStorage.setItem('RecentPlayerKey', player.key);
-        }
-      });
-    }
-
-    render() {
-      if (!this.state.game.phase) {
-        return (
-          <div className="page-container play-page">
-            <FormControl>
-              <TextField
-                label="Game PIN"
-                name="Game ID"
-                value={this.state.gameId}
-                margin="normal"
-                onChange={this.handleChange('gameId')}
-              />
-            </FormControl>
-            <Button onClick={this.fetchGame} variant="contained">Join</Button>
-          </div>
-        );
+  createPlayer(player) {
+    const { game } = this.state;
+    const { showSnackbar } = this.props;
+    const playerRef = fire.database().ref(`/games/${game.key}/players`).push();
+    const newPlayer = Object.assign({ key: playerRef.key }, player);
+    const that = this;
+    playerRef.set(newPlayer, (error) => {
+      if (error) {
+        const snack = {
+          variant: 'error',
+          message: 'Unexpected internal error',
+        };
+        showSnackbar(snack);
+      } else {
+        that.setState({
+          playerKey: newPlayer.key,
+        });
+        localStorage.setItem('RecentPlayerKey', newPlayer.key);
       }
+    });
+  }
+
+  render() {
+    const { game, playerKey, gameId } = this.state;
+    const { showSnackbar } = this.props;
+    if (!game.phase) {
       return (
         <div className="page-container play-page">
-          {this.state.game.gametype === 'quiz' && <Quiz game={this.state.game} createPlayer={this.createPlayer} playerKey={this.state.playerKey} showSnackbar={this.props.showSnackbar} />}
-          {this.state.game.gametype === 'snake' && <Minigame game={this.state.game} createPlayer={this.createPlayer} playerKey={this.state.playerKey} showSnackbar={this.props.showSnackbar} />}
-          {this.state.game.gametype === 'tetris' && <Minigame game={this.state.game} createPlayer={this.createPlayer} playerKey={this.state.playerKey} showSnackbar={this.props.showSnackbar} />}
-
+          <FormControl>
+            <TextField
+              label="Game PIN"
+              name="Game ID"
+              value={gameId}
+              margin="normal"
+              onChange={this.handleChange('gameId')}
+            />
+          </FormControl>
+          <Button onClick={this.fetchGame} variant="contained">Join</Button>
         </div>
       );
     }
-}
+    return (
+      <div className="page-container play-page">
+        {game.gametype === 'quiz' && <Quiz game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
+        {game.gametype === 'snake' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
+        {game.gametype === 'tetris' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
+        {game.gametype === 'golf' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
 
+      </div>
+    );
+  }
+}
+Play.propTypes = {
+  showSnackbar: PropTypes.func.isRequired,
+  toggleHeader: PropTypes.func.isRequired,
+};
 export default Play;

@@ -8,6 +8,10 @@ import Tetris from '../tetris/Tetris';
 import PhaseFinalResult from './PhaseFinalResult';
 import PhaseEnd from './PhaseEnd';
 import SnakeStarting from '../snake/SnakeStarting';
+import Golf from '../golf/Golf';
+import GolfStarting from '../golf/GolfStarting';
+import SnakeSetup from '../snake/SnakeSetup';
+import GolfSetup from '../golf/GolfSetup';
 
 class Minigame extends PureComponent {
   render() {
@@ -16,7 +20,7 @@ class Minigame extends PureComponent {
       case 'snake':
         return (
           <div className="host-container">
-            {game.phase === 'setup' && <PhaseSetup game={game} gameFunc={gameFunc} />}
+            {game.phase === 'setup' && <SnakeSetup game={game} gameFunc={gameFunc} />}
             {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
             {game.phase === 'starting' && <SnakeStarting game={game} gameFunc={gameFunc} />}
             {game.phase === 'gameplay' && <Snake game={game} gameFunc={gameFunc} />}
@@ -31,6 +35,17 @@ class Minigame extends PureComponent {
             {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
             {game.phase === 'starting' && <PhaseStarting game={game} gameFunc={gameFunc} />}
             {game.phase === 'gameplay' && <Tetris game={game} gameFunc={gameFunc} />}
+            {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
+            {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
+          </div>
+        );
+      case 'golf':
+        return (
+          <div className="host-container">
+            {game.phase === 'setup' && <GolfSetup game={game} gameFunc={gameFunc} />}
+            {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
+            {game.phase === 'starting' && <GolfStarting game={game} gameFunc={gameFunc} />}
+            {game.phase === 'gameplay' && <Golf game={game} gameFunc={gameFunc} />}
             {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
             {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
           </div>
