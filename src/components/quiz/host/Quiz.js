@@ -10,28 +10,28 @@ import PhaseResultQuestion from './PhaseResultQuestion';
 import PhaseEnd from './PhaseEnd';
 
 class Quiz extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
+  constructor(props) {
+    super(props);
+    this.state = {
 
-        };
-    }
+    };
+  }
 
-    render() {
-        return (
-            <div className="host-container">
-                {this.props.game.phase === "setup" && <PhaseSetup game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "connection" && <PhaseConnection game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "starting" && <PhaseStarting game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "awaiting_question" && <PhaseAwaitingQuestion game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "show_question" && <PhaseShowQuestion game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "answer" && <PhaseAnswer game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "result_question" && <PhaseResultQuestion game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "final_result" && <PhaseFinalResult game={this.props.game} gameFunc={this.props.gameFunc} />}
-                {this.props.game.phase === "end" && <PhaseEnd game={this.props.game} gameFunc={this.props.gameFunc} />}
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div className="host-container">
+        {this.props.game.phase === 'setup' && <PhaseSetup game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'connection' && <PhaseConnection game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'starting' && <PhaseStarting game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'awaiting_question' && <PhaseAwaitingQuestion game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'show_question' && <PhaseShowQuestion game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'answer' && <PhaseAnswer game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'result_question' && <PhaseResultQuestion game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'final_result' && <PhaseFinalResult game={this.props.game} gameFunc={this.props.gameFunc} />}
+        {this.props.game.phase === 'end' && <PhaseEnd game={this.props.game} gameFunc={this.props.gameFunc} />}
+      </div>
+    );
+  }
 }
 
 export default Quiz;

@@ -12,6 +12,7 @@ import Golf from '../golf/Golf';
 import GolfStarting from '../golf/GolfStarting';
 import SnakeSetup from '../snake/SnakeSetup';
 import GolfSetup from '../golf/GolfSetup';
+import GolfLevelCompleted from '../golf/GolfLevelCompleted';
 
 class Minigame extends PureComponent {
   render() {
@@ -46,6 +47,7 @@ class Minigame extends PureComponent {
             {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
             {game.phase === 'starting' && <GolfStarting game={game} gameFunc={gameFunc} />}
             {game.phase === 'gameplay' && <Golf game={game} gameFunc={gameFunc} />}
+            {game.phase === 'level_completed' && <GolfLevelCompleted game={game} gameFunc={gameFunc} />}
             {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
             {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
           </div>
