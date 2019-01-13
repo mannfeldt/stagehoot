@@ -88,7 +88,7 @@ class PhaseConnection extends Component {
               <div className="quiz-top-section" />
               <div className="quiz-middle-section">
                 <Typography variant="h5">
-                  <span>Welcome</span>
+                  <span>Welcome </span>
                   <span className="dynamic-text">{playerName}</span>
                 </Typography>
                 <Typography variant="subtitle1"> Watch the screen, your name should show.</Typography>

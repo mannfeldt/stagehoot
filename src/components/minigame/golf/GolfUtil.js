@@ -1,22 +1,14 @@
 import { sample } from 'lodash';
-import * as I from 'immutable';
+import tinycolor from 'tinycolor2';
 import * as p2 from 'p2';
 import {
-  WIDTH, HEIGHT, HOLE_HEIGHT,
+  HOLE_HEIGHT,
   HOLE_CURVE_DEPTH,
   HOLE_WIDTH,
+  GROUND_COLORS,
   BALL_RADIUS,
 } from './GolfConstants';
 
-const colors = [
-  'yellow',
-  'pink',
-  'limegreen',
-  'skyblue',
-  'orange',
-  'red',
-  'white',
-];
 /* get an int between min and max inclusive */
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -73,12 +65,6 @@ export function isInvalidSwing(swingData) {
 /*
  * Resets the ball position to level spawn if ball fell off world.
  */
-export function ensureBallInBounds(body, level) {
-  if (body.interpolatedPosition[1] > HEIGHT + 20) {
-    body.position = [level.spawn[0], level.spawn[1] - BALL_RADIUS];
-    body.velocity = [0, 0];
-  }
-}
 
 function newBall(position) {
   const ballShape = new p2.Circle({
@@ -95,6 +81,7 @@ function newBall(position) {
   ballBody.addShape(ballShape);
 
   ballBody.angularDamping = 0.8;
+  ballBody.damping = 0.18;
   ballBody.sleepTimeLimit = 1;
   ballBody.sleepSpeedLimit = 2;
 
@@ -107,20 +94,40 @@ export function createBall(spawn) {
     spawn[1] - BALL_RADIUS,
   ]);
 }
+export function getDistanceYards(a, b) {
+  if (a > b) {
+    return Math.floor((a - b) / 4);
+  }
+  return Math.floor((b - a) / 4);
+}
 
 export function createBallFromInitial(position, velocity) {
   const ball = newBall(position);
   ball.velocity = velocity.slice(); // clone
   return ball;
 }
-
+export function getSwingData(club, acceleration) {
+  const xFactor = (90 - club.loft) / 90;
+  const YFactor = club.loft / 90;
+  // en lös putt kommer fortfarande registreras som 0.14 etc. kanske ska lägga på en mini så att highestAcceleration alltid är minst 5?
+  // lägger alltså på gratis 5 på highest acc. eller så får jag räkna om värdet på den så att de första upp till 10 räknas som mer värda ellerså?
+  const power = acceleration;
+  // kör testleveln. kolla på angulardampening? kanske är det som är problemet. får ju ingen lyft på bollarna. öka faktorerna. öka y?
+  const swing = {
+    x: Math.min(Math.ceil(power * xFactor) * club.powerFactor, club.max),
+    y: Math.min(Math.ceil(power * YFactor) * club.powerFactor, club.max),
+  };
+  return swing;
+}
 export function addHolePoints(level) {
+  const { width } = level;
+
   // points has to start with x=0 and end with x=WIDTH
   if (level.points[0][0] !== 0) {
     throw new Error('invalid points: first x !== 0');
   }
-  if (level.points[level.points.length - 1][0] !== WIDTH) {
-    throw new Error(`invalid points: last x !== WIDTH (${WIDTH})`);
+  if (level.points[level.points.length - 1][0] !== width) {
+    throw new Error(`invalid points: last x !== WIDTH (${width})`);
   }
 
   // insert hole
@@ -157,6 +164,7 @@ export function addHolePoints(level) {
 }
 
 export function createGround(level) {
+  const { height, width } = level;
   // This used to create a single ground shape.
   // Now it creates 3 because this mysteriously fixes a bug where the ground after the hole wasn't
   // working correctly? man I don't even know
@@ -164,8 +172,8 @@ export function createGround(level) {
   const afterHole = level.points.filter(point => point[0] > level.hole[0]);
 
   const vertsBeforeHole = beforeHole.concat([
-    [beforeHole[beforeHole.length - 1][0], HEIGHT],
-    [0, HEIGHT],
+    [beforeHole[beforeHole.length - 1][0], height],
+    [0, height],
   ]);
 
   // Creates this shape:
@@ -177,13 +185,13 @@ export function createGround(level) {
     [level.hole[0] - HOLE_WIDTH / 2, level.hole[1] + HOLE_CURVE_DEPTH],
     [level.hole[0], level.hole[1] + HOLE_HEIGHT],
     [level.hole[0] + HOLE_WIDTH / 2, level.hole[1] + HOLE_CURVE_DEPTH],
-    [level.hole[0] + HOLE_WIDTH / 2, HEIGHT],
-    [level.hole[0] - HOLE_WIDTH / 2, HEIGHT],
+    [level.hole[0] + HOLE_WIDTH / 2, height],
+    [level.hole[0] - HOLE_WIDTH / 2, height],
   ];
 
   const vertsAfterHole = afterHole.concat([
-    [WIDTH, HEIGHT],
-    [afterHole[0][0], HEIGHT],
+    [width, height],
+    [afterHole[0][0], height],
   ]);
 
   const grounds = [vertsBeforeHole, vertsHole, vertsAfterHole].map((verts) => {
@@ -224,7 +232,7 @@ export function createHoleSensor(pos) {
   const sensorBody = new p2.Body({
     position: [
       pos[0],
-      pos[1] + HOLE_HEIGHT,
+      pos[1] + (Math.ceil(HOLE_HEIGHT * 1.4)),
     ],
   });
   sensorBody.damping = 0;
@@ -261,25 +269,83 @@ export function getSegmentWidths(totalWidth, minWidth) {
 
   return widths;
 }
-export function levelGen(test) {
+
+export function getPlayerColors(len) {
+  const goldenRatio = 0.618033988749895;
+  const colors = [];
+  const s = 0.5;
+  const v = 0.95;
+  let h = Math.random();
+  for (let i = 0; i < len; i++) {
+    h += goldenRatio;
+    h %= 1;
+    const tiny = tinycolor.fromRatio({ h, s, v });
+    colors.push(tiny.toHexString());
+  }
+
+  return colors;
+}
+// lägg till olika material de två segementerna närmast hålet ska vara green, där färgen är anoorlunda och friktionen mindre
+// vattenhinder? blått och räknas likt outOfBounds? fast sätt tillbaka till senaste pos, spara alltid senaste pos använd även för outofbounds?
+// bunker: hög friktion, ingen studs = damping?
+// bunker och vatten kan bara finnas på plant eller i en viaduct, ta nåra av de spetsiga hålen/viaducterna och gör till vatten eller bunker
+// bunker och vatten kan påverka par? kan öka paret ett snäpp om det är mycket bunker/vatten
+// rough och fairway är samma? tillsvidare
+export function levelGen(width, height, test) {
   if (test) {
     const testLevel = {
       points: [
-        [0, 200],
-        [WIDTH, 200],
+        [0, 400],
+        [width, 400],
       ],
-      hole: [100, 200],
-      spawn: [50, 200],
-      color: 'white',
+      hole: [width / 1.5, 400],
+      spawn: [100, 400],
+      color: 'brown',
+      par: 4,
+      height,
+      time: 45000,
+      width,
     };
     return testLevel;
   }
 
-  const segmentWidths = getSegmentWidths(WIDTH, 12);
+  const segmentWidths = getSegmentWidths(width, 12);
   const numSegments = segmentWidths.length;
 
-  const spawnSegment = randInt(1, Math.floor(numSegments / 3));
-  const holeSegment = numSegments - randInt(1, Math.floor(numSegments / 3));
+  const spawnSegment = randInt(2, Math.floor(numSegments / 5));
+  let par;
+  if (width > 1000) {
+    const rnd = randInt(1, 18);
+    if (rnd > 8) {
+      par = 4;
+    } else if (rnd > 4) {
+      par = 5;
+    } else {
+      par = 3;
+    }
+  } else {
+    par = 5;
+  }
+  const asdf = {
+    5: [2, Math.floor(numSegments / 4)],
+    4: [Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)],
+    3: [Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)],
+  };
+  const holeSegments = {
+    5: numSegments - randInt(2, Math.floor(numSegments / 4)),
+    4: numSegments - randInt(Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)),
+    3: numSegments - randInt(Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)),
+  };
+
+  const holeSegment = holeSegments[par];
+
+  const timePars = {
+    5: 90 * 1000,
+    4: 60 * 1000,
+    3: 45 * 1000,
+  };
+
+  const time = timePars[par];
 
   const points = [];
   let spawnX;
@@ -287,8 +353,8 @@ export function levelGen(test) {
   let holeX;
   let holeY;
 
-  const minY = 80;
-  const maxY = 250;
+  const minY = height * 0.5;
+  const maxY = minY + Math.min(200, height * 0.3);
 
   for (let idx = 0; idx <= numSegments; idx++) {
     const segmentWidth = segmentWidths[idx - 1];
@@ -302,12 +368,12 @@ export function levelGen(test) {
       x = points[idx - 1][0] + segmentWidth;
     }
 
-    if (x > WIDTH) {
-      x = WIDTH;
+    if (x > width) {
+      x = width;
     }
 
     if (idx === 0) {
-      y = randInt(HEIGHT - 150, HEIGHT - 20);
+      y = randInt(height - 150, height - 20);
     } else {
       const prevY = points[idx - 1][1];
 
@@ -349,7 +415,7 @@ export function levelGen(test) {
     points.push([x, y]);
   }
 
-  const color = sample(colors);
+  const color = sample(GROUND_COLORS);
 
   const hole = [holeX, holeY];
   const spawn = [spawnX, spawnY];
@@ -359,6 +425,10 @@ export function levelGen(test) {
     hole,
     spawn,
     color,
+    par,
+    time,
+    height,
+    width,
   };
 
   return level;

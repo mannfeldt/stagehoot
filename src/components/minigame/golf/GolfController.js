@@ -2,39 +2,104 @@ import React, { Component, Fragment } from 'react';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { fire } from '../../../base';
+import { withStyles } from '@material-ui/core/styles';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import * as util from './GolfUtil';
+import { fire } from '../../../base';
 import {
   MAX_POWER,
   MIN_POWER,
+  CLUBS,
+  BALL_RADIUS,
+  AIR_COLOR,
+  GRASS_COLOR,
+  BALL_RADIUS_CONTROLLER,
   PLAYER_COLORS,
 } from './GolfConstants';
 
-let c;
+const styles = theme => ({
+  container: {
+    height: '100vh',
+    width: '100vw',
+  },
+  canvas: {
+  },
+  header: {
+    height: 80,
+  },
+  footer: {
+    height: 80,
+    marginTop: '-4px',
+  },
+});
+
+let canvas;
 let ctx;
 
+function drawBall(x, y, fill, stroke, playerState) {
+  ctx.lineWidth = 1;
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.beginPath();
+  ctx.arc(x, y, BALL_RADIUS_CONTROLLER, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.closePath();
+
+  ctx.beginPath();
+  ctx.arc(x, y, BALL_RADIUS_CONTROLLER - ctx.lineWidth / 2, 0, 2 * Math.PI);
+  ctx.stroke();
+  ctx.closePath();
+}
+function drawEnvironment(x, y, groundColor, stroke) {
+  ctx.fillStyle = GRASS_COLOR;
+  ctx.fillRect(0, y - BALL_RADIUS_CONTROLLER, x, BALL_RADIUS_CONTROLLER);
+  // groundcolor längst ner
+  // GRASS_COLOR är stroke
+  // WITH på
+  // AIR_COLOR är överdelen
+}
+function drawDistance(x, y, distance) {
+  ctx.font = '24px roboto';
+  ctx.fillStyle = '#000000';
+  ctx.fillText(`Distance: ${distance} yards`, 15, 24);
+}
+function drawScoreText(x, y, player) {
+  ctx.font = '24px roboto';
+  ctx.fillStyle = '#000000';
+  ctx.fillText(`You scored with ${player.swing.strokes} strokes in ${player.scoreTime} seconds`, 15, 24);
+}
 function clearCanvas() {
-  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 class GolfController extends Component {
   constructor(props) {
     super(props);
+    // sätt det här till rätt höjd. det ska vara windowheight - header - footer
+    const canvasHeight = Math.floor(window.innerHeight - 160);
+    const canvasWidth = Math.floor(window.innerWidth);
     this.state = {
       highestAcceleration: 0,
       isSwinging: false,
       swingData: [],
-      loftAngle: 60,
+      clubIndex: 0,
+      canvasHeight,
+      canvasWidth,
     };
     this.drawSwing = this.drawSwing.bind(this);
+    this.renderFrame = this.renderFrame.bind(this);
     this.saveSwing = this.saveSwing.bind(this);
   }
 
   componentDidMount() {
-    c = document.getElementById('swingcanvas');
-    ctx = c.getContext('2d');
+    canvas = document.getElementById('swingcanvas');
+    ctx = canvas.getContext('2d');
+    ctx.translate(0.5, 0.5);
     const that = this;
-    window.addEventListener('touchstart', (e) => {
+    canvas.addEventListener('touchstart', (e) => {
       that.setState(() => {
         const highestAcceleration = 0;
         const swingData = [];
@@ -42,10 +107,12 @@ class GolfController extends Component {
         return { highestAcceleration, swingData, isSwinging };
       });
       clearCanvas();
+      this.renderFrame();
+
       // e.preventDefault();
     }, false);
 
-    window.addEventListener('touchend', (e) => {
+    canvas.addEventListener('touchend', (e) => {
       const { swingData } = that.state;
       that.setState(() => {
         const isSwinging = false;
@@ -55,6 +122,7 @@ class GolfController extends Component {
       this.saveSwing();
       // e.preventDefault();
     }, false);
+
 
     window.addEventListener('devicemotion', (event) => {
       const { isSwinging, swingData, highestAcceleration } = that.state;
@@ -70,12 +138,18 @@ class GolfController extends Component {
         }
       }
     }, true);
+    this.renderFrame();
   }
+
+  handleChangeSelect = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
 
   saveSwing() {
     const { playerKey, game } = this.props;
     const {
-      isSwinging, swingData, highestAcceleration, loftAngle,
+      isSwinging, swingData, highestAcceleration, clubIndex,
     } = this.state;
     const currentPlayer = game.players[playerKey];
     if (currentPlayer.state !== 'STILL') {
@@ -87,15 +161,13 @@ class GolfController extends Component {
       alert('invalid swing');
       return;
     }
+    // ska bara kunna används wood på första slaget? ge det lite extra power
+    const club = CLUBS[clubIndex];
+    const swing = util.getSwingData(club, highestAcceleration);
+    swing.strokes = currentPlayer.swing.strokes + 1;
 
-    const xFactor = (90 - loftAngle) / 90;
-    const YFactor = loftAngle / 90;
-
-    const swing = {
-      x: Math.min(Math.round(highestAcceleration * xFactor) * 2, MAX_POWER),
-      y: Math.min(Math.round(highestAcceleration * YFactor) * 2, MAX_POWER),
-      strokes: currentPlayer.swing.strokes + 1,
-    };
+    // test
+    // test
 
 
     fire.database().ref(`/games/${game.key}/players/${playerKey}/swing`).set(swing, (error) => {
@@ -112,7 +184,7 @@ class GolfController extends Component {
     const len = swingData.length;
     // test om den här. det ska vara hela swingen efter att den är klar som ritas.
     // kolla på drawGround etc. där behöver jag inte loopa beginpath och stroke etc. utan jag har istöället en start pos
-    const prevSwing = { y: 100, x: 100 };
+    const prevSwing = { y: canvas.height - (BALL_RADIUS_CONTROLLER * 2), x: canvas.width / 2 };
     for (let i = 0; i < len; i++) {
       const newY = prevSwing.y + (Math.round(swingData[i].z));
       const newX = prevSwing.x + (Math.round(swingData[i].y));
@@ -125,18 +197,64 @@ class GolfController extends Component {
     }
   }
 
+  renderFrame() {
+    const { game, playerKey, classes } = this.props;
+    if (!ctx) {
+      return;
+    }
+    const currentPlayer = game.players[playerKey];
+
+    ctx.lineWidth = 4;
+    const background = new Image();
+    background.src = 'https://i.imgur.com/DE8oR5A.png';
+
+    background.onload = function () {
+      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+      if (currentPlayer.state === 'STILL') {
+        drawBall(canvas.width / 2, canvas.height - (BALL_RADIUS_CONTROLLER * 2), currentPlayer.color, 'gray');
+        drawDistance(canvas.width / 2, canvas.height / 2, currentPlayer.distance);
+      } else if (currentPlayer.state === 'SCORED') {
+        drawScoreText(canvas.width / 2, canvas.height / 2, currentPlayer);
+      }
+
+      drawEnvironment(canvas.width, canvas.height, game.minigame.levelColor, 'gray');
+    };
+  }
+
   // man ska kunna swinga hela tiden men det är bara när player.state är 'STILL' som en boll rendreras och swingen kan sparas.
   // lägg till en selectbox där man väljer klubba som står loftAngle.
+  // lägg till en snyggare powermätare. använd någon riktigt visuel mätare
   render() {
-    const { game, playerKey } = this.props;
-    const { highestAcceleration, isSwinging } = this.state;
-    const currentPlayer = game.players[playerKey];
+    const { game, playerKey, classes } = this.props;
+    const {
+      highestAcceleration, isSwinging, canvasHeight, canvasWidth, clubIndex,
+    } = this.state;
+    this.renderFrame();
     return (
       <div className="phase-container">
-        <div className="player-controlls-container" style={currentPlayer.state === 'STILL' ? { backgroundColor: 'green' } : {}}>
-          <Typography variant="h2">club: driver</Typography>
-          <canvas id="swingcanvas" height="400" width="320" />
-          <Typography variant="h2">{highestAcceleration}</Typography>
+        <div className={classes.container}>
+          <div className={classes.header}>
+            <FormControl>
+              <InputLabel htmlFor="clubc-required">Club</InputLabel>
+              <Select
+                value={clubIndex || 0}
+                onChange={this.handleChangeSelect}
+                name="clubIndex"
+                inputProps={{
+                  id: 'club-required',
+                }}
+              >
+                {CLUBS.map((c, index) => (
+                  <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                ))}
+
+              </Select>
+            </FormControl>
+          </div>
+          <canvas id="swingcanvas" className={classes.canvas} height={canvasHeight} width={canvasWidth} />
+          <div className={classes.footer} style={{ backgroundColor: game.minigame.levelColor }}>
+            <Typography variant="h2">{highestAcceleration}</Typography>
+          </div>
         </div>
       </div>
     );
@@ -145,5 +263,6 @@ class GolfController extends Component {
 GolfController.propTypes = {
   playerKey: PropTypes.string.isRequired,
   game: PropTypes.object.isRequired,
+  classes: PropTypes.any,
 };
-export default GolfController;
+export default withStyles(styles)(GolfController);

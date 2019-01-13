@@ -16,7 +16,7 @@ class GolfSetup extends Component {
     super(props);
     this.state = {
       surveyPlayers: false,
-      nameGenerator: false,
+      nameGenerator: true,
       gamemode: props.game.minigame.gamemode,
       holes: props.game.minigame.holes,
       opponentCollision: props.game.minigame.opponentCollision,
