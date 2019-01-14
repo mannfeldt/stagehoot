@@ -9,6 +9,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import * as util from './GolfUtil';
 import { fire } from '../../../base';
+import './golf.css';
 import {
   MAX_POWER,
   MIN_POWER,
@@ -61,15 +62,24 @@ function drawEnvironment(x, y, groundColor, stroke) {
   // WITH på
   // AIR_COLOR är överdelen
 }
+function drawStrokes(x, y, distance) {
+  ctx.font = '28px roboto';
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'center';
+  ctx.fillText(`Slag: ${distance} yards`, x, y);
+}
+
 function drawDistance(x, y, distance) {
   ctx.font = '24px roboto';
   ctx.fillStyle = '#000000';
-  ctx.fillText(`Distance: ${distance} yards`, 15, 24);
+  ctx.textAlign = 'center';
+  ctx.fillText(`Distance: ${distance} yards`, x, 24);
 }
 function drawScoreText(x, y, player) {
-  ctx.font = '24px roboto';
+  ctx.font = '22px roboto';
   ctx.fillStyle = '#000000';
-  ctx.fillText(`You scored with ${player.swing.strokes} strokes in ${player.scoreTime} seconds`, 15, 24);
+  ctx.textAlign = 'center';
+  ctx.fillText(`You scored with ${player.swing.strokes} strokes in ${player.scoreTime} seconds`, x, y);
 }
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -118,13 +128,16 @@ class GolfController extends Component {
         const isSwinging = false;
         return { isSwinging };
       });
-      this.drawSwing(swingData);
+      this.renderFrame();
       this.saveSwing();
       // e.preventDefault();
     }, false);
 
 
-    window.addEventListener('devicemotion', (event) => {
+    window.addEventListener('devicemotion', (e) => {
+      const event = e || window.event;
+      event.preventDefault();
+      event.stopPropagation();
       const { isSwinging, swingData, highestAcceleration } = that.state;
       if (isSwinging) {
         const { x, y, z } = event.acceleration;
@@ -154,6 +167,10 @@ class GolfController extends Component {
     const currentPlayer = game.players[playerKey];
     if (currentPlayer.state !== 'STILL') {
       alert('ball is not still');
+      return;
+    }
+    if (game.phase !== 'gameplay') {
+      alert('game is not playing');
       return;
     }
 
@@ -199,6 +216,7 @@ class GolfController extends Component {
 
   renderFrame() {
     const { game, playerKey, classes } = this.props;
+    const { swingData } = this.state;
     if (!ctx) {
       return;
     }
@@ -211,12 +229,13 @@ class GolfController extends Component {
     background.onload = function () {
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
       if (currentPlayer.state === 'STILL') {
+        drawStrokes(canvas.width / 2, canvas.height / 2, currentPlayer.swing.strokes);
         drawBall(canvas.width / 2, canvas.height - (BALL_RADIUS_CONTROLLER * 2), currentPlayer.color, 'gray');
         drawDistance(canvas.width / 2, canvas.height / 2, currentPlayer.distance);
       } else if (currentPlayer.state === 'SCORED') {
         drawScoreText(canvas.width / 2, canvas.height / 2, currentPlayer);
       }
-
+      this.drawSwing(swingData);
       drawEnvironment(canvas.width, canvas.height, game.minigame.levelColor, 'gray');
     };
   }

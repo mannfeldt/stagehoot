@@ -269,7 +269,9 @@ export function getSegmentWidths(totalWidth, minWidth) {
 
   return widths;
 }
-
+export function calculateScore(strokes, time) {
+  return Math.round(100 / (strokes + (time / 20)));
+}
 export function getPlayerColors(len) {
   const goldenRatio = 0.618033988749895;
   const colors = [];
@@ -303,7 +305,7 @@ export function levelGen(width, height, test) {
       color: 'brown',
       par: 4,
       height,
-      time: 45000,
+      time: 2000,
       width,
     };
     return testLevel;
