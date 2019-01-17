@@ -4,7 +4,7 @@ self.__precacheManifest = [
     "url": "/stagehoot/static/media/countdown.5c685d8c.wav"
   },
   {
-    "revision": "ad4b0c0913b0748906d7",
+    "revision": "202bea6692309e1b3fb1",
     "url": "/stagehoot/static/css/main.e5c50c61.chunk.css"
   },
   {
@@ -40,8 +40,8 @@ self.__precacheManifest = [
     "url": "/stagehoot/static/media/golfiron3.f554f315.wav"
   },
   {
-    "revision": "ad4b0c0913b0748906d7",
-    "url": "/stagehoot/static/js/main.ad4b0c09.chunk.js"
+    "revision": "202bea6692309e1b3fb1",
+    "url": "/stagehoot/static/js/main.202bea66.chunk.js"
   },
   {
     "revision": "389fcba5b9c520f5c710e083fe932101",
@@ -76,7 +76,7 @@ self.__precacheManifest = [
     "url": "/stagehoot/static/media/fingerprint.deabfcc6.svg"
   },
   {
-    "revision": "f639087af491290bcf45a81d8a3cfc79",
+    "revision": "0a0b7d71710865e20a5026fc55a69403",
     "url": "/stagehoot/index.html"
   }
 ];
