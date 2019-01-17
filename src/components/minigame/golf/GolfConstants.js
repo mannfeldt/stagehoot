@@ -25,46 +25,73 @@ export const FAIRWAY_COLOR = 'green';
 export const GREEN_COLOR = 'green';
 export const BUNKER_COLOR = 'green';
 export const WATER_COLOR = 'blue';
+export const PENALTY_STROKES = 12;
 
 
 export const PHYSICS_SPEED_FACTOR = 3;
 
+export const SCORE_TERMS = [
+  {
+    name: 'Albatross', score: -3,
+  }, {
+    name: 'Eagle', score: -2,
+  },
+  {
+    name: 'Birdie', score: -1,
+  },
+  {
+    name: 'Par', score: 0,
+  },
+  {
+    name: 'Bogey', score: 1,
+  },
+  {
+    name: 'Double bogey', score: 2,
+  },
+  {
+    name: 'Triple bogey', score: 3,
+  },
+  {
+    name: 'Quadruple bogey', score: 4,
+  },
+];
+
 export const CLUBS = [
   {
-    name: 'Wood', id: 0, loft: 22, powerFactor: 3.4, max: 800,
+    name: 'Wood', type: 'wood', id: 0, loft: 22, powerFactor: 3.6, max: 800,
   },
   {
-    name: 'Hybrid', id: 1, loft: 26, powerFactor: 3.2, max: 800,
+    name: 'Hybrid', type: 'iron', id: 1, loft: 26, powerFactor: 3.4, max: 800,
   },
   {
-    name: '3 Iron', id: 2, loft: 31, powerFactor: 2.8, max: 700,
+    name: '3 Iron', type: 'iron', id: 2, loft: 31, powerFactor: 3, max: 700,
   },
   {
-    name: '4 Iron', id: 3, loft: 34, powerFactor: 2.75, max: 700,
+    name: '4 Iron', type: 'iron', id: 3, loft: 34, powerFactor: 2.95, max: 700,
   },
   {
-    name: '5 Iron', id: 4, loft: 37, powerFactor: 2.7, max: 700,
+    name: '5 Iron', type: 'iron', id: 4, loft: 37, powerFactor: 2.9, max: 700,
   },
   {
-    name: '6 Iron', id: 5, loft: 40, powerFactor: 2.65, max: 700,
+    name: '6 Iron', type: 'iron', id: 5, loft: 40, powerFactor: 2.85, max: 700,
   },
   {
-    name: '7 Iron', id: 6, loft: 43, powerFactor: 2.6, max: 700,
+    name: '7 Iron', type: 'iron', id: 6, loft: 43, powerFactor: 2.8, max: 700,
   },
   {
-    name: '8 Iron', id: 7, loft: 46, powerFactor: 2.55, max: 700,
+    name: '8 Iron', type: 'iron', id: 7, loft: 46, powerFactor: 2.75, max: 700,
   },
   {
-    name: '9 Iron', id: 8, loft: 49, powerFactor: 2.5, max: 700,
+    name: '9 Iron', type: 'iron', id: 8, loft: 49, powerFactor: 2.7, max: 700,
   },
   {
-    name: 'Wedge', id: 9, loft: 62, powerFactor: 2.4, max: 700,
+    name: 'Wedge', type: 'iron', id: 9, loft: 62, powerFactor: 2.6, max: 700,
   },
   {
-    name: 'Chipper', id: 10, loft: 78, powerFactor: 2.3, max: 700,
+    name: 'Chipper', type: 'iron', id: 10, loft: 78, powerFactor: 2.5, max: 700,
   },
   {
-    name: 'Putter', id: 11, loft: 1, powerFactor: 1.5, max: 500,
+    name: 'Putter', type: 'putt', id: 11, loft: 1, powerFactor: 1.5, max: 500,
   },
 ];
 

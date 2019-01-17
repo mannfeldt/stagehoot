@@ -16,10 +16,11 @@ class GolfSetup extends Component {
     super(props);
     this.state = {
       surveyPlayers: false,
-      nameGenerator: true,
+      nameGenerator: false,
       gamemode: props.game.minigame.gamemode,
       holes: props.game.minigame.holes,
-      opponentCollision: props.game.minigame.opponentCollision,
+      scoremode: props.game.minigame.scoremode,
+      speedmode: props.game.minigame.speedmode,
       difficulty: props.game.minigame.difficulty,
     };
   }
@@ -42,16 +43,17 @@ class GolfSetup extends Component {
       const { game, gameFunc } = this.props;
       const {
         surveyPlayers, nameGenerator,
-        opponentCollision, holes, difficulty, gamemode,
+        holes, difficulty, gamemode, scoremode, speedmode,
       } = this.state;
       const minigame = {
         surveyPlayers,
         nameGenerator,
+        speedmode,
         multiplayerMode,
-        opponentCollision,
         holes,
         difficulty,
         gamemode,
+        scoremode,
       };
       game.minigame = minigame;
       game.phase = 'connection';
@@ -62,7 +64,7 @@ class GolfSetup extends Component {
     render() {
       const {
         surveyPlayers, nameGenerator,
-        opponentCollision, holes, difficulty, gamemode,
+        holes, difficulty, gamemode, scoremode, speedmode,
       } = this.state;
       return (
         <div className="phase-container">
@@ -82,6 +84,7 @@ class GolfSetup extends Component {
                 )}
                 label="Generate names for players"
               />
+
               <FormControl required>
                 <InputLabel htmlFor="gametype-required">Game mode</InputLabel>
                 <Select
@@ -113,6 +116,23 @@ class GolfSetup extends Component {
                             )
                         }
               <FormControl required>
+                <InputLabel htmlFor="scoremode-required">Score mode</InputLabel>
+                <Select
+                  value={scoremode || ''}
+                  onChange={this.handleChangeSelect}
+                  name="scoremode"
+                  inputProps={{
+                    id: 'scoremode-required',
+                  }}
+                >
+                  <MenuItem value="strokes">Strokes</MenuItem>
+                  <MenuItem value="time">Time</MenuItem>
+                  <MenuItem value="compedetive">Compedetive</MenuItem>
+
+
+                </Select>
+              </FormControl>
+              <FormControl required>
                 <InputLabel htmlFor="gametype-required">difficulty</InputLabel>
                 <Select
                   value={difficulty || ''}
@@ -128,17 +148,16 @@ class GolfSetup extends Component {
                   <MenuItem value="75">Pro</MenuItem>
                 </Select>
               </FormControl>
-
               <FormControl component="fieldset">
                 <FormControlLabel
                   control={(
                     <Switch
-                      checked={opponentCollision}
-                      onChange={this.handleChangeBool('opponentCollision')}
-                      value="opponentCollision"
+                      checked={speedmode}
+                      onChange={this.handleChangeBool('speedmode')}
+                      value="speedmode"
                     />
                 )}
-                  label="Opponent collisions"
+                  label="Speed mode"
                 />
               </FormControl>
               <FormControlLabel

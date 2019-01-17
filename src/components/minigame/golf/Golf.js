@@ -7,20 +7,27 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import { fire } from '../../../base';
+import golfwood1Audio from './audio/golfwood.wav';
+import golfwood2Audio from './audio/golfwood2.wav';
+import golfwood3Audio from './audio/golfwood3.wav';
+import golfiron1Audio from './audio/golfiron.wav';
+import golfiron2Audio from './audio/golfiron2.wav';
+import golfiron3Audio from './audio/golfiron3.wav';
+
+import countdownAudio from './audio/countdown.wav';
+import golfclapAudio from './audio/golfclap.wav';
+import golfputtAudio from './audio/golfputt.wav';
+import golfscoreAudio from './audio/golfscore.wav';
+
 
 // http://jsfiddle.net/AceJJ/1748/ fireworks
 import * as util from './GolfUtil';
 import {
-  WIDTH, HEIGHT, HOLE_HEIGHT,
-  HOLE_CURVE_DEPTH,
-  HOLE_WIDTH,
   HURRY_UP_MS,
-  AIR_COLOR,
   GRASS_COLOR,
   MATCH_OVER_MS,
   BALL_RADIUS,
-  TIMER_MS,
-  PLAYER_COLORS,
+  PENALTY_STROKES,
   CLUBS,
 } from './GolfConstants';
 
@@ -78,11 +85,58 @@ class Golf extends Component {
     // lite delay när jag ökar speeden. är det olika delay för olika snakes? optimera senare.
     const canvasHeight = Math.floor(window.innerHeight - 160);
     const canvasWidth = Math.floor(window.innerWidth);
+
+    // ta in olika ljud för olika styrkor på alla här. då kan de också bli så att detspelar över varandra.
+    // https://freesound.org/search/?q=golf&g=1&f=type%3A%22wav%22+tag%3A%22golf%22&page=3#sound
+    const soundEffects = {
+      wood: [
+        {
+          audio: util.createAudio(golfwood1Audio),
+          minpower: 400,
+        },
+        {
+          audio: util.createAudio(golfwood2Audio),
+          minpower: 300,
+        },
+        {
+          audio: util.createAudio(golfwood3Audio),
+          minpower: 200,
+        },
+      ],
+      golfclap: {
+        audio: util.createAudio(golfclapAudio),
+      },
+      iron: [
+        {
+          audio: util.createAudio(golfiron1Audio),
+          minpower: 350,
+        },
+        {
+          audio: util.createAudio(golfiron2Audio),
+          minpower: 250,
+        },
+        {
+          audio: util.createAudio(golfiron3Audio),
+          minpower: 150,
+        },
+      ],
+      putt: [
+        {
+          audio: util.createAudio(golfputtAudio),
+          minpower: 8,
+        },
+      ],
+      ballInHole: {
+        audio: util.createAudio(golfscoreAudio),
+      },
+      countdown: {
+        audio: util.createAudio(countdownAudio),
+      },
+    };
     this.state = {
       levelData: null,
       world: null,
       level: null,
-      players: props.players, // I.map()
       startTime: null,
       expTime: null,
       holeSensor: null,
@@ -91,7 +145,7 @@ class Golf extends Component {
       canvasWidth,
       leaderId: null,
       matchEndTime: null,
-      testacceleration: 183,
+      testacceleration: 195,
       testClubIndex: 2,
       testBallIndex: 0,
       balls: null,
@@ -100,6 +154,7 @@ class Golf extends Component {
       totalScores: [],
       currentlevelScores: [],
       leaderboard: [],
+      soundEffects,
     };
     // golf
     this.init = this.init.bind(this);
@@ -135,9 +190,8 @@ class Golf extends Component {
 
   setEventHandlers(world) {
     world.on('beginContact', (evt) => {
-      // createHoleSensor body
       const {
-        balls, holeSensor, startTime, expTime, scorers,
+        balls, holeSensor, startTime, expTime, scorers, soundEffects, level,
       } = this.state;
       const { game: _game } = this.props;
       const players = Object.values(_game.players);
@@ -145,18 +199,24 @@ class Golf extends Component {
       const ballBody = evt.bodyA === holeSensor ? evt.bodyB : evt.bodyA;
       if (ballBody.scored) return;
       const { playerKey } = ballBody;
+      soundEffects.ballInHole.audio.currentTime = 0;
+      soundEffects.ballInHole.audio.play();
 
       // alert(`${this.props.game.players[playerKey].name} scored!`);
       // update players state with whatever. and uppdate firebase
       ballBody.scored = true;
-      const newExpTime = expTime > Date.now() + (HURRY_UP_MS * 1000) ? Date.now() + (HURRY_UP_MS * 1000) : expTime;
+      let newExpTime = expTime;
+      if (_game.minigame.speedmode && expTime > Date.now() + (HURRY_UP_MS * 2)) {
+        newExpTime = expTime - HURRY_UP_MS;
+      }
 
       const scoreTime = Math.floor((Date.now() - startTime) / 1000);
       const scorer = {
         playerKey,
         time: scoreTime,
-        strokes: _game.players[playerKey].swing.strokes,
+        strokes: ballBody.strokes,
         hole: _game.minigame.round,
+        par: level.par,
       };
       scorers.push(scorer);
       this.setState(() => ({
@@ -211,7 +271,7 @@ class Golf extends Component {
     const ensuredBalls = balls.map((ball) => {
       const result = ball;
       if (ball.interpolatedPosition[0] < 0 || ball.interpolatedPosition[0] > canvasWidth) {
-        result.position = [level.spawn[0], level.spawn[1] - BALL_RADIUS];
+        result.position = [ball.lastPos[0], ball.lastPos[1] - 20];
         result.velocity = [0, 0];
       }
       return result;
@@ -220,29 +280,23 @@ class Golf extends Component {
     this.setState(() => ({
       balls: ensuredBalls,
     }));
-    // börja med att bygga en fungerande version nu och testa ordentligt med Mobil sen prioritera nedan
+    // goooo
+    // 7. någon snygg clubpicker.
 
-    // 1. använd den senaste positionen istället. så vid varje slag eller när bollen stannar så ska balls updateras med lastknownpos[0,0]
+    // 10. lägg till options om att kunna studs i väggar och tak?
 
-    // lägg till options om att kunna studs i väggar och tak?
+    // par kan baseras på hur hålet ligger till "hur stora höjdskillnaderna är runt om hålet
 
-    // 3. krocka bort andras bollar? behöver jag lägga till ballGroundContact grej? inte när de är i hålet
+    // ersätt bakgrundsbilden med målnen med en bild som innehåller lite instruktioner
+    // kan vara olika bilder beroende på state. bilden skrivs om vid touchstart, touchend, och vid rerender. kanske kan ta bort den från touchstart och end då de ändå updaterar satate och därmed rerender
+    // något med fingerprint på som ändras till en golfswing-icon när isSwinging är true.
+    // är ingenting medan bollen är moving?
 
-    // 2. skapa två modes: först i hålet, och minst antal slag. påverkar endast hur poängen räknas. helt på tid eller helt på slag?
+    // 8. backspinn?
 
-    // 4. lägg till speedmätare på swingen istäellet för en siffra.
+    // 11. ny game modes???
 
-    // rita ut swingen bättre och bättre validering
-
-    // någon snygg clubpicker.
-
-    // 5. lägg till musik/ljudefekter?
-
-    // 6. backspinn?
-
-    // instruktioner för hur golfcontrollerfungerar. både på controllen och i golf.se ska det vara någon gif vore snygt
-
-    // prioritera bland features
+    // 9. rita ut en hålflaga?
   }
 
   drawBalls() {
@@ -314,33 +368,50 @@ class Golf extends Component {
     ctx.font = '24px roboto';
     ctx.fillStyle = '#000000';
     ctx.fillText('Level completed!', 15, 24);
+    ctx.font = '20px roboto';
+    ctx.textAlign = 'right';
+    ctx.fillText(`pin: ${game.gameId}`, canvasWidth - 20, 24);
+    ctx.textAlign = 'left';
+
+
     const timeRemaining = Math.floor((nextLevelTimer - Date.now()) / 1000);
     ctx.fillText(timeRemaining, canvasWidth / 2, 24);
     for (let i = 0; i < leaderboard.length; i++) {
       const data = leaderboard[i];
-      ctx.fillText(`${game.players[data.playerKey].name}: ${data.totalStrokes} slag`, canvasWidth / 2, 60 + (30 * i));
+      ctx.fillText(`${game.players[data.playerKey].name}: ${data.totalScore} poäng`, canvasWidth / 2, 60 + (30 * i));
     }
   }
 
   drawPlayHud() {
     const {
-      expTime, level, canvasHeight, canvasWidth,
+      expTime, level, canvasHeight, canvasWidth, soundEffects, scorers,
     } = this.state;
     const { game } = this.props;
     ctx.font = '24px roboto';
     ctx.fillStyle = '#000000';
     ctx.fillText(`Hole ${game.minigame.round} Par ${level.par}`, 15, 24);
+    ctx.font = '20px roboto';
+    ctx.textAlign = 'right';
+    ctx.fillText(`pin: ${game.gameId}`, canvasWidth - 30, 24);
+    ctx.textAlign = 'left';
+
     const timeRemaining = Math.floor((expTime - Date.now()) / 1000);
+    if (timeRemaining === 10) {
+      soundEffects.countdown.audio.play();
+    }
     ctx.textAlign = 'center';
     ctx.fillText(timeRemaining, canvasWidth / 2, 24);
     ctx.textAlign = 'left';
-
     const scoredTextHeight = 40;
-    Object.values(game.players).filter(x => x.state === 'SCORED')
-      .sort((a, b) => a.scoreTime > b.scoreTime)
+    scorers.filter(x => x.hole === game.minigame.round)
       .slice(0, 3)
-      .forEach((p, index) => ctx.fillText(`${p.name} gick i hål med ${p.swing.strokes} slag på ${p.scoreTime} sekunder`, canvasWidth / 2, scoredTextHeight * (1 + index)));
-    // funkar typ men försvinner snabbt... ska stanna kvar tills ny kommer och petar ner den. upp till 3 samtida som visas. en per rad.
+      .forEach((s, index) => ctx.fillText(`${game.players[s.playerKey].name} gjorde ${util.getScoreName(s.strokes, s.par)} efter ${s.time} sekunder`, canvasWidth / 2, scoredTextHeight * (1 + index)));
+
+    // Object.values(game.players).filter(x => x.state === 'SCORED')
+    //   .sort((a, b) => a.scoreTime > b.scoreTime)
+    //   .slice(0, 3)
+    //   .forEach((p, index) => ctx.fillText(`${p.name} gick i hål med XXX slag på ${p.scoreTime} sekunder`, canvasWidth / 2, scoredTextHeight * (1 + index)));
+    // // funkar typ men försvinner snabbt... ska stanna kvar tills ny kommer och petar ner den. upp till 3 samtida som visas. en per rad.
 
     // lägg till info om vilken hål det här är. hål x? kolla på game.round? vilket par är det?
     // tid kvar?
@@ -354,30 +425,34 @@ class Golf extends Component {
   }
 
   swing(velocity, ballIndex, test) {
-    const { balls, holeSensor } = this.state;
+    const { balls, holeSensor, soundEffects } = this.state;
     const { game: { players } } = this.props;
-    const ballToHit = balls.find(b => b.ballIndex === ballIndex);
-    players[ballToHit.playerKey].state = 'MOVING';
-    if (test) {
-      players[ballToHit.playerKey].swing.strokes += 1;
+    const clubtype = util.identifyClubType(velocity);
+    const power = velocity.x + velocity.y;
+    const soundEffect = soundEffects[clubtype].find(x => power > x.minpower);
+    // ljudet borde styras mer av var på banan jag slår. spawn så är det en ren smäll. utanför spawn så är det lite mer "gräsljud"?
+    // iron och wood blir samma. wood ska jag inte kunna välja utanför spawn?
+    if (soundEffect) {
+      soundEffect.audio.currentTime = 0;
+      soundEffect.audio.play();
     }
 
+    const ballToHit = balls.find(b => b.ballIndex === ballIndex);
+    players[ballToHit.playerKey].state = 'MOVING';
+
     const holeX = holeSensor.interpolatedPosition[0];
-    // kanske bara kan göra ballToHit.interpolatedpostion.... istället för att hämta från balls array igen? samma med setstate behöver inte göras då?
-    // utan kan bara göra return balls direkt efter att jag gjort ändringen på balltohit
-    const ballX = balls[ballToHit.ballIndex].interpolatedPosition[0];
+    const ballX = ballToHit.interpolatedPosition[0];
     const velocityWithDirection = { ...velocity, y: -velocity.y };
     // bollen är förbi hålet
     if (ballX > holeX) {
       velocityWithDirection.x = -velocityWithDirection.x;
     }
     this.syncPlayersObjectToFirebase(players);
-
-    this.setState(() => {
-      balls[ballToHit.ballIndex].velocity[0] = velocityWithDirection.x;
-      balls[ballToHit.ballIndex].velocity[1] = velocityWithDirection.y;
-      return { balls, players };
-    });
+    ballToHit.velocity[0] = velocityWithDirection.x;
+    ballToHit.velocity[1] = velocityWithDirection.y;
+    ballToHit.strokes += 1;
+    ballToHit.lastPos = [...ballToHit.position];
+    this.setState(() => ({ balls }));
   }
 
   createLevel() {
@@ -392,7 +467,7 @@ class Golf extends Component {
     ctx = canvas.getContext('2d');
     ctx.lineWidth = 5;
 
-    const level = util.addHolePoints(util.levelGen(canvasWidth, canvasHeight, true));
+    const level = util.addHolePoints(util.levelGen(canvasWidth, canvasHeight, false));
     const world = util.createWorld();
 
     //
@@ -416,6 +491,8 @@ class Golf extends Component {
       ball.playerKey = playerKeys[i];
       ball.ballIndex = i;
       ball.scored = false;
+      ball.strokes = 0;
+      ball.lastPos = [...ball.position];
       world.addBody(ball);
       const player = Object.assign({
         ballIndex: i,
@@ -424,10 +501,6 @@ class Golf extends Component {
         state: 'STILL',
         distance: util.getDistanceYards(level.hole[0], level.spawn[0]),
         score: 0,
-        lastLevelScore: 0,
-        swing: {
-          strokes: 0,
-        },
       }, game.players[playerKeys[i]]);
       balls.push(ball);
       createdPlayers.push(player);
@@ -465,6 +538,7 @@ class Golf extends Component {
   syncPlayersObjectToFirebase(playersObj) {
     const { game, gameFunc } = this.props;
     game.players = playersObj;
+
     this.saveGame(game);
   }
 
@@ -489,11 +563,12 @@ class Golf extends Component {
 
   nextPhase() {
     const { game, gameFunc } = this.props;
+    const { soundEffects } = this.state;
     if (game.minigame.round === game.minigame.holes) {
       // uppdaetra players.score... använd det som finnsi leaderboard eller scorers?
       game.phase = 'final_result';
     } else {
-      game.minigame.round += 1;
+      soundEffects.golfclap.audio.play();
       game.phase = 'level_completed';
       this.setState(() => ({
         nextLevelTimer: Date.now() + MATCH_OVER_MS,
@@ -510,6 +585,7 @@ class Golf extends Component {
     const deltaTime = lastTime ? (time - lastTime) / 400 : 0;
 
     // Move bodies forward in time
+
     world.step(fixedTimeStep, deltaTime, maxSubSteps);
     lastTime = time;
 
@@ -567,6 +643,8 @@ class Golf extends Component {
       ];
       ball.velocity = [0, 0];
       ball.scored = false;
+      ball.strokes = 0;
+      ball.lastPos = [...ball.position];
       world.addBody(ball);
     });
     this.setEventHandlers(world);
@@ -580,10 +658,6 @@ class Golf extends Component {
       ...p,
       state: 'STILL',
       distance: util.getDistanceYards(level.hole[0], level.spawn[0]),
-      lastLevelScore: 0,
-      swing: {
-        strokes: 0,
-      },
     }))
       .reduce((_result, player) => {
         const result = _result;
@@ -603,6 +677,7 @@ class Golf extends Component {
 
     game.phase = 'gameplay';
     game.players = playerUpdates;
+    game.minigame.round += 1;
     this.saveGame(game);
   }
 
@@ -610,36 +685,88 @@ class Golf extends Component {
     // finns alltid risk att firebase tar tid på sig att skriva och läsa och då hinner jag inte få upp score?
     // kanske behöver ha viss information i state här ändå.
     const { game } = this.props;
-    const { scorers, leaderboard } = this.state;
-    const board = Object.values(game.players).map((player) => {
-      const totalScore = scorers.filter(x => x.playerKey === player.key);
-      if (totalScore.length === 0) {
-        return {
-          currentRoundScore: 0,
-          totalScore: 0,
-          currentStrokes: 0,
-          totalStrokes: 10,
-          playerKey: player.key,
-        };
-      }
-      const currentScore = totalScore.find(x => x.hole === game.minigame.round);
-      const playerScore = {
-        currentRoundScore: currentScore ? util.calculateScore(currentScore.strokes, currentScore.time) : 0,
-        totalScore: totalScore.reduce((r, s) => r + util.calculateScore(s.strokes, s.time), 0),
-        currentStrokes: currentScore ? currentScore.strokes : 10,
-        totalStrokes: totalScore.reduce((r, s) => r + s.strokes, 0),
-        playerKey: player.key,
-      };
-      return playerScore;
-    })
-      .sort((a, b) => a.totalStrokes > b.totalStrokes);
+    const { scorers: _scorers, leaderboard, level } = this.state;
+    // lägg till poängräkning för olika scoremodes: strokes, time, placement
+    // allt ska översättas till score, inte rakt av strokes. hole in one === 100, andra slag är 80 - (strokes*5)
+    // time: level.time - scoretime (hole in one still bonus 10p?)
+    // position: position är något annat än scoremode? för måste fortfarande avgöra om det är time eller strokes som gäller
+    // eller så är det ntal slag och vid lika så är det tiden
+    // kolla hur manygolf gör det. 50,40,35,30,25,20,15,10,5,1....1
+    //
+    const completteScorers = [..._scorers];
+
+    const players = Object.values(game.players);
+    // give default penalty scores to players who didnt score on this round
+    const currentScorers = _scorers.filter(x => x.hole === game.minigame.round);
+    if (!currentScorers || currentScorers.length < players.length) {
+      players.forEach((player) => {
+        if (!currentScorers || !currentScorers.some(x => x.playerKey === player.key)) {
+          const scorer = {
+            playerKey: player.key,
+            par: level.par,
+            strokes: PENALTY_STROKES,
+            time: (level.time * 1.5) / 1000,
+            hole: game.minigame.round,
+          };
+          completteScorers.push(scorer);
+        }
+      });
+    }
+
+    let board;
+    switch (game.minigame.scoremode) {
+      case 'strokes':
+
+        board = players.map((player) => {
+          const totalScore = completteScorers.filter(x => x.playerKey === player.key);
+          const currentScore = totalScore.find(x => x.hole === game.minigame.round);
+          const playerScore = {
+            currentRoundScore: util.calculateStrokeScore(currentScore.strokes, level),
+            totalScore: totalScore.reduce((r, s) => r + util.calculateStrokeScore(s.strokes, level), 0),
+            playerKey: player.key,
+          };
+          return playerScore;
+        }).sort((a, b) => b.totalScore - a.totalScore);
+        break;
+      case 'time':
+        board = players.map((player) => {
+          const totalScore = completteScorers.filter(x => x.playerKey === player.key);
+          const currentScore = totalScore.find(x => x.hole === game.minigame.round);
+          const playerScore = {
+            currentRoundScore: util.calculateTimeScore(currentScore.time, level),
+            totalScore: totalScore.reduce((r, s) => r + util.calculateTimeScore(s.time, level), 0),
+            playerKey: player.key,
+          };
+          return playerScore;
+        })
+          .sort((a, b) => b.totalScore - a.totalScore);
+        break;
+      case 'compedetive':
+      // fixa till. rälkna ut poäng genom strokes och level.par
+      // sätt ett max antal slag till 10, hämta från constants
+      // fixa namn på alla scored i constans? -2 = eagle +2 = double boogie etc +5 vad heter det?
+      // använd namnen vid drawPlayHud
+        board = players.map((player) => {
+          const totalScore = completteScorers.filter(x => x.playerKey === player.key);
+          const currentScore = totalScore.find(x => x.hole === game.minigame.round);
+          const playerScore = {
+            currentRoundScore: currentScore.strokes - currentScore.par,
+            totalScore: totalScore.reduce((r, s) => r + (s.strokes - currentScore.par), 0),
+            playerKey: player.key,
+          };
+          return playerScore;
+        }).sort((a, b) => a.totalScore - b.totalScore);
+        break;
+      case 'position':
+        // läg till för positon likt manygolf. strokes och sen time avgör vilken position som ges
+        break;
+      default:
+        break;
+    }
     this.setState(() => ({
       leaderboard: board,
+      scorers: completteScorers,
     }));
-
-
-    // räkna ut varje spelares score och updatera det till firebase.
-    // en totalscore och en recentlevelScore
   }
 
 
@@ -649,9 +776,11 @@ class Golf extends Component {
     const swingRef = fire.database().ref(`/games/${game.key}/players/${player.key}/swing`);
     const that = this;
     swingRef.on('value', (snapshot) => {
+      const { game: _game } = that.props;
+      const currentPlayer = _game.players[player.key];
       const swingData = snapshot.val();
-      if (swingData && swingData.strokes > player.swing.strokes) {
-        that.swing(swingData, player.ballIndex);
+      if (swingData) {
+        that.swing(swingData, currentPlayer.ballIndex);
       } else {
         console.log('move error');
       }
@@ -673,14 +802,11 @@ class Golf extends Component {
     if (now > expTime) {
       return true;
     }
-    // måste testa om denna fungerar. kansek inte känner av när någon balls blir scored? måste kolla på players? varför fungerar inte hurry up grejen?
     if (!balls.some(x => !x.scored)) {
       return true;
     }
     return false;
   }
-
-  // function giveoutPoints
 
   renderFrame() {
     const { canvasHeight, canvasWidth } = this.state;
@@ -703,7 +829,7 @@ class Golf extends Component {
     return (
       <div className="phase-container" id="golfboard">
         <canvas id="golfcanvas" height={canvasHeight} width={canvasWidth} />
-        <button onClick={this.testSwing}>swing</button>
+        <button type="button" onClick={this.testSwing}>swing</button>
         <FormControl>
           <InputLabel htmlFor="clubc-required">Club</InputLabel>
           <Select

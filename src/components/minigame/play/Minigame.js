@@ -37,7 +37,7 @@ class Minigame extends PureComponent {
           <div className="play-container">
             {game.phase === 'connection' && <PhaseConnection game={game} addPlayer={createPlayer} playerKey={playerKey} />}
             {game.phase === 'starting' && <PhaseStarting game={game} />}
-            {game.phase === 'gameplay' && <GolfController game={game} playerKey={playerKey} />}
+            {(game.phase === 'gameplay' || game.phase === 'level_completed') && <GolfController game={game} playerKey={playerKey} />}
             {lastPhase && <PhaseFinalResult game={game} playerKey={playerKey} />}
           </div>
         );

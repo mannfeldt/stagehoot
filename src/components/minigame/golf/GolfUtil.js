@@ -7,6 +7,8 @@ import {
   HOLE_WIDTH,
   GROUND_COLORS,
   BALL_RADIUS,
+  CLUBS,
+  SCORE_TERMS,
 } from './GolfConstants';
 
 /* get an int between min and max inclusive */
@@ -35,8 +37,9 @@ const ballGroundContact = new p2.ContactMaterial(ballMaterial, groundMaterial, {
 });
 
 const ballHoleContact = new p2.ContactMaterial(ballMaterial, holeMaterial, {
-  friction: 1,
-  restitution: 0.3,
+  friction: 0.1,
+  restitution: 0,
+  relaxation: 8,
 });
 
 const BALL_GROUP = Math.pow(2, 1);
@@ -44,7 +47,7 @@ const GROUND_GROUP = Math.pow(2, 2);
 
 export function createWorld() {
   const world = new p2.World({
-    gravity: [0, 50],
+    gravity: [0, 60],
   });
 
   world.sleepMode = p2.World.BODY_SLEEPING;
@@ -72,6 +75,7 @@ function newBall(position) {
     collisionGroup: BALL_GROUP,
     collisionMask: GROUND_GROUP,
   });
+
   ballShape.material = ballMaterial;
 
   const ballBody = new p2.Body({
@@ -100,24 +104,84 @@ export function getDistanceYards(a, b) {
   }
   return Math.floor((b - a) / 4);
 }
-
+export function identifyClubType(velocity) {
+  const yRatio = velocity.y / (velocity.x + velocity.y);
+  const loft = yRatio * 90;
+  if (loft < 5) return 'putt';
+  const firstIron = CLUBS.find(x => x.type === 'iron');
+  if (loft < firstIron.loft - 1) {
+    return 'wood';
+  }
+  return 'iron';
+}
 export function createBallFromInitial(position, velocity) {
   const ball = newBall(position);
   ball.velocity = velocity.slice(); // clone
   return ball;
 }
+export function createAudio(file) {
+  const snd = new Audio();
+  const src = document.createElement('source');
+  src.type = 'audio/mpeg';
+  src.src = file;
+  snd.appendChild(src);
+  return snd;
+}
 export function getSwingData(club, acceleration) {
   const xFactor = (90 - club.loft) / 90;
   const YFactor = club.loft / 90;
-  // en lös putt kommer fortfarande registreras som 0.14 etc. kanske ska lägga på en mini så att highestAcceleration alltid är minst 5?
-  // lägger alltså på gratis 5 på highest acc. eller så får jag räkna om värdet på den så att de första upp till 10 räknas som mer värda ellerså?
   const power = acceleration;
-  // kör testleveln. kolla på angulardampening? kanske är det som är problemet. får ju ingen lyft på bollarna. öka faktorerna. öka y?
   const swing = {
-    x: Math.min(Math.ceil(power * xFactor) * club.powerFactor, club.max),
-    y: Math.min(Math.ceil(power * YFactor) * club.powerFactor, club.max),
+    x: Math.min(Math.ceil(power * xFactor * club.powerFactor), club.max),
+    y: Math.min(Math.ceil(power * YFactor * club.powerFactor), club.max),
   };
   return swing;
+}
+
+export function getScoreName(strokes, par) {
+  if (strokes === 1) return 'Hole in one!';
+  const score = strokes - par;
+  const term = SCORE_TERMS.find(x => x.score === score);
+  if (term) return term.name;
+  return `${score} over par`;
+}
+export function validateSwingMovement(acceleration, clubIndex) {
+  // i teorin så finns det två olika godkända swingar. höger och vänster. sen även putt.
+  // z positiv = nedswing.
+  // x positiv = vänsterswing, negativ = högerswing
+
+  // använd golcbluban för att välja 3 olika valideringar. putter, iron, wood
+  // försök få till en ratio där värdena är giltiga: vid wood så är det precis när uppswingen börjar
+  // för putter så är det när z är väldigt liten +5 - -5 kanske. eller relativt till x
+  // för iron så är det när z är positiv, x och z är kanske lika i värden
+
+  // y får aldrig vara högre än någon av x eller z.
+
+  // regler: abs(x) måste vara större än z i alla swingar
+
+  // z får inte vara mycket negativ . max -2 eller så för
+  const xpower = Math.abs(acceleration.x);
+  const ypower = Math.abs(acceleration.y);
+  const zpower = Math.abs(acceleration.z);
+
+  if (ypower > xpower && ypower > zpower) return false;
+
+  const club = CLUBS[clubIndex];
+  switch (club.type) {
+    case 'wood':
+    // z måste vara negativ och den får inte vara mer än 50% av xpower
+      return xpower > zpower;
+    case 'iron':
+      if (acceleration.z < 0) return false;
+      const angleRatio = xpower / zpower;
+      return angleRatio > 0.5 && angleRatio < 5;
+    case 'putt':
+      return xpower / 2 > zpower;
+    default:
+      break;
+  }
+
+  return true;
 }
 export function addHolePoints(level) {
   const { width } = level;
@@ -269,8 +333,16 @@ export function getSegmentWidths(totalWidth, minWidth) {
 
   return widths;
 }
-export function calculateScore(strokes, time) {
-  return Math.round(100 / (strokes + (time / 20)));
+export function calculateStrokeScore(strokes, level) {
+  const parScore = {
+    3: strokes === 1 ? 25 : 25 - (strokes * 2),
+    4: strokes === 1 ? 25 : 25 - (strokes * 2),
+    5: strokes === 1 ? 25 : 25 - (strokes * 2),
+  };
+  return Math.abs(Math.round(parScore[level.par]));
+}
+export function calculateTimeScore(scoretime, level) {
+  return Math.round((((level.time / 1000) * 1.5) - scoretime) / 10);
 }
 export function getPlayerColors(len) {
   const goldenRatio = 0.618033988749895;
@@ -305,7 +377,7 @@ export function levelGen(width, height, test) {
       color: 'brown',
       par: 4,
       height,
-      time: 2000,
+      time: 20 * 1000,
       width,
     };
     return testLevel;
@@ -314,7 +386,7 @@ export function levelGen(width, height, test) {
   const segmentWidths = getSegmentWidths(width, 12);
   const numSegments = segmentWidths.length;
 
-  const spawnSegment = randInt(2, Math.floor(numSegments / 5));
+  const spawnSegment = randInt(2, 4);
   let par;
   if (width > 1000) {
     const rnd = randInt(1, 18);
@@ -328,26 +400,28 @@ export function levelGen(width, height, test) {
   } else {
     par = 5;
   }
-  const asdf = {
-    5: [2, Math.floor(numSegments / 4)],
-    4: [Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)],
-    3: [Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)],
-  };
-  const holeSegments = {
-    5: numSegments - randInt(2, Math.floor(numSegments / 4)),
-    4: numSegments - randInt(Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)),
-    3: numSegments - randInt(Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)),
+
+  const parSetting = {
+    hole: {
+      5: numSegments - randInt(2, Math.floor(numSegments / 4)),
+      4: numSegments - randInt(Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)),
+      3: numSegments - randInt(Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)),
+    },
+    time: {
+      5: 100 * 1000,
+      4: 80 * 1000,
+      3: 60 * 1000,
+    },
+    flatRatio: {
+      5: 40,
+      4: 30,
+      3: 20,
+    },
   };
 
-  const holeSegment = holeSegments[par];
+  const holeSegment = parSetting.hole[par];
 
-  const timePars = {
-    5: 90 * 1000,
-    4: 60 * 1000,
-    3: 45 * 1000,
-  };
-
-  const time = timePars[par];
+  const time = parSetting.time[par];
 
   const points = [];
   let spawnX;
@@ -355,8 +429,8 @@ export function levelGen(width, height, test) {
   let holeX;
   let holeY;
 
-  const minY = height * 0.5;
-  const maxY = minY + Math.min(200, height * 0.3);
+  const minY = Math.floor(height * 0.4);
+  const maxY = minY + Math.min(400, height * 0.5);
 
   for (let idx = 0; idx <= numSegments; idx++) {
     const segmentWidth = segmentWidths[idx - 1];
@@ -380,7 +454,7 @@ export function levelGen(width, height, test) {
       const prevY = points[idx - 1][1];
 
       // special-case flat section
-      if (randInt(1, 3) === 1) {
+      if (randInt(1, parSetting.flatRatio[par]) > 10) {
         y = prevY;
       } else {
         let boundLow = prevY - 40;

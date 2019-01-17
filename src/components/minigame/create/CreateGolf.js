@@ -18,6 +18,8 @@ class CreateGolf extends Component {
       title: '',
       gametype: 'golf',
       holes: 18,
+      scoremode: 'strokes',
+      speedmode: true,
       opponentCollision: false,
       password: '',
       gamemode: 'classic',
@@ -44,12 +46,13 @@ class CreateGolf extends Component {
     createGame() {
       const { createGame } = this.props;
       const {
-        password, gametype, title, gamemode, holes,
-        opponentCollision, difficulty,
+        password, gametype, title, gamemode, holes, scoremode, speedmode,
+        difficulty,
       } = this.state;
       const minigame = {
         gamemode,
-        opponentCollision,
+        scoremode,
+        speedmode,
         holes,
         difficulty,
       };
@@ -77,7 +80,7 @@ class CreateGolf extends Component {
     render() {
       const {
         password, title, gamemode,
-        opponentCollision, holes, difficulty,
+        holes, difficulty, scoremode, speedmode,
       } = this.state;
       return (
         <div className="app-page create-page">
@@ -100,6 +103,22 @@ class CreateGolf extends Component {
                   >
                     <MenuItem value="classic">Classic</MenuItem>
                     <MenuItem value="wild">Wild</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl required fullWidth>
+                  <InputLabel htmlFor="scoremode-required">Score mode</InputLabel>
+                  <Select
+                    value={scoremode || ''}
+                    fullWidth
+                    onChange={this.handleChangeSelect}
+                    name="scoremode"
+                    inputProps={{
+                      id: 'scoremode-required',
+                    }}
+                  >
+                    <MenuItem value="strokes">Strokes</MenuItem>
+                    <MenuItem value="time">Time</MenuItem>
+                    <MenuItem value="compedetive">Compedetive</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -145,12 +164,12 @@ class CreateGolf extends Component {
                   <FormControlLabel
                     control={(
                       <Switch
-                        checked={opponentCollision}
-                        onChange={this.handleChangeBool('opponentCollision')}
-                        value="opponentCollision"
+                        checked={speedmode}
+                        onChange={this.handleChangeBool('speedmode')}
+                        value="speedmode"
                       />
                     )}
-                    label="Opponent collisions"
+                    label="Speed mode"
                   />
                 </FormControl>
               </Grid>
