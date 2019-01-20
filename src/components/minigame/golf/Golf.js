@@ -294,6 +294,19 @@ class Golf extends Component {
 
     // 8. backspinn?
 
+    // fixa public games...lista under /play där man kan se games som är i connectphase?in_progress? man ska också kunna se vilka games man själv är med i?
+    // jag hämtar alltså ut alla games som är status in_progress eller "setup". alla visas i en lista.
+    // och en extra lista om det finns games som man säljv är med i av alla ovan. baserat på ens playerkey.
+
+    // kalibereringsfunktion? för att lösa problemet med olika känsliga mobiler?
+    // man håller ner tummen och svingar flera gånger, det högsta värdet man kommer upp i används för att kaliberera extra power.
+    // standard värdet på en bra mobil är att man max kan slå 150 (75m/s). om man kalibrerar och får till t.ex. 100 som högsta värde så
+    // sätter jag 100 + 10% = 110 som nya hösta värdet. det är ett hårt maxvärde så man inte kan fuska med kalibreringen och kalbirera lågt för att sen slå
+    // mycket hårdare. så om jag kalibrerar till 100 så blir maxpower 110. powerfaktorn blir 160/110=1.36 så resultatet av kalibreringen blir:
+    // en extra powerfactor på 1.36. en maxgräns på vi set hightestacceleration på 150 används alltid
+
+    // power faktorns uträkning blir: MAXPOWER/(heighestcalibration*1.1)
+
     // 11. ny game modes???
 
     // 9. rita ut en hålflaga?
@@ -563,9 +576,12 @@ class Golf extends Component {
 
   nextPhase() {
     const { game, gameFunc } = this.props;
-    const { soundEffects } = this.state;
-    if (game.minigame.round === game.minigame.holes) {
-      // uppdaetra players.score... använd det som finnsi leaderboard eller scorers?
+    const { soundEffects, leaderboard } = this.state;
+    if (`${game.minigame.round}` === game.minigame.holes) {
+      game.minigame.leaderboard = leaderboard.map(x => ({
+        ...x,
+        currentRoundScore: null,
+      }));
       game.phase = 'final_result';
     } else {
       soundEffects.golfclap.audio.play();

@@ -12,7 +12,6 @@ import Golf from '../golf/Golf';
 import GolfStarting from '../golf/GolfStarting';
 import SnakeSetup from '../snake/SnakeSetup';
 import GolfSetup from '../golf/GolfSetup';
-import GolfLevelCompleted from '../golf/GolfLevelCompleted';
 
 class Minigame extends PureComponent {
   render() {

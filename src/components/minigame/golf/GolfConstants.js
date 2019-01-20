@@ -58,40 +58,40 @@ export const SCORE_TERMS = [
 
 export const CLUBS = [
   {
-    name: 'Wood', type: 'wood', id: 0, loft: 22, powerFactor: 3.6, max: 800,
+    name: 'Wood', type: 'wood', id: 0, loft: 22, powerFactor: 3.8, max: 800,
   },
   {
-    name: 'Hybrid', type: 'iron', id: 1, loft: 26, powerFactor: 3.4, max: 800,
+    name: 'Hybrid', type: 'iron', id: 1, loft: 26, powerFactor: 3.6, max: 800,
   },
   {
-    name: '3 Iron', type: 'iron', id: 2, loft: 31, powerFactor: 3, max: 700,
+    name: '3 Iron', type: 'iron', id: 2, loft: 31, powerFactor: 3.2, max: 700,
   },
   {
-    name: '4 Iron', type: 'iron', id: 3, loft: 34, powerFactor: 2.95, max: 700,
+    name: '4 Iron', type: 'iron', id: 3, loft: 34, powerFactor: 3.15, max: 700,
   },
   {
-    name: '5 Iron', type: 'iron', id: 4, loft: 37, powerFactor: 2.9, max: 700,
+    name: '5 Iron', type: 'iron', id: 4, loft: 37, powerFactor: 3.1, max: 700,
   },
   {
-    name: '6 Iron', type: 'iron', id: 5, loft: 40, powerFactor: 2.85, max: 700,
+    name: '6 Iron', type: 'iron', id: 5, loft: 40, powerFactor: 3.05, max: 700,
   },
   {
-    name: '7 Iron', type: 'iron', id: 6, loft: 43, powerFactor: 2.8, max: 700,
+    name: '7 Iron', type: 'iron', id: 6, loft: 43, powerFactor: 3, max: 700,
   },
   {
-    name: '8 Iron', type: 'iron', id: 7, loft: 46, powerFactor: 2.75, max: 700,
+    name: '8 Iron', type: 'iron', id: 7, loft: 46, powerFactor: 2.95, max: 700,
   },
   {
-    name: '9 Iron', type: 'iron', id: 8, loft: 49, powerFactor: 2.7, max: 700,
+    name: '9 Iron', type: 'iron', id: 8, loft: 49, powerFactor: 2.9, max: 700,
   },
   {
-    name: 'Wedge', type: 'iron', id: 9, loft: 62, powerFactor: 2.6, max: 700,
+    name: 'Wedge', type: 'iron', id: 9, loft: 62, powerFactor: 2.75, max: 700,
   },
   {
-    name: 'Chipper', type: 'iron', id: 10, loft: 78, powerFactor: 2.5, max: 700,
+    name: 'Chipper', type: 'iron', id: 10, loft: 78, powerFactor: 2.6, max: 700,
   },
   {
-    name: 'Putter', type: 'putt', id: 11, loft: 1, powerFactor: 1.5, max: 500,
+    name: 'Putter', type: 'putt', id: 11, loft: 1, powerFactor: 1.6, max: 400,
   },
 ];
 

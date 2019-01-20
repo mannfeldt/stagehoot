@@ -24,7 +24,7 @@ class Home extends Component {
               <Card className="card-button">
                 <CardHeader title="Play" />
                 <CardContent>
-                  <Typography variant="subtitle1" align="center">Connect to a game</Typography>
+                  <Typography variant="subtitle1" align="center">Connect to a game as player</Typography>
                 </CardContent>
               </Card>
             </Link>
@@ -34,7 +34,7 @@ class Home extends Component {
               <Card className="card-button">
                 <CardHeader title="Host" />
                 <CardContent>
-                  <Typography variant="subtitle1" align="center">Host a created game</Typography>
+                  <Typography variant="subtitle1" align="center">Host a created game using game pin</Typography>
                 </CardContent>
               </Card>
             </Link>
@@ -44,7 +44,7 @@ class Home extends Component {
               <Card className="card-button">
                 <CardHeader title="Create" />
                 <CardContent>
-                  <Typography variant="subtitle1" align="center">Create a game</Typography>
+                  <Typography variant="subtitle1" align="center">Setup a new game and recive a related game pin</Typography>
                 </CardContent>
               </Card>
             </Link>

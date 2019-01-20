@@ -3,15 +3,12 @@ import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import ReactSpeedometer from 'react-d3-speedometer';
 import * as util from './GolfUtil';
 import { fire } from '../../../base';
 import './golf.css';
-import ReactSpeedometer from 'react-d3-speedometer';
 import {
   MAX_POWER,
   MIN_POWER,
@@ -20,14 +17,12 @@ import {
   AIR_COLOR,
   GRASS_COLOR,
   BALL_RADIUS_CONTROLLER,
-  PLAYER_COLORS,
 } from './GolfConstants';
 import driverIcon from './img/driverIcon.svg';
 import ironIcon from './img/ironIcon.svg';
 import putterIcon from './img/putterIcon.svg';
 import golfbagIcon from './img/golfbag.svg';
 import fingerprintIcon from './img/fingerprint.svg';
-
 
 const styles = theme => ({
   container: {
@@ -178,7 +173,7 @@ class GolfController extends Component {
         const isSwinging = true;
         return { highestAcceleration, swingData, isSwinging };
       });
-      this.renderFrame();
+      // this.renderFrame();
 
       // e.preventDefault();
     }, false);
@@ -193,7 +188,7 @@ class GolfController extends Component {
         return { isSwinging };
       });
       this.saveSwing(highestAcceleration, clubIndex);
-      this.renderFrame();
+      // this.renderFrame();
       // e.preventDefault();
     }, false);
 
@@ -218,18 +213,53 @@ class GolfController extends Component {
         const xpower = Math.abs(x);
         const zpower = Math.abs(z);
 
-        const power = Math.floor((xpower * 1.5) + (zpower / 2));
+        const power = Math.floor(xpower + zpower);
         // const power2 = Math.floor(Math.abs(y) + Math.abs(z));
         // const power3 = Math.floor(Math.abs(x) + Math.abs(y));
 
-        if (power > highestAcceleration && util.validateSwingMovement(event.acceleration, clubIndex)) {
+        // && util.validateSwingMovement(event.acceleration, clubIndex)
+        if (power > highestAcceleration) {
           that.setState(() => ({ highestAcceleration: power, swingData }));
         } else {
-          that.setState(() => swingData);
+          that.setState({ swingData });
         }
       }
     }, true);
     this.renderFrame();
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    const {
+      swingData, isSwinging, strokes, anchorEl, clubIndex,
+    } = this.state;
+    if (nextState.isSwinging !== isSwinging) {
+      return true;
+    }
+    // if (nextState.swingData !== swingData) {
+    //   return false;
+    // }
+
+    if (nextState.strokes !== strokes) {
+      return true;
+    }
+    if (nextState.anchorEl !== anchorEl) {
+      return true;
+    }
+    if (nextState.clubIndex !== clubIndex) {
+      return true;
+    }
+    const { game, playerKey } = this.props;
+    if (nextProps.game.phase !== game.phase) {
+      return true;
+    }
+
+    const currentPlayer = game.players[playerKey];
+    const nextCurrentPlayer = nextProps.game.players[playerKey];
+    if (currentPlayer.state !== nextCurrentPlayer.state) {
+      return true;
+    }
+
+    return false;
   }
 
   handleClick = (event) => {
@@ -357,7 +387,7 @@ class GolfController extends Component {
               open={open}
               onClose={this.handleClose}
             >
-              {CLUBS.map((c, index) => (
+              {CLUBS.map(c => (
                 <MenuItem onClick={this.handleChange('clubIndex')} key={c.id} value={c.id}>
                   <img src={clubIcons[c.type]} alt={c.name} className={classes.menuitemicon} />
                   {c.name}

@@ -1,13 +1,3 @@
-import React, { Component } from 'react';
-import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
-
-let canvas;
-let context;
-let SCREEN_WIDTH = window.innerWidth;
-let SCREEN_HEIGHT = window.innerHeight;
 let first = true;
 const mousePos = {
   x: 400,
@@ -18,17 +8,19 @@ let rockets = [];
 const MAX_PARTICLES = 400;
 const colorCode = 0;
 const img = new Image();
-img.src = 'http://www.golfworldtravel.se/wp-content/uploads/2013/12/Arabella-Sheraton-Golf-4.jpg';
+img.src = 'https://upload.wikimedia.org/wikipedia/commons/9/95/Ponte_Vecchio_visto_dal_ponte_di_Santa_Trinita.jpg';
 
 
-function loop() {
+export function loop(winner, canvas, context) {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
   // update screen size
-  if (SCREEN_WIDTH != window.innerWidth) {
-    canvas.width = SCREEN_WIDTH = window.innerWidth;
-  }
-  if (SCREEN_HEIGHT != window.innerHeight) {
-    canvas.height = SCREEN_HEIGHT = window.innerHeight;
-  }
+  //   if (SCREEN_WIDTH != window.innerWidth) {
+  //     canvas.width = SCREEN_WIDTH = window.innerWidth;
+  //   }
+  //   if (SCREEN_HEIGHT != window.innerHeight) {
+  //     canvas.height = SCREEN_HEIGHT = window.innerHeight;
+  //   }
 
   context.save();
   if (first) {
@@ -37,7 +29,9 @@ function loop() {
   } else {
     context.globalAlpha = 0.2;
   }
-  context.drawImage(img, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  context.font = '24px roboto';
+  context.fillStyle = '#000000';
+  context.fillText('Level completed!', 15, 24);
   context.restore();
 
 
@@ -56,7 +50,7 @@ function loop() {
     const distance = Math.sqrt(Math.pow(mousePos.x - rockets[i].pos.x, 2) + Math.pow(mousePos.y - rockets[i].pos.y, 2));
 
     // random chance of 1% if rockets is above the middle
-    const randomChance = rockets[i].pos.y < (SCREEN_HEIGHT * 2 / 3) ? (Math.random() * 100 <= 1) : false;
+    const randomChance = rockets[i].pos.y < (canvas.height * 2 / 3) ? (Math.random() * 100 <= 1) : false;
 
     /* Explosion rules
            - 80% of screen
@@ -64,7 +58,7 @@ function loop() {
           - close to the mouse
           - 1% chance of random explosion
       */
-    if (rockets[i].pos.y < SCREEN_HEIGHT / 5 || rockets[i].vel.y >= 0 || distance < 50 || randomChance) {
+    if (rockets[i].pos.y < canvas.height / 5 || rockets[i].vel.y >= 0 || distance < 50 || randomChance) {
       rockets[i].explode();
     } else {
       existingRockets.push(rockets[i]);
@@ -170,10 +164,10 @@ Particle.prototype.exists = function () {
   return this.alpha >= 0.1 && this.size >= 1;
 };
 
-function Rocket(x) {
+function Rocket(x, height) {
   Particle.apply(this, [{
     x,
-    y: SCREEN_HEIGHT,
+    y: height,
   }]);
 
   this.explosionColor = 0;
@@ -238,12 +232,12 @@ Rocket.prototype.render = function (c) {
 
   c.restore();
 };
-function launch() {
-  launchFrom(mousePos.x);
+export function launch(height) {
+  launchFrom(mousePos.x, height);
 }
-function launchFrom(x) {
+export function launchFrom(x, height) {
   if (rockets.length < 10) {
-    const rocket = new Rocket(x);
+    const rocket = new Rocket(x, height);
     rocket.explosionColor = Math.floor(Math.random() * 360 / 10) * 10;
     rocket.vel.y = Math.random() * -3 - 4;
     rocket.vel.x = Math.random() * 6 - 3;
@@ -253,68 +247,3 @@ function launchFrom(x) {
     rockets.push(rocket);
   }
 }
-class PhaseFinalResult extends Component {
-  constructor(props) {
-    super(props);
-    this.replayGame = this.replayGame.bind(this);
-  }
-
-  componentDidMount() {
-    canvas = document.getElementById('fireworkscanvas');
-    context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    setInterval(launch, 800);
-    setInterval(loop, 1000 / 50);
-  }
-
-  replayGame() {
-    const { gameFunc } = this.props;
-    gameFunc.update({ phase: 'starting' });
-  }
-
-  /*
-skriv ut vinnaren och hur lång tid gamet tog
-(använd minigame.ticks och minigame.difficulty för att räkna ut sekunder)
-minigame.winners inner håller vinnare/vinnarna.
-kan vara så att winners inte finns om det snakes.length === 1
- men då är ju den "vinnaren". typ i coop singelplayer
-podium
-  */
-  render() {
-    const { gameFunc, game } = this.props;
-    const cheight = canvas ? canvas.height : window.innerHeight;
-    const cWidth = canvas ? canvas.width : window.innerWidth;
-
-    const winner = game.players[game.minigame.leaderboard[0].playerKey];
-    const winnerScore = game.minigame.leaderboard[0].totalScore;
-    return (
-      <div className="phase-container">
-        <canvas id="fireworkscanvas" />
-        <div style={{
-          position: 'absolute', top: 0, marginTop: cheight / 2, marginLeft: cWidth / 2,
-        }}
-        >
-          <Typography variant="h2" style={{ color: 'white' }}>{`${winner.name} vinner med ${winnerScore} poäng`}</Typography>
-        </div>
-        <div style={{ position: 'absolute', top: 0, marginTop: cheight }}>
-          <div>
-            <Button onClick={this.replayGame}>Replay game</Button>
-            <Button onClick={gameFunc.restart}>Re-host game</Button>
-            <Button onClick={gameFunc.quit}>Quit game</Button>
-            <Button onClick={() => alert('show results')}>Show results</Button>
-            <Button onClick={() => alert('start survey')}>Start survey</Button>
-            <Button>
-              <Link to="/create">Create new game</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
-PhaseFinalResult.propTypes = {
-  game: PropTypes.object.isRequired,
-  gameFunc: PropTypes.object.isRequired,
-};
-export default PhaseFinalResult;
