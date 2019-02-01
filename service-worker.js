@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/stagehoot/precache-manifest.907091751c820aa1675147f0f075fe51.js"
+  "/stagehoot/precache-manifest.664702d33d306b62197f8c9f57caaabd.js"
 );
 
 workbox.clientsClaim();

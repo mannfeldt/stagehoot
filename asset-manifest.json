@@ -1,9 +1,9 @@
 {
   "main.css": "/stagehoot/static/css/main.e043a26d.chunk.css",
-  "main.js": "/stagehoot/static/js/main.a13f88dc.chunk.js",
-  "main.js.map": "/stagehoot/static/js/main.a13f88dc.chunk.js.map",
-  "static/js/1.379e6087.chunk.js": "/stagehoot/static/js/1.379e6087.chunk.js",
-  "static/js/1.379e6087.chunk.js.map": "/stagehoot/static/js/1.379e6087.chunk.js.map",
+  "main.js": "/stagehoot/static/js/main.1e568778.chunk.js",
+  "main.js.map": "/stagehoot/static/js/main.1e568778.chunk.js.map",
+  "static/js/1.bb3b07d0.chunk.js": "/stagehoot/static/js/1.bb3b07d0.chunk.js",
+  "static/js/1.bb3b07d0.chunk.js.map": "/stagehoot/static/js/1.bb3b07d0.chunk.js.map",
   "runtime~main.js": "/stagehoot/static/js/runtime~main.a27241d7.js",
   "runtime~main.js.map": "/stagehoot/static/js/runtime~main.a27241d7.js.map",
   "static/media/golfbag.svg": "/stagehoot/static/media/golfbag.c7fbd966.svg",
@@ -23,6 +23,6 @@
   "static/media/fingerprint.svg": "/stagehoot/static/media/fingerprint.deabfcc6.svg",
   "static/css/main.e043a26d.chunk.css.map": "/stagehoot/static/css/main.e043a26d.chunk.css.map",
   "index.html": "/stagehoot/index.html",
-  "precache-manifest.907091751c820aa1675147f0f075fe51.js": "/stagehoot/precache-manifest.907091751c820aa1675147f0f075fe51.js",
+  "precache-manifest.664702d33d306b62197f8c9f57caaabd.js": "/stagehoot/precache-manifest.664702d33d306b62197f8c9f57caaabd.js",
   "service-worker.js": "/stagehoot/service-worker.js"
 }
