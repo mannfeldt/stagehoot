@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import './App.scss';
+import {
+  HashRouter as Router,
+  Route,
+} from 'react-router-dom';
 import { fire } from './base';
 import Header from './components/common/Header';
 import Create from './components/pages/Create';
@@ -8,10 +12,6 @@ import Play from './components/pages/Play';
 import Home from './components/pages/Home';
 import CustomizedSnackbars from './components/common/CustomizedSnackbars';
 
-import {
-  HashRouter as Router,
-  Route,
-} from "react-router-dom";
 
 class App extends Component {
   constructor(props) {
@@ -20,27 +20,47 @@ class App extends Component {
       snack: '',
       showHeader: true,
     };
+    const hash = window.location.hash
+      .substring(1)
+      .split('&')
+      .reduce((initial, item) => {
+        if (item) {
+          const parts = item.split('=');
+          initial[parts[0]] = decodeURIComponent(parts[1]);
+        }
+        return initial;
+      }, {});
+    window.location.hash = '';
+    if (hash.access_token) {
+      localStorage.setItem('spotifytoken', hash.access_token);
+      localStorage.setItem('spotifytoken_timestamp', Date.now());
+
+    }
     this.showSnackbar = this.showSnackbar.bind(this);
     this.hideSnackbar = this.hideSnackbar.bind(this);
     this.toggleHeader = this.toggleHeader.bind(this);
 
   }
+
   hideSnackbar() {
-    let snack = this.state.snack;
+    const snack = this.state.snack;
     snack.open = false;
     this.setState({
-      snack: snack,
+      snack,
     });
   }
+
   showSnackbar(snack) {
     snack.open = true;
     this.setState({
-      snack: snack,
+      snack,
     });
   }
+
   toggleHeader(value) {
     this.setState({ showHeader: value });
   }
+
   render() {
     return (
       <Router>

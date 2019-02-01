@@ -178,6 +178,8 @@ class Host extends Component {
           {game.gametype === 'snake' && <Minigame game={game} gameFunc={gameFunctions} />}
           {game.gametype === 'tetris' && <Minigame game={game} gameFunc={gameFunctions} />}
           {game.gametype === 'golf' && <Minigame game={game} gameFunc={gameFunctions} />}
+          {game.gametype === 'spotify' && <Minigame game={game} gameFunc={gameFunctions} />}
+
         </div>
       );
     }

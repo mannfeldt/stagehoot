@@ -9,6 +9,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CreateTetris from './CreateTetris';
 import CreateGolf from './CreateGolf';
 import CreateSnake from './CreateSnake';
+import CreateSpotify from './CreateSpotify';
 
 class CreateMinigame extends Component {
   constructor(props) {
@@ -54,11 +55,20 @@ class CreateMinigame extends Component {
                 </CardContent>
               </Card>
             </Grid>
+            <Grid item xs={6}>
+              <Card className="card-button" onClick={this.setGameType('spotify')}>
+                <CardHeader title="Spotify" />
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">Get to know your friends Music taste</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
           )}
           {gametype === 'snake' && <CreateSnake createGame={createGame} />}
           {gametype === 'tetris' && <CreateTetris createGame={createGame} />}
           {gametype === 'golf' && <CreateGolf createGame={createGame} />}
+          {gametype === 'spotify' && <CreateSpotify createGame={createGame} />}
         </div>
       );
     }

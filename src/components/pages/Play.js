@@ -12,6 +12,7 @@ import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import GameIcon from '@material-ui/icons/VideogameAsset';
 import GolfIcon from '@material-ui/icons/GolfCourse';
+import SpotifyIcon from '@material-ui/icons/MusicNote';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core';
 import { fire } from '../../base';
@@ -165,6 +166,12 @@ class Play extends Component {
       game, playerKey, gameId, recentGameId, recentGame,
     } = this.state;
     const { showSnackbar } = this.props;
+    const gameAvatars = {
+      golf: <GolfIcon />,
+      spotify: <SpotifyIcon />,
+      quiz: <GameIcon />,
+      snake: <GameIcon />,
+    };
     if (!game.phase) {
       return (
         <div className="page-container play-page">
@@ -187,8 +194,7 @@ class Play extends Component {
               <ListItem>
                 <ListItemAvatar>
                   <Avatar>
-                    {recentGame.gametype === 'golf' && (<GolfIcon />)}
-                    {recentGame.gametype !== 'golf' && (<GameIcon />)}
+                    {gameAvatars[recentGame.gametype]}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
@@ -214,6 +220,7 @@ class Play extends Component {
         {game.gametype === 'snake' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
         {game.gametype === 'tetris' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
         {game.gametype === 'golf' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
+        {game.gametype === 'spotify' && <Minigame game={game} createPlayer={this.createPlayer} playerKey={playerKey} showSnackbar={showSnackbar} />}
 
       </div>
     );

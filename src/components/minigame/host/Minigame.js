@@ -12,6 +12,10 @@ import Golf from '../golf/Golf';
 import GolfStarting from '../golf/GolfStarting';
 import SnakeSetup from '../snake/SnakeSetup';
 import GolfSetup from '../golf/GolfSetup';
+import SpotifySetup from '../spotify/host/SpotifySetup';
+import SpotifyConnection from '../spotify/host/SpotifyConnection';
+import SpotifyStarting from '../spotify/host/SpotifyStarting';
+import Spotify from '../spotify/host/Spotify';
 
 class Minigame extends PureComponent {
   render() {
@@ -46,6 +50,17 @@ class Minigame extends PureComponent {
             {game.phase === 'connection' && <PhaseConnection game={game} gameFunc={gameFunc} />}
             {game.phase === 'starting' && <GolfStarting game={game} gameFunc={gameFunc} />}
             {(game.phase === 'gameplay' || game.phase === 'level_completed') && <Golf game={game} gameFunc={gameFunc} />}
+            {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
+            {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
+          </div>
+        );
+      case 'spotify':
+        return (
+          <div className="host-container">
+            {game.phase === 'setup' && <SpotifySetup game={game} gameFunc={gameFunc} />}
+            {game.phase === 'connection' && <SpotifyConnection game={game} gameFunc={gameFunc} />}
+            {game.phase === 'starting' && <SpotifyStarting game={game} gameFunc={gameFunc} />}
+            {(game.phase === 'gameplay' || game.phase === 'level_completed') && <Spotify game={game} gameFunc={gameFunc} />}
             {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
             {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}
           </div>

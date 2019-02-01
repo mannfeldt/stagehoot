@@ -6,6 +6,9 @@ import PhaseFinalResult from './PhaseFinalResult';
 import SnakeController from '../snake/SnakeController';
 import TetrisController from '../tetris/TetrisController';
 import GolfController from '../golf/GolfController';
+import SpotifyConnection from '../spotify/play/SpotifyConnection';
+import SpotifyController from '../spotify/play/SpotifyController';
+import SpotifyResultQuestion from '../spotify/play/SpotifyResultQuestion';
 
 class Minigame extends PureComponent {
   render() {
@@ -38,6 +41,16 @@ class Minigame extends PureComponent {
             {game.phase === 'connection' && <PhaseConnection game={game} addPlayer={createPlayer} playerKey={playerKey} />}
             {game.phase === 'starting' && <PhaseStarting game={game} />}
             {(game.phase === 'gameplay' || game.phase === 'level_completed') && <GolfController game={game} playerKey={playerKey} />}
+            {lastPhase && <PhaseFinalResult game={game} playerKey={playerKey} />}
+          </div>
+        );
+      case 'spotify':
+        return (
+          <div className="play-container">
+            {game.phase === 'connection' && <SpotifyConnection game={game} addPlayer={createPlayer} playerKey={playerKey} />}
+            {game.phase === 'starting' && <PhaseStarting game={game} />}
+            {game.phase === 'gameplay' && <SpotifyController game={game} playerKey={playerKey} />}
+            {game.phase === 'level_completed' && <SpotifyResultQuestion game={game} playerKey={playerKey} />}
             {lastPhase && <PhaseFinalResult game={game} playerKey={playerKey} />}
           </div>
         );

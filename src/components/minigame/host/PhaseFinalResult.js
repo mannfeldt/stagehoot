@@ -18,7 +18,7 @@ let rockets = [];
 const MAX_PARTICLES = 400;
 const colorCode = 0;
 const img = new Image();
-img.src = 'http://www.golfworldtravel.se/wp-content/uploads/2013/12/Arabella-Sheraton-Golf-4.jpg';
+img.src = 'https://www.golfworldtravel.se/wp-content/uploads/2013/12/Arabella-Sheraton-Golf-4.jpg';
 
 
 function loop() {
