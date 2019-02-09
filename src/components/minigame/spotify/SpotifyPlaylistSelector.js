@@ -1,19 +1,14 @@
-import React, { Component } from 'react';
-import TextField from '@material-ui/core/TextField';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
-import StarBorderIcon from '@material-ui/icons/StarBorder';
-import GridListTileBar from '@material-ui/core/GridListTileBar';
-import IconButton from '@material-ui/core/IconButton';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import * as util from './SpotifyUtil';
 import {
   MISSING_ALBUM_COVER,
-  MIN_SONGS_PLAYLIST,
 } from './SpotifyConstants';
 
 function slimifyPlaylist(playlist) {
@@ -22,31 +17,30 @@ function slimifyPlaylist(playlist) {
     id: playlist.id,
     img: playlist.images.length > 0 ? playlist.images[0] : MISSING_ALBUM_COVER,
     totalSongs: playlist.tracks.total,
+    owner: playlist.owner.display_name,
   };
   return slim;
 }
 
 const styles = theme => ({
+  img: {
+    height: 64,
+    webkitBboxShadow: '0 0 10px rgba(0,0,0,.3)',
+    boxShadow: '0 0 10px rgba(0,0,0,.3)',
+  },
+  listitem: {
+
+  },
+  primary: {
+    fontSize: 16,
+  },
   root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: 'inherit',
   },
-  gridList: {
-    width: 500,
-    height: 450,
-    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-    transform: 'translateZ(0)',
-  },
-  titleBar: {
-    background:
-      'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, '
-      + 'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-  },
-  icon: {
-    color: 'white',
+  header: {
+    backgroundColor: '#282828',
+    padding: 10,
+    marginBottom: 10,
   },
 });
 function SpotifyPlayListSelector(props) {
@@ -55,26 +49,23 @@ function SpotifyPlayListSelector(props) {
     return null;
   }
   const slimPlaylists = playlists.filter(p => util.isValidPlaylist(p)).map(pl => slimifyPlaylist(pl));
+
   return (
     <div>
-      <GridList cellHeight={200} spacing={1} className={classes.gridList}>
-        {slimPlaylists.map(playlist => (
-          <GridListTile key={playlist.id} cols={1} rows={1}>
-            <img src={playlist.img.url} alt={playlist.name} />
-            <GridListTileBar
-              title={`${playlist.name} - ${playlist.totalSongs}`}
-              titlePosition="top"
-              actionIcon={(
-                <IconButton className={classes.icon} onClick={() => setSelection(playlist.id)}>
-                  <StarBorderIcon />
-                </IconButton>
-)}
-              actionPosition="left"
-              className={classes.titleBar}
-            />
-          </GridListTile>
-        ))}
-      </GridList>
+      <Typography className={classes.header} variant="subtitle1">Select a playlist</Typography>
+      <List className={classes.root}>
+        <Grid container>
+          {slimPlaylists.map(playlist => (
+            <Grid item md={4} xs={12}>
+              <ListItem key={playlist.id} button onClick={() => setSelection(playlist.id)} className={classes.listitem}>
+                <img src={playlist.img.url} alt={playlist.name} className={classes.img} />
+                <ListItemText classes={{ primary: classes.primary }} primary={playlist.name} secondary={`by ${playlist.owner} ● ${playlist.totalSongs} songs`} />
+              </ListItem>
+            </Grid>
+          ))}
+        </Grid>
+      </List>
+
     </div>
   );
 }

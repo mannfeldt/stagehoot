@@ -3,7 +3,49 @@ import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
+import PersonIcon from '@material-ui/icons/Person';
 
+const styles = theme => ({
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexFlow: 'column',
+  },
+  avatar: {
+    marginBottom: 15,
+    height: 120,
+    webkitBboxShadow: '0 0 10px rgba(0,0,0,.3)',
+    boxShadow: '0 0 10px rgba(0,0,0,.3)',
+  },
+  icon: {
+    height: 120,
+    width: 120,
+    marginTop: 15,
+  },
+  primaryText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 500,
+  },
+  secondaryText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 400,
+    opacity: 0.6,
+  },
+  pin: {
+    fontSize: 32,
+
+  },
+  header: {
+    fontSize: 28,
+    padding: 45,
+    fontWeight: 400,
+    color: '#fff',
+  },
+});
 class SpotifyConnection extends Component {
   constructor(props) {
     super(props);
@@ -16,7 +58,7 @@ class SpotifyConnection extends Component {
   }
 
   render() {
-    const { game } = this.props;
+    const { game, classes } = this.props;
     let { players } = game;
     if (!players) {
       players = [];
@@ -26,24 +68,30 @@ class SpotifyConnection extends Component {
     return (
       <div className="phase-container">
         <div className="quiz-top-section">
-          <Typography variant="h2">
+          <Typography className={classes.header}>
             <span>Join game with Game PIN: </span>
-            <span className="dynamic-text">{game.gameId}</span>
+            <span className={classes.pin}>{game.gameId}</span>
           </Typography>
-          <Typography variant="subtitle1">{game.title}</Typography>
+          <Typography className={classes.title}>{game.title}</Typography>
         </div>
         <div className="quiz-middle-section">
-          <Grid container>
+          <Grid
+            container
+            direction="row"
+            spacing={24}
+            justify="center"
+            alignItems="flex-start"
+          >
             {players.map(player => (
-              <Grid key={player.key} item xs={3}>
-                {player.avatar && <img src={player.avatar} alt={player.name} /> }
-                <Typography paragraph variant="body1" className="dynamic-text">{player.name}</Typography>
+              <Grid key={player.key} item>
+                {player.avatar ? (<img className={classes.avatar} src={player.avatar} alt={player.name} />) : (<PersonIcon classes={{ root: classes.icon }} />) }
+                <Typography className={classes.secondaryText}>{player.name}</Typography>
               </Grid>
             ))}
           </Grid>
         </div>
         <div className="quiz-bottom-section">
-          <Button onClick={this.nextPhase} variant="contained">Start</Button>
+          <Button onClick={this.nextPhase} color="primary">Start</Button>
         </div>
       </div>
     );
@@ -52,5 +100,6 @@ class SpotifyConnection extends Component {
 SpotifyConnection.propTypes = {
   game: PropTypes.object.isRequired,
   gameFunc: PropTypes.object.isRequired,
+  classes: PropTypes.any,
 };
-export default SpotifyConnection;
+export default withStyles(styles)(SpotifyConnection);

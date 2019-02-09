@@ -8,6 +8,11 @@ import { fire } from '../../base';
 import Quiz from '../quiz/host/Quiz';
 import Minigame from '../minigame/host/Minigame';
 
+function fetchGame(gameId, callback) {
+  fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
+    .once('value', callback);
+}
+
 class Host extends Component {
   constructor(props) {
     super(props);
@@ -15,14 +20,21 @@ class Host extends Component {
       game: {},
       gameId: localStorage.getItem('RecentGameId') || '',
       password: '',
-
+      isRedirected: Date.now() - localStorage.getItem('spotifytoken_timestamp') < 2000,
     };
     this.updateGame = this.updateGame.bind(this);
-    this.fetchGame = this.fetchGame.bind(this);
     this.initGameListiner = this.initGameListiner.bind(this);
     this.restartGame = this.restartGame.bind(this);
     this.quitGame = this.quitGame.bind(this);
     this.endGame = this.endGame.bind(this);
+  }
+
+
+  componentDidMount() {
+    const { gameId, isRedirected } = this.state;
+    if (isRedirected) {
+      this.joinGame(gameId);
+    }
   }
 
     handleChange = name => (event) => {
@@ -66,35 +78,34 @@ class Host extends Component {
     }
 
 
-    fetchGame() {
-      const { gameId, password } = this.state;
+    joinGame(gameId) {
+      const { password } = this.state;
       const { showSnackbar, toggleHeader } = this.props;
       const that = this;
-      fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
-        .once('value', (snapshot) => {
-          if (snapshot.val()) {
-            let game;
-            snapshot.forEach((child) => {
-              game = child.val();
-            });
-            if (game.password === password) {
-              that.initGameListiner(game.key);
-              toggleHeader();
-            } else {
-              const snack = {
-                variant: 'error',
-                message: 'Could not find matching game',
-              };
-              showSnackbar(snack);
-            }
+      fetchGame(gameId, (snapshot) => {
+        if (snapshot.val()) {
+          let game;
+          snapshot.forEach((child) => {
+            game = child.val();
+          });
+          if (game.password === password) {
+            that.initGameListiner(game.key);
+            toggleHeader();
           } else {
             const snack = {
-              variant: 'info',
-              message: 'No game found',
+              variant: 'error',
+              message: 'Could not find matching game',
             };
             showSnackbar(snack);
           }
-        });
+        } else {
+          const snack = {
+            variant: 'info',
+            message: 'No game found',
+          };
+          showSnackbar(snack);
+        }
+      });
     }
 
     initGameListiner(gameKey) {
@@ -138,7 +149,9 @@ class Host extends Component {
       // result_question sets phase to final_result if questions are all done.
       // final_result shows result of all players. top 3 and/or all. sets phase to end on action
       // end shows options for replay, export result, etc.
-      const { gameId, password, game } = this.state;
+      const {
+        gameId, password, game, isRedirected,
+      } = this.state;
       const { showSnackbar, toggleHeader } = this.props;
       const gameFunctions = {
         update: this.updateGame,
@@ -146,6 +159,15 @@ class Host extends Component {
         end: this.endGame,
         quit: this.quitGame,
       };
+
+      if (!game.phase && isRedirected) {
+        return (
+          <div>
+            <span>Loading...</span>
+          </div>
+        );
+      }
+
       if (!game.phase) {
         return (
           <div className="page-container host-page">
@@ -168,7 +190,7 @@ class Host extends Component {
                 onChange={this.handleChange('password')}
               />
             </FormControl>
-            <Button onClick={this.fetchGame} variant="contained">Fetch</Button>
+            <Button onClick={() => this.joinGame(gameId)} variant="contained">Host</Button>
           </div>
         );
       }

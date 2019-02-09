@@ -3,13 +3,18 @@ import { Typography, Card } from '@material-ui/core';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
     };
+    const timestamp = localStorage.getItem('spotifytoken_timestamp');
+    const spotifyType = localStorage.getItem('spotify_type');
+    if (Date.now() - timestamp < 2000 && spotifyType) {
+      props.history.push(`/${spotifyType}`);
+    }
   }
 
   render() {
@@ -55,4 +60,4 @@ class Home extends Component {
   }
 }
 
-export default Home;
+export default withRouter(Home);

@@ -6,6 +6,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Table from '@material-ui/core/Table';
 import TablePagination from '@material-ui/core/TablePagination';
 import PropTypes from 'prop-types';
+import Avatar from '@material-ui/core/Avatar';
+import PersonIcon from '@material-ui/icons/Person';
+import { Typography } from '@material-ui/core';
 
 const styles = theme => ({
   root: {
@@ -14,6 +17,13 @@ const styles = theme => ({
   table: {
     maxWidth: 700,
     whiteSpace: 'nowrap',
+  },
+  player: {
+    display: 'inline-flex',
+    alignItems: 'center',
+  },
+  playerText: {
+    marginLeft: 15,
   },
 });
 
@@ -93,7 +103,19 @@ class Leaderboard extends Component {
               {leaderboardData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index) => (
                 <TableRow key={data.key}>
                   <TableCell padding="dense">{index + 1}</TableCell>
-                  <TableCell>{data.name}</TableCell>
+                  <TableCell>
+                    <div className={classes.player}>
+                      {data.avatar ? (
+                        <Avatar
+                          alt={data.name}
+                          src={data.avatar}
+                        />
+                      ) : <Avatar><PersonIcon /></Avatar>}
+                      <div className={classes.playerText}>
+                        <Typography>{data.name}</Typography>
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell style={{ width: this.getScoreCellWidth() }}>{getLeaderboardScore(data)}</TableCell>
                 </TableRow>
               ))}

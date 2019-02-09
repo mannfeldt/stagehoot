@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import {
+  SPOTIFY_GREEN,
+} from './SpotifyConstants';
 
-const colors = ['#80DEEA', '#EF9A9A', '#CE93D8', '#C5E1A5'];
-const MAX_PLAYERS = 10;
-const PLAYER_BAR_HEIGHT_INCREMENT = 30;
-const MAX_HEIGHT_CHART = 740;
+const MAX_PLAYERS = 30;
+const PLAYER_BAR_HEIGHT_INCREMENT = 22;
+const MAX_HEIGHT_CHART = 700;
 
 function getRawData(game) {
   const currentAnswers = Object.values(game.answers).filter(a => a.question === game.minigame.currentq);
@@ -12,12 +14,12 @@ function getRawData(game) {
   const answerPopulation = players.map((p) => {
     const popularity = {
       name: p.name,
-      nr: currentAnswers.reduce((init, curr) => init + (curr.answer.includes(p.key) ? 1 : 0), 0),
+      nr: currentAnswers.reduce((init, curr) => init + (curr.answer && curr.answer.includes(p.key) ? 1 : 0), 0),
     };
     return popularity;
   });
 
-  answerPopulation.sort((a, b) => b.nr - a.nr); // For ascending sort
+  answerPopulation.sort((a, b) => b.nr - a.nr);
   return answerPopulation;
 }
 
@@ -47,7 +49,7 @@ class AnswerChart extends Component {
     for (let i = 0; i < maxIndex; i++) {
       chartData.labels.push(answerPopulation[i].name);
       chartData.datasets[0].data.push(answerPopulation[i].nr);
-      chartData.datasets[0].backgroundColor.push(colors[i % 4]);
+      chartData.datasets[0].backgroundColor.push(SPOTIFY_GREEN);
     }
 
     return chartData;
@@ -55,7 +57,7 @@ class AnswerChart extends Component {
 
   getChartHeight() {
     const chartData = this.getChartData();
-    let height = 70 + (chartData.labels.length * PLAYER_BAR_HEIGHT_INCREMENT);
+    let height = 50 + (chartData.labels.length * PLAYER_BAR_HEIGHT_INCREMENT);
     if (height > MAX_HEIGHT_CHART) {
       height = MAX_HEIGHT_CHART;
     }
@@ -64,7 +66,7 @@ class AnswerChart extends Component {
 
   getChartOptions() {
     const chartHeight = this.getChartHeight();
-    const padding = (MAX_HEIGHT_CHART - chartHeight) / 2;
+    const padding = (MAX_HEIGHT_CHART - chartHeight);
     const options = {
       maintainAspectRatio: false,
       showTooltips: false,
@@ -73,6 +75,9 @@ class AnswerChart extends Component {
         yAxes: [{
           ticks: {
             beginAtZero: true,
+            min: 0,
+            fontSize: 13,
+            fontColor: 'rgba(255, 255, 255, 0.7)',
           },
           display: true,
           beginAtZero: true,
@@ -80,6 +85,12 @@ class AnswerChart extends Component {
         xAxes: [{
           display: true,
           beginAtZero: true,
+          ticks: {
+            beginAtZero: true,
+            min: 0,
+            fontSize: 16,
+            fontColor: 'rgba(255, 255, 255, 0.7)',
+          },
         }],
       },
       legend: {
@@ -91,9 +102,8 @@ class AnswerChart extends Component {
       events: [],
       layout: {
         padding: {
-          left: 0,
-          right: 60,
-          top: padding,
+          left: 15,
+          right: 30,
           bottom: padding,
         },
       },
@@ -102,12 +112,13 @@ class AnswerChart extends Component {
   }
 
   render() {
+    const options = this.getChartOptions();
     return (
       <div style={{ maxHeight: MAX_HEIGHT_CHART }}>
         <HorizontalBar
           data={this.getChartData}
           height={MAX_HEIGHT_CHART}
-          options={this.getChartOptions()}
+          options={options}
         />
       </div>
     );

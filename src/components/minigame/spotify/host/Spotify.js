@@ -1,13 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import { Typography } from '@material-ui/core';
 import SpotifyResultQuestion from './SpotifyResultQuestion';
-import { fire } from '../../../../base';
+import TrackPlayer from '../TrackPlayer';
 import * as util from '../SpotifyUtil';
 import {
   AUTH_EXPIRE_MS,
@@ -15,7 +10,6 @@ import {
   CLIENT_ID,
   SONG_VOLUME_FADE_TIME,
 } from '../SpotifyConstants';
-import PhaseAnswer from '../../../quiz/host/PhaseAnswer';
 
 class Spotify extends Component {
   constructor(props) {
@@ -28,6 +22,8 @@ class Spotify extends Component {
       questions: [],
       usedQuestions: [],
       songplaying: false,
+      songCurrentTime: 0,
+      songDuration: 30,
     };
 
     this.nextPhase = this.nextPhase.bind(this);
@@ -45,6 +41,7 @@ class Spotify extends Component {
       const authEndpoint = 'https://accounts.spotify.com/authorize';
       // Replace with your app's client ID, redirect URI and desired scopes
       const redirectUri = window.location.origin + window.location.pathname;
+      localStorage.setItem('spotify_type', 'host');
       const scopes = [
         'user-top-read',
       ];
@@ -158,6 +155,11 @@ class Spotify extends Component {
     audio.onended = () => {
       this.nextPhase();
     };
+    audio.canplay = () => {
+      this.setState(() => ({
+        songDuration: audio.duration,
+      }));
+    };
     // fade in and out
     audio.ontimeupdate = () => {
       const left = audio.duration - audio.currentTime;
@@ -167,7 +169,11 @@ class Spotify extends Component {
       } else if (audio.volume < 1) {
         audio.volume = Math.min(1, audio.volume + 0.2);
       }
+      this.setState(() => ({
+        songCurrentTime: audio.currentTime,
+      }));
     };
+
     // generera questions här istället?
     // kolla PhaseAnswer.js
     // behöver en timer likt det fast får ligga undern ågon metod som denna?
@@ -204,7 +210,7 @@ class Spotify extends Component {
   render() {
     const { game, gameFunc } = this.props;
     const {
-      tracks, questions, songplaying,
+      tracks, questions, songplaying, songCurrentTime, songDuration,
     } = this.state;
 
     if (game.phase === 'gameplay' && !songplaying) {
@@ -223,19 +229,11 @@ class Spotify extends Component {
       );
     }
 
-
+    const trackData = { ...question.track, currentTime: songCurrentTime, duration: songDuration };
     return (
       <div>
-
         {question.type === 'guess_owner' && (
-          <div>
-            <Typography>Vems låt är detta?</Typography>
-            <img src={question.track.img.url} alt="cover art" />
-
-            <Typography>{question.track.name}</Typography>
-            <Typography>{question.track.artists}</Typography>
-
-          </div>
+          <TrackPlayer track={trackData} />
         )}
       </div>
     );

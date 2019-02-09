@@ -34,13 +34,17 @@ class Play extends Component {
       recentGameId: localStorage.getItem('RecentGameIdPlay') || '',
       playerKey: '',
       recentGame: null,
+      isRedirected: Date.now() - localStorage.getItem('spotifytoken_timestamp') < 2000,
     };
     this.createPlayer = this.createPlayer.bind(this);
     this.joinGame = this.joinGame.bind(this);
   }
 
   componentDidMount() {
-    const { recentGameId } = this.state;
+    const { recentGameId, isRedirected } = this.state;
+    if (isRedirected) {
+      this.joinGame(recentGameId);
+    }
     if (recentGameId) {
       fetchGame(recentGameId, (snapshot) => {
         if (snapshot.val()) {
@@ -163,7 +167,7 @@ class Play extends Component {
 
   render() {
     const {
-      game, playerKey, gameId, recentGameId, recentGame,
+      game, playerKey, gameId, recentGameId, recentGame, isRedirected,
     } = this.state;
     const { showSnackbar } = this.props;
     const gameAvatars = {
@@ -172,6 +176,13 @@ class Play extends Component {
       quiz: <GameIcon />,
       snake: <GameIcon />,
     };
+    if (!game.phase && isRedirected) {
+      return (
+        <div>
+          <span>Loading...</span>
+        </div>
+      );
+    }
     if (!game.phase) {
       return (
         <div className="page-container play-page">

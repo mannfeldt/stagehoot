@@ -1,6 +1,5 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -11,14 +10,22 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Checkbox from '@material-ui/core/Checkbox';
 import Avatar from '@material-ui/core/Avatar';
+import PersonIcon from '@material-ui/icons/Person';
 import { fire } from '../../../../base';
 
 const styles = theme => ({
   root: {
     width: '100%',
-    backgroundColor: theme.palette.background.paper,
   },
   itemtext: {
+    overflow: 'hidden',
+  },
+  header: {
+    backgroundColor: '#282828',
+    padding: 10,
+    marginBottom: 10,
+  },
+  itemtextDense: {
     paddingLeft: 2,
     paddingRight: 2,
     overflow: 'hidden',
@@ -31,27 +38,7 @@ const styles = theme => ({
     height: '100vh',
     width: '100vw',
   },
-  canvas: {
-  },
-  header: {
-    height: 80,
-  },
-  footer: {
-    height: 180,
-    marginTop: '-4px',
-  },
-  clubwrapper: {
-    display: 'flex',
-    marginTop: '-120px',
-    position: 'absolute',
-    alignItems: 'flex-end',
-  },
-  menuitemicon: {
-    height: '100%',
-    paddingRight: 10,
-  },
 });
-
 
 class SpotifyController extends Component {
   constructor(props) {
@@ -60,8 +47,6 @@ class SpotifyController extends Component {
 
     this.state = {
       answer: [],
-
-
     };
     this.saveAnswer = this.saveAnswer.bind(this);
     this.toggleOption = this.toggleOption.bind(this);
@@ -78,22 +63,8 @@ class SpotifyController extends Component {
   // jag gör alla beräkningar på score i render() och jag sparar först score till firebase på nextphase
   componentWillUnmount() {
     const { answer } = this.state;
-    if (answer.length > 0) {
-      this.saveAnswer();
-    }
+    this.saveAnswer();
   }
-
-
-  handleChange = name => (event) => {
-    this.setState({
-      [name]: event.target.value,
-      anchorEl: null,
-    });
-  };
-
-  handleChangeSelect = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
-  };
 
   toggleOption(playerKey) {
     this.setState((state) => {
@@ -141,24 +112,33 @@ class SpotifyController extends Component {
     // ta bort checkboxen och ersätt med en conditional icon för om den är vald eller inte?
     // den ikonen + bold text + någon border/color runt hela itemet?
     // checkmetoden kollar om itemet finns i answer eller ej. tar bort / lägger till.
+    const useDense = players.length > 11;
     return (
       <div className="phase-container">
         <div className={classes.container}>
-          <List dense className={classes.root}>
+          <Typography className={classes.header} variant="subtitle1">Markera ditt svar</Typography>
+          <List dense={useDense} className={classes.root}>
             <Grid container>
               {players.map(player => (
-                <Grid item md={4} xs={6}>
-                  <ListItem key={player.key} button onClick={() => this.toggleOption(player.key)} className={classes.listitem}>
+                <Grid key={player.key} item md={4} xs={useDense ? 6 : 12}>
+                  <ListItem button onClick={() => this.toggleOption(player.key)} className={classes.listitem}>
                     <ListItemAvatar>
-                      <Avatar
-                        alt={player.name}
-                        src={player.avatar}
-                      />
+                      {player.avatar ? (
+                        <Avatar
+                          alt={player.name}
+                          src={player.avatar}
+                        />
+                      ) : <Avatar><PersonIcon /></Avatar>}
                     </ListItemAvatar>
-                    <ListItemText className={classes.itemtext} primary={player.name} />
+                    {answer.includes(player.key) ? (
+                      <ListItemText className={useDense ? classes.itemtextDense : classes.itemtext} primary={player.name} />
+                    ) : (
+                      <ListItemText className={useDense ? classes.itemtextDense : classes.itemtext} secondary={player.name} />
+                    )}
                     <ListItemSecondaryAction>
                       <Checkbox
-                        disabled
+                        onClick={() => this.toggleOption(player.key)}
+                        color="primary"
                         checked={answer.includes(player.key)}
                       />
                     </ListItemSecondaryAction>

@@ -12,7 +12,6 @@ import Play from './components/pages/Play';
 import Home from './components/pages/Home';
 import CustomizedSnackbars from './components/common/CustomizedSnackbars';
 
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -34,7 +33,6 @@ class App extends Component {
     if (hash.access_token) {
       localStorage.setItem('spotifytoken', hash.access_token);
       localStorage.setItem('spotifytoken_timestamp', Date.now());
-
     }
     this.showSnackbar = this.showSnackbar.bind(this);
     this.hideSnackbar = this.hideSnackbar.bind(this);
@@ -71,6 +69,7 @@ class App extends Component {
             <Route exact path="/host" render={() => <Host showSnackbar={this.showSnackbar} toggleHeader={this.toggleHeader} />} />
             <Route exact path="/create" render={() => <Create showSnackbar={this.showSnackbar} />} />
             <Route exact path="/" render={() => <Home />} />
+
           </div>
           {this.state.snack && <CustomizedSnackbars snack={this.state.snack} hideSnackbar={this.hideSnackbar} />}
         </div>

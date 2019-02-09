@@ -20,6 +20,8 @@ class SpotifyConnection extends Component {
       spotifyUser: null,
       avatar: null,
       playlists: [],
+      invalidSpotifyToken: !localStorage.getItem('spotifytoken') || Date.now() - localStorage.getItem('spotifytoken_timestamp') > AUTH_EXPIRE_MS,
+
     };
     this.createPlayer = this.createPlayer.bind(this);
     this.setPlaylist = this.setPlaylist.bind(this);
@@ -27,16 +29,19 @@ class SpotifyConnection extends Component {
 
   componentDidMount() {
     const { game } = this.props;
+    const { invalidSpotifyToken } = this.state;
     const token = localStorage.getItem('spotifytoken');
-    const timestamp = localStorage.getItem('spotifytoken_timestamp');
+
 
     // If there is no token, redirect to Spotify authorization. kolla om token gått ut också
     // jag kan sätta redirect till någon anna route och lösa det så att när man kommer dit så går den direkt och kollar i firebase och connectar än till rätt game?
 
-    if (!token || Date.now() - timestamp > AUTH_EXPIRE_MS) {
+    if (invalidSpotifyToken) {
       const authEndpoint = 'https://accounts.spotify.com/authorize';
       // Replace with your app's client ID, redirect URI and desired scopes
       const redirectUri = window.location.origin + window.location.pathname;
+      localStorage.setItem('spotify_type', 'play');
+
       const scopes = [
         'user-top-read',
         'playlist-read-private',
@@ -102,7 +107,14 @@ class SpotifyConnection extends Component {
 
   render() {
     const { game, playerKey } = this.props;
-    const { name, playlists, selectedPlaylist } = this.state;
+    const {
+      name, playlists, selectedPlaylist, invalidSpotifyToken,
+    } = this.state;
+    if (invalidSpotifyToken) {
+      return (
+        <span>Loading...</span>
+      );
+    }
     let playerName = '';
     if (game.players && playerKey && game.players[playerKey]) {
       playerName = game.players[playerKey].name;
@@ -126,7 +138,6 @@ class SpotifyConnection extends Component {
           )
           : (
             <div>
-              <Typography variant="subtitle1">Select a playlist</Typography>
               <SpotifyPlayListSelector setSelection={this.setPlaylist} playlists={playlists} />
             </div>
           )

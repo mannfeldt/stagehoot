@@ -30,5 +30,12 @@ export function isValidPlaylist(playlist) {
 
   return true;
 }
+export function formatTime(sec) {
+  let minutes = Math.floor(sec / 60);
+  minutes = (minutes >= 10) ? minutes : `0${minutes}`;
+  let seconds = Math.floor(sec % 60);
+  seconds = (seconds >= 10) ? seconds : `0${seconds}`;
+  return `${minutes}:${seconds}`;
+}
 
-export default[generateQuestions, isValidPlaylist];
+export default[generateQuestions, isValidPlaylist, formatTime];

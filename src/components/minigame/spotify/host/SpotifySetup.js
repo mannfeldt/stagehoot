@@ -23,20 +23,22 @@ class SpotifySetup extends Component {
       questions: 16,
       nameGenerator: false,
       gamemode: props.game.minigame.gamemode,
+      invalidSpotifyToken: !localStorage.getItem('spotifytoken') || Date.now() - localStorage.getItem('spotifytoken_timestamp') > AUTH_EXPIRE_MS,
     };
   }
 
   componentDidMount() {
+    const { invalidSpotifyToken } = this.state;
     const token = localStorage.getItem('spotifytoken');
-    const timestamp = localStorage.getItem('spotifytoken_timestamp');
 
     // If there is no token, redirect to Spotify authorization. kolla om token gått ut också
     // jag kan sätta redirect till någon anna route och lösa det så att när man kommer dit så går den direkt och kollar i firebase och connectar än till rätt game?
 
-    if (!token || Date.now() - timestamp > AUTH_EXPIRE_MS) {
+    if (invalidSpotifyToken) {
       const authEndpoint = 'https://accounts.spotify.com/authorize';
       // Replace with your app's client ID, redirect URI and desired scopes
       const redirectUri = window.location.origin + window.location.pathname;
+      localStorage.setItem('spotify_type', 'host');
       const scopes = [
         'user-top-read',
       ];
@@ -85,13 +87,19 @@ class SpotifySetup extends Component {
         nameGenerator,
         gamemode,
         questions,
+        invalidSpotifyToken,
       } = this.state;
+      if (invalidSpotifyToken) {
+        return (
+          <span>Loading...</span>
+        );
+      }
       return (
         <div className="phase-container">
           <Typography variant="h4">Game Settings</Typography>
-          <Button onClick={() => this.startGame('classic')} variant="contained">Classic</Button>
-          <Button onClick={() => this.startGame('coop')} variant="contained">Co-op multiplayer</Button>
-          <Button onClick={() => this.startGame('team')} variant="contained">Team multiplayer</Button>
+          <Button onClick={() => this.startGame('classic')} color="primary">Classic</Button>
+          <Button onClick={() => this.startGame('coop')} color="primary">Co-op multiplayer</Button>
+          <Button onClick={() => this.startGame('team')} color="primary">Team multiplayer</Button>
           <FormControl component="fieldset">
             <FormGroup>
               <FormControlLabel
