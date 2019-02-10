@@ -18,10 +18,12 @@ class Spotify extends Component {
     this.state = {
       spotifytoken: localStorage.getItem('spotifytoken') || '',
       tokentimestamp: localStorage.getItem('spotifytoken_timestamp') || '',
+      playlists: [],
       tracks: [],
+      questionTracks: [],
       questions: [],
       usedQuestions: [],
-      songplaying: false,
+      questionPlaying: false,
       songCurrentTime: 0,
       songDuration: 30,
     };
@@ -53,7 +55,7 @@ class Spotify extends Component {
     myHeaders.append('Authorization', `Bearer ${spotifytoken}`);
     const playerArray = Object.values(game.players);
     // playerArray = playerArray.concat(playerArray).concat(playerArray);
-    const maxQuestionsPerList = Math.ceil((game.minigame.questions * 2) / playerArray.length);
+    const maxQuestionsPerList = Math.ceil((game.minigame.questions) / playerArray.length);
     playerArray.forEach((player, index) => {
       fetch(`https://api.spotify.com/v1/playlists/${player.playlist}/tracks`, {
         method: 'GET',
@@ -73,25 +75,44 @@ class Spotify extends Component {
               id: t.track.id,
             };
             return track;
-          }).filter(t => t.audio);
+          });
+          // jag kommer behöva värden till playlistan från andra anrop till api.
+          // ska jag lägga till hela strukturen med async await?
+          // gör inget om det tar lite tid. lägg till en "generating questons loader" kan uppdatera den med progress efter varje steg :)
+          const playlist = {
+            playerKey: player.key,
+            playerName: player.name,
+            totalTracks: tracks.length,
+            popularity: util.getAvaragePopularity(tracks),
+            artists: util.getArtistFrequencyMap(tracks),
+          };
+
+          const questionTracks = tracks.filter(t => t.audio).sort(() => Math.random() - 0.5);
+          if (questionTracks.length > maxQuestionsPerList) {
+            questionTracks.length = maxQuestionsPerList;
+          }
           // ta bort för många. sortera alla på popularitet och sen sätt length till 10(?) om det är över 10
           // ta bort dem frårn question inte från track för då riskerar rätt svar att bli felaktiga
           // då är alla playlists åtminstone samma storlek. kan även lägga till validering på playlistSelector att det måste finnas minst 10låtar med preview_url
-          this.setState((state) => {
-            // sortera efter populäritet eller något annat? senast tillagda?
-            const questionTracks = tracks.sort(() => Math.random() - 0.5);
-            if (questionTracks.length > maxQuestionsPerList) {
-              questionTracks.length = maxQuestionsPerList;
-            }
-            const questions = util.generateQuestions(questionTracks);
-            return ({
-              questions: [...state.questions, ...questions].sort(() => Math.random() - 0.5),
-              tracks: [...state.tracks, ...tracks],
-            });
-          }, () => {
+          this.setState(state => ({
+            playlists: [...state.playlist, playlist],
+            tracks: [...state.tracks, ...tracks],
+            questionTracks: [...state.questionTracks, ...questionTracks],
+          }), () => {
             if (index + 1 === playerArray.length && game.phase === 'gameplay') {
+              // när alla playlists har genererats så genereras frågorna och sen ställs första frågan.
+              this.setState((state) => {
+                // använd minigame för att se vilka options som är satta för vilka frågor som ska genereras.
+                // lägg till true false på de olika frågetyperna i setup/create game.
+                const questions = util.generateQuestions(state.playlists, state.questionTracks, game.minigame);
+                return ({
+                  questions: questions.sort(() => Math.random() - 0.5),
+                });
+              }, () => {
+                this.playQuestion();
+              });
               // det är sista loopen
-              this.playQuestion();
+              // här vill jag generera questions.
             }
           });
         });
@@ -137,43 +158,38 @@ class Spotify extends Component {
   playQuestion() {
     const { questions, tracks } = this.state;
     const { game } = this.props;
-    const currentQuestion = game.minigame.currentq;
-    // testa detta med fuskgrejen igen att skapa 4 players till foreachen
-    // testa köra en await eller then på setstate? här eller tidigare i loopen. jag vill vara säker på att ha fått alla frågor här
-    // blanda frågorna random?
-    // https://medium.learnreact.com/setstate-takes-a-callback-1f71ad5d2296
-
-
-    // /kör någon metod som är "nextquestion"
-    // initquiz körs bara en gång, nextquestion körs inför varje fråga.
-
-    this.setState({ songplaying: true });
-    console.table(questions);
-    const audio = new Audio(questions[currentQuestion].track.audio);
-    audio.volume = 0.1;
-    audio.play();
-    audio.onended = () => {
-      this.nextPhase();
-    };
-    audio.canplay = () => {
-      this.setState(() => ({
-        songDuration: audio.duration,
-      }));
-    };
-    // fade in and out
-    audio.ontimeupdate = () => {
-      const left = audio.duration - audio.currentTime;
-      const fadeout = left <= SONG_VOLUME_FADE_TIME;
-      if (fadeout) {
-        audio.volume = left / SONG_VOLUME_FADE_TIME;
-      } else if (audio.volume < 1) {
-        audio.volume = Math.min(1, audio.volume + 0.2);
-      }
-      this.setState(() => ({
-        songCurrentTime: audio.currentTime,
-      }));
-    };
-
+    const currentQuestion = questions[game.minigame.currentq];
+    this.setState({ questionPlaying: true });
+    if (currentQuestion.track) {
+      const audio = new Audio(questions[currentQuestion].track.audio);
+      audio.volume = 0.1;
+      audio.play();
+      audio.onended = () => {
+        this.nextPhase();
+      };
+      audio.canplay = () => {
+        this.setState(() => ({
+          songDuration: audio.duration,
+        }));
+      };
+      // fade in and out
+      audio.ontimeupdate = () => {
+        const left = audio.duration - audio.currentTime;
+        const fadeout = left <= SONG_VOLUME_FADE_TIME;
+        if (fadeout) {
+          audio.volume = left / SONG_VOLUME_FADE_TIME;
+        } else if (audio.volume < 1) {
+          audio.volume = Math.min(1, audio.volume + 0.2);
+        }
+        this.setState(() => ({
+          songCurrentTime: audio.currentTime,
+        }));
+      };
+    } else {
+      // om det inte finns en track som ska spelas och styra när frågan är klar så skapas en timer
+      // alt skapa ett interval som räknas ner sekundrar och använd det till att visa en progress likt den i trackPlayer. kolla på quiz
+      setTimeout(this.nextPhase, currentQuestion.time);
+    }
     // generera questions här istället?
     // kolla PhaseAnswer.js
     // behöver en timer likt det fast får ligga undern ågon metod som denna?
@@ -198,7 +214,7 @@ class Spotify extends Component {
 
   nextPhase() {
     const { game } = this.props;
-    this.setState({ songplaying: false });
+    this.setState({ questionPlaying: false });
     if (game.minigame.currentq >= game.minigame.questions) {
       game.phase = 'final_result';
     } else {
@@ -210,12 +226,12 @@ class Spotify extends Component {
   render() {
     const { game, gameFunc } = this.props;
     const {
-      tracks, questions, songplaying, songCurrentTime, songDuration,
+      tracks, questions, questionPlaying, songCurrentTime, songDuration,
     } = this.state;
 
-    if (game.phase === 'gameplay' && !songplaying) {
+    if (game.phase === 'gameplay' && !questionPlaying) {
       return (
-        <div>loading questions</div>
+        <div>loading questions: lägg till genererar frågor som en progressbar här. skapa en questionBuffer i state som uppdateras lite efter varje steg i componentDidMount</div>
       );
     }
     const question = questions[game.minigame.currentq];
@@ -225,18 +241,44 @@ class Spotify extends Component {
       // i firebase kommer man bara se player.answers och inte quiz.questions. men vi behöver synka currentquestionindex kanske?
       // det är i resultqestion som jag rättar svaren så jag behöver ju hela tracks där och currentquestion
       return (
-        <SpotifyResultQuestion game={game} gameFunc={gameFunc} tracks={tracks} question={question} nextQuestion={this.nextQuestion} />
+        <SpotifyResultQuestion game={game} playlists={playlists} gameFunc={gameFunc} tracks={tracks} question={question} nextQuestion={this.nextQuestion} />
       );
     }
 
-    const trackData = { ...question.track, currentTime: songCurrentTime, duration: songDuration };
-    return (
-      <div>
-        {question.type === 'guess_owner' && (
-          <TrackPlayer track={trackData} />
-        )}
-      </div>
-    );
+
+    switch (question.type) {
+      case 'track_owner':
+        return (
+          <div>
+            <TrackPlayer track={{ ...question.track, currentTime: songCurrentTime, duration: songDuration }} />
+          </div>
+        );
+      case 'popularity':
+        return (
+          <div>
+            <span>En enkel textfråga med en progressbar nertill likt trackplayer som är timern</span>
+            {question.text}
+
+          </div>
+        );
+      case 'artist':
+        return (
+          <div>
+            <span>Liknande popularity fast lägg till en bild på artisten. spela kanske hans mest spelade låt?</span>
+            {question.text}
+
+          </div>
+        );
+      case 'size':
+        return (
+          <div>
+            <span>En enkel textfråga med en progressbar nertill likt trackplayer som är timern</span>
+            {question.text}
+          </div>
+        );
+      default:
+        return (null);
+    }
   }
 }
 Spotify.propTypes = {

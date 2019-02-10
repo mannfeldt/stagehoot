@@ -24,9 +24,12 @@ import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import ListItemText from '@material-ui/core/ListItemText';
+import Input from '@material-ui/core/Input';
+import Select from '@material-ui/core/Select';
+import Checkbox from '@material-ui/core/Checkbox';
 import { Typography } from '@material-ui/core';
 
 // const play = ({
@@ -65,7 +68,12 @@ import { Typography } from '@material-ui/core';
 //     });
 //   },
 // });
-
+const QUESTION_TYPES = [
+  'track_owner',
+  'popularity',
+  'size',
+  'artist',
+];
 
 class CreateSpotify extends Component {
   constructor(props) {
@@ -77,6 +85,10 @@ class CreateSpotify extends Component {
       password: '',
       gamemode: 'classic',
       difficulty: '300',
+      qPopularity: true,
+      qSize: true,
+      qTrackOwner: true,
+      qArtist: true,
     };
     // const hash = window.location.hash
     //   .substring(1)
@@ -120,11 +132,15 @@ class CreateSpotify extends Component {
     createGame() {
       const { createGame } = this.props;
       const {
-        password, gametype, title, gamemode, questions,
+        password, gametype, title, gamemode, questions, qArtist, qPopularity, qSize, qTrackOwner,
       } = this.state;
       const minigame = {
         gamemode,
         questions,
+        qArtist,
+        qPopularity,
+        qSize,
+        qTrackOwner,
       };
       const game = {
         password,
@@ -150,7 +166,7 @@ class CreateSpotify extends Component {
     render() {
       const {
         password, title, gamemode,
-        questions, difficulty, scoremode, speedmode,
+        questions, qTrackOwner, qArtist, qPopularity, qSize,
       } = this.state;
       return (
         <div className="app-page create-page">
@@ -192,6 +208,57 @@ class CreateSpotify extends Component {
                                 </FormControl>
                                 )
                             }
+              </Grid>
+              <Typography variant="h5">Question types</Typography>
+              <Grid item xs={12}>
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
+                        checked={qTrackOwner}
+                        onChange={this.handleChangeBool('qTrackOwner')}
+                        value="qTrackOwner"
+                      />
+                    )}
+                    label="Track owner"
+                  />
+                </FormControl>
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
+                        checked={qPopularity}
+                        onChange={this.handleChangeBool('qPopularity')}
+                        value="qPopularity"
+                      />
+                    )}
+                    label="Popularity"
+                  />
+                </FormControl>
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
+                        checked={qArtist}
+                        onChange={this.handleChangeBool('qArtist')}
+                        value="qArtist"
+                      />
+                    )}
+                    label="Artist"
+                  />
+                </FormControl>
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
+                        checked={qSize}
+                        onChange={this.handleChangeBool('qSize')}
+                        value="qSize"
+                      />
+                    )}
+                    label="Playlist size"
+                  />
+                </FormControl>
               </Grid>
               <Grid item xs={12}>
                 <FormControl>

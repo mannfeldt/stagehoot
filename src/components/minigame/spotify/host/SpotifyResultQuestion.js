@@ -60,10 +60,34 @@ class SpotifyResultQuestion extends Component {
     this.getCorrectPlayers = this.getCorrectPlayers.bind(this);
   }
 
+  // returnera en array med playerkeys för de som är rätt
   getCorrectAnswer() {
-    const { game, tracks, question } = this.props;
-    const correctPlayers = tracks.filter(t => t.id === question.track.id).map(tr => tr.playerKey);
-    return correctPlayers;
+    const {
+      game, tracks, question, playlists,
+    } = this.props;
+    switch (question.qtype) {
+      case 'track_owner':
+        return tracks.filter(t => t.id === question.track.id).map(tr => tr.playerKey);
+      case 'popularity':
+        // popularity är samma metodik som size
+
+        return null;
+      case 'size':
+        const correctAnswers = playlist.reduce((a, b) => (a.totalTracks > b.totalTracks ? a : b));
+        const correctAnswers = playlist.reduce((a, b) => (a.totalTracks > b.totalTracks ? a : b), playlist[0]);
+        // sen ta playerkey från den
+
+        // alt
+        // tänk om flera har lika många? då ska svaret var alla dem?
+        const correctAnswers = playlist.sort((a, b) => a.totalTracks - b.totalTracks)[0].playerKey;
+
+        return null;
+      case 'artist':
+      // hämta ut alla playlists som har en key under playlist.artist som är = question.artist. ta sedan den som har högst värde
+        return null;
+      default:
+        return null;
+    }
   }
 
   getLeaderboardData(correctAnswer) {
@@ -184,7 +208,9 @@ class SpotifyResultQuestion extends Component {
         <div className="quiz-top-section">
           <Typography className={classes.pin}>{`Game PIN:${game.gameId} `}</Typography>
         </div>
-        <div className="quiz-middle-section" />
+        <div className="quiz-middle-section">
+          <span>Rättar svaren...</span>
+        </div>
         <div className="quiz-bottom-section">
           <div>
             {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}

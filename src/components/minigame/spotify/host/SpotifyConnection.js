@@ -14,15 +14,16 @@ const styles = theme => ({
     flexFlow: 'column',
   },
   avatar: {
-    marginBottom: 15,
+    marginBottom: 5,
     height: 120,
+    borderRadius: '50%',
     webkitBboxShadow: '0 0 10px rgba(0,0,0,.3)',
     boxShadow: '0 0 10px rgba(0,0,0,.3)',
   },
   icon: {
     height: 120,
     width: 120,
-    marginTop: 15,
+    marginTop: 5,
   },
   primaryText: {
     fontSize: 18,
@@ -37,7 +38,6 @@ const styles = theme => ({
   },
   pin: {
     fontSize: 32,
-
   },
   header: {
     fontSize: 28,
@@ -78,12 +78,15 @@ class SpotifyConnection extends Component {
           <Grid
             container
             direction="row"
-            spacing={24}
             justify="center"
             alignItems="flex-start"
           >
             {players.map(player => (
-              <Grid key={player.key} item>
+              <Grid
+                key={player.key}
+                item
+                style={{ padding: '15px 30px 30px 30px' }}
+              >
                 {player.avatar ? (<img className={classes.avatar} src={player.avatar} alt={player.name} />) : (<PersonIcon classes={{ root: classes.icon }} />) }
                 <Typography className={classes.secondaryText}>{player.name}</Typography>
               </Grid>
