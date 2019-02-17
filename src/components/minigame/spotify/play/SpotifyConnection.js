@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
-import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
-import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
 import { Typography } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
+import * as util from '../SpotifyUtil';
 import SpotifyPlayListSelector from '../SpotifyPlaylistSelector';
 import {
   AUTH_EXPIRE_MS,
   CLIENT_ID,
+  SPOTIFY_AUTH_SCOPES,
 } from '../SpotifyConstants';
 
 class SpotifyConnection extends Component {
@@ -27,7 +25,7 @@ class SpotifyConnection extends Component {
     this.setPlaylist = this.setPlaylist.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const { game } = this.props;
     const { invalidSpotifyToken } = this.state;
     const token = localStorage.getItem('spotifytoken');
@@ -42,42 +40,44 @@ class SpotifyConnection extends Component {
       const redirectUri = window.location.origin + window.location.pathname;
       localStorage.setItem('spotify_type', 'play');
 
-      const scopes = [
-        'user-top-read',
-        'playlist-read-private',
-      ];
       localStorage.setItem('RecentGameIdPlay', game.gameId);
-      window.location = `${authEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=token&show_dialog=true`;
+      window.location = `${authEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&scope=${SPOTIFY_AUTH_SCOPES.join('%20')}&response_type=token&show_dialog=true`;
     }
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
+    const getHeader = {
+      method: 'GET',
+      headers: myHeaders,
+    };
 
     // Make a call using the token
 
-    const result = fetch('https://api.spotify.com/v1/me', {
-      method: 'GET',
-      headers: myHeaders,
-    }).then(response => response.json())
-      .then((data) => {
-        this.setState({ name: data.display_name, avatar: data.images.length > 0 ? data.images[0].url : null });
-        return fetch(`https://api.spotify.com/v1/users/${data.id}/playlists`, {
-          method: 'GET',
-          headers: myHeaders,
-        });
-      })
-      .then(response => response.json());
+    const profileResponse = await fetch('https://api.spotify.com/v1/me', getHeader);
+    const profileResult = await profileResponse.json();
 
-    result.then((r) => {
-      this.setState({ playlists: r.items });
-      console.table(r.items); // 2nd request result
-    });
+    let hasNext = true;
+    let offset = 0;
+    const limit = 50;
+    const userPlaylists = [];
+    while (hasNext) {
+      const playlistsResponse = await fetch(`https://api.spotify.com/v1/users/${profileResult.id}/playlists?limit=${limit}&offset=${offset}`, getHeader);
+      const playlistsResult = await playlistsResponse.json();
+      userPlaylists.push(...playlistsResult.items);
+      if (playlistsResult.items.length < limit) {
+        hasNext = false;
+      } else {
+        offset += limit;
+      }
+    }
 
-    // spara till state:
-    // spotifyUser
-    // user.name
-    // playlist.id
-    // playlists
-    //
+    const existingPlaylists = Object.values(game.players || {}).map(x => x.playlist);
+    const selectablePlaylists = userPlaylists.filter(x => !existingPlaylists.includes(x.id) && util.isValidPlaylist(x));
+
+    this.setState(() => ({
+      playlists: selectablePlaylists,
+      name: profileResult.display_name,
+      avatar: profileResult.images.length > 0 ? profileResult.images[0].url : null,
+    }));
   }
 
   setPlaylist(selectedPlaylist) {
@@ -108,7 +108,7 @@ class SpotifyConnection extends Component {
   render() {
     const { game, playerKey } = this.props;
     const {
-      name, playlists, selectedPlaylist, invalidSpotifyToken,
+      playlists, selectedPlaylist, invalidSpotifyToken,
     } = this.state;
     if (invalidSpotifyToken) {
       return (

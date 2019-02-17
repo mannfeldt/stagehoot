@@ -112,7 +112,6 @@ class Minigame extends PureComponent {
           <MuiThemeProvider theme={theme}>
             <div className="play-container">
               {game.phase === 'connection' && <SpotifyConnection game={game} addPlayer={createPlayer} playerKey={playerKey} />}
-              {game.phase === 'starting' && <PhaseStarting game={game} />}
               {game.phase === 'gameplay' && <SpotifyController game={game} playerKey={playerKey} />}
               {game.phase === 'level_completed' && <SpotifyResultQuestion game={game} playerKey={playerKey} />}
               {lastPhase && <PhaseFinalResult game={game} playerKey={playerKey} />}

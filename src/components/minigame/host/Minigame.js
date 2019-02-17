@@ -127,7 +127,6 @@ class Minigame extends PureComponent {
             <div className="host-container">
               {game.phase === 'setup' && <SpotifySetup game={game} gameFunc={gameFunc} />}
               {game.phase === 'connection' && <SpotifyConnection game={game} gameFunc={gameFunc} />}
-              {game.phase === 'starting' && <SpotifyStarting game={game} gameFunc={gameFunc} />}
               {(game.phase === 'gameplay' || game.phase === 'level_completed') && <Spotify game={game} gameFunc={gameFunc} />}
               {game.phase === 'final_result' && <PhaseFinalResult game={game} gameFunc={gameFunc} />}
               {game.phase === 'end' && <PhaseEnd game={game} gameFunc={gameFunc} />}

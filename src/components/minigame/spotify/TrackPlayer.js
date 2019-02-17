@@ -2,10 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import { Progress } from 'react-sweet-progress';
-import * as util from './SpotifyUtil';
-import 'react-sweet-progress/lib/style.css';
+import SpotifyTimer from './SpotifyTimer';
 import {
   SPOTIFY_GREEN,
 } from './SpotifyConstants';
@@ -69,13 +66,6 @@ const styles = theme => ({
     fontWeight: 400,
     opacity: 0.6,
   },
-  hidden: {
-    display: 'none',
-  },
-  nosize: {
-    width: 0,
-    height: 0,
-  },
   header: {
     fontSize: 28,
     padding: 45,
@@ -84,39 +74,15 @@ const styles = theme => ({
 });
 
 function TrackPlayer(props) {
-  const { track, classes } = props;
-  const timeString = util.formatTime(track.currentTime);
-  const durationString = util.formatTime(track.duration);
-  const progress = (track.currentTime / (track.duration - 0.5)) * 100;
+  const { track, classes, text } = props;
   return (
     <div className={classes.container}>
-      <Typography className={classes.header}>Vems låt är detta?</Typography>
-      <img src={track.img.url} alt="cover art" className={classes.img} />
+      <Typography className={classes.header}>{text}</Typography>
+      <img src={track.img} alt="cover art" className={classes.img} />
       <div className={classes.footer}>
         <Typography className={classes.primaryText}>{track.name}</Typography>
         <Typography className={classes.secondaryText}>{track.artists}</Typography>
-        <div className={classes.timeContainer}>
-          <Typography className={classes.timeTextLeft}>{timeString}</Typography>
-          <LinearProgress
-            className={classes.progress}
-            variant="determinate"
-            value={progress}
-            classes={{
-              colorPrimary: classes.linearColorPrimary,
-              barColorPrimary: classes.linearBarColorPrimary,
-            }}
-          />
-          <Typography className={classes.timeTextRight}>{durationString}</Typography>
-        </div>
-        <div>
-          {/* detta är bara fulhack. componenten behövs för att linearProgress ska köras smooth.. */}
-          <Progress
-            percent={progress}
-            status="success"
-            className={classes.nosize}
-            symbolClassName={classes.hidden}
-          />
-        </div>
+        <SpotifyTimer time={track.currentTime} duration={track.duration} />
       </div>
     </div>
   );
@@ -125,6 +91,7 @@ function TrackPlayer(props) {
 TrackPlayer.propTypes = {
   classes: PropTypes.object.isRequired,
   track: PropTypes.object.isRequired,
+  text: PropTypes.string,
 };
 
 export default withStyles(styles)(TrackPlayer);

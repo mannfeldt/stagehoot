@@ -6,7 +6,6 @@ import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import * as util from './SpotifyUtil';
 import {
   MISSING_ALBUM_COVER,
 } from './SpotifyConstants';
@@ -34,6 +33,10 @@ const styles = theme => ({
   primary: {
     fontSize: 16,
   },
+  dot: {
+    fontSize: '11px',
+    padding: '0 8px',
+  },
   root: {
     backgroundColor: 'inherit',
   },
@@ -48,7 +51,7 @@ function SpotifyPlayListSelector(props) {
   if (!playlists) {
     return null;
   }
-  const slimPlaylists = playlists.filter(p => util.isValidPlaylist(p)).map(pl => slimifyPlaylist(pl));
+  const slimPlaylists = playlists.map(pl => slimifyPlaylist(pl));
 
   return (
     <div>
@@ -56,16 +59,25 @@ function SpotifyPlayListSelector(props) {
       <List className={classes.root}>
         <Grid container>
           {slimPlaylists.map(playlist => (
-            <Grid item md={4} xs={12}>
-              <ListItem key={playlist.id} button onClick={() => setSelection(playlist.id)} className={classes.listitem}>
+            <Grid item md={4} xs={12} key={playlist.id}>
+              <ListItem button onClick={() => setSelection(playlist.id)} className={classes.listitem}>
                 <img src={playlist.img.url} alt={playlist.name} className={classes.img} />
-                <ListItemText classes={{ primary: classes.primary }} primary={playlist.name} secondary={`by ${playlist.owner} ● ${playlist.totalSongs} songs`} />
+                <ListItemText
+                  classes={{ primary: classes.primary }}
+                  primary={playlist.name}
+                  secondary={(
+                    <span>
+                      {`by ${playlist.owner}`}
+                      <span className={classes.dot}>•</span>
+                      {`${playlist.totalSongs} songs`}
+                    </span>
+                  )}
+                />
               </ListItem>
             </Grid>
           ))}
         </Grid>
       </List>
-
     </div>
   );
 }

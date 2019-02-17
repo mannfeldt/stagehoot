@@ -46,7 +46,7 @@ class SpotifyController extends Component {
     // sätt det här till rätt höjd. det ska vara windowheight - header - footer
 
     this.state = {
-      answer: [],
+      answer: ['default'],
     };
     this.saveAnswer = this.saveAnswer.bind(this);
     this.toggleOption = this.toggleOption.bind(this);

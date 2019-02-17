@@ -68,12 +68,6 @@ import { Typography } from '@material-ui/core';
 //     });
 //   },
 // });
-const QUESTION_TYPES = [
-  'track_owner',
-  'popularity',
-  'size',
-  'artist',
-];
 
 class CreateSpotify extends Component {
   constructor(props) {
@@ -85,10 +79,12 @@ class CreateSpotify extends Component {
       password: '',
       gamemode: 'classic',
       difficulty: '300',
-      qPopularity: true,
+      autoplay: true,
+      qFeatures: true,
       qSize: true,
       qTrackOwner: true,
       qArtist: true,
+      qGenre: true,
     };
     // const hash = window.location.hash
     //   .substring(1)
@@ -132,13 +128,15 @@ class CreateSpotify extends Component {
     createGame() {
       const { createGame } = this.props;
       const {
-        password, gametype, title, gamemode, questions, qArtist, qPopularity, qSize, qTrackOwner,
+        password, gametype, title, gamemode, questions, qArtist, qFeatures, qSize, qTrackOwner, qGenre, autoplay,
       } = this.state;
       const minigame = {
         gamemode,
+        autoplay,
         questions,
+        qGenre,
         qArtist,
-        qPopularity,
+        qFeatures,
         qSize,
         qTrackOwner,
       };
@@ -166,7 +164,7 @@ class CreateSpotify extends Component {
     render() {
       const {
         password, title, gamemode,
-        questions, qTrackOwner, qArtist, qPopularity, qSize,
+        questions, qTrackOwner, qArtist, qFeatures, qSize, qGenre, autoplay,
       } = this.state;
       return (
         <div className="app-page create-page">
@@ -220,19 +218,19 @@ class CreateSpotify extends Component {
                         value="qTrackOwner"
                       />
                     )}
-                    label="Track owner"
+                    label="Tracks"
                   />
                 </FormControl>
                 <FormControl component="fieldset">
                   <FormControlLabel
                     control={(
                       <Checkbox
-                        checked={qPopularity}
-                        onChange={this.handleChangeBool('qPopularity')}
-                        value="qPopularity"
+                        checked={qFeatures}
+                        onChange={this.handleChangeBool('qFeatures')}
+                        value="qFeatures"
                       />
                     )}
-                    label="Popularity"
+                    label="Features"
                   />
                 </FormControl>
                 <FormControl component="fieldset">
@@ -251,6 +249,18 @@ class CreateSpotify extends Component {
                   <FormControlLabel
                     control={(
                       <Checkbox
+                        checked={qGenre}
+                        onChange={this.handleChangeBool('qGenre')}
+                        value="qGenre"
+                      />
+                    )}
+                    label="Genres"
+                  />
+                </FormControl>
+                <FormControl component="fieldset">
+                  <FormControlLabel
+                    control={(
+                      <Checkbox
                         checked={qSize}
                         onChange={this.handleChangeBool('qSize')}
                         value="qSize"
@@ -259,6 +269,18 @@ class CreateSpotify extends Component {
                     label="Playlist size"
                   />
                 </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={(
+                    <Switch
+                      checked={autoplay}
+                      onChange={this.handleChangeBool('autoplay')}
+                      value="autoplay"
+                    />
+                )}
+                  label="Autoplay questions"
+                />
               </Grid>
               <Grid item xs={12}>
                 <FormControl>

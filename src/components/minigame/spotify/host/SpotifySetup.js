@@ -13,6 +13,7 @@ import Switch from '@material-ui/core/Switch';
 import {
   AUTH_EXPIRE_MS,
   CLIENT_ID,
+  SPOTIFY_AUTH_SCOPES,
 } from '../SpotifyConstants';
 
 class SpotifySetup extends Component {
@@ -20,8 +21,9 @@ class SpotifySetup extends Component {
     super(props);
     this.state = {
       surveyPlayers: false,
-      questions: 16,
+      questions: props.game.minigame.questions,
       nameGenerator: false,
+      autoplay: props.game.minigame.autoplay,
       gamemode: props.game.minigame.gamemode,
       invalidSpotifyToken: !localStorage.getItem('spotifytoken') || Date.now() - localStorage.getItem('spotifytoken_timestamp') > AUTH_EXPIRE_MS,
     };
@@ -39,10 +41,7 @@ class SpotifySetup extends Component {
       // Replace with your app's client ID, redirect URI and desired scopes
       const redirectUri = window.location.origin + window.location.pathname;
       localStorage.setItem('spotify_type', 'host');
-      const scopes = [
-        'user-top-read',
-      ];
-      window.location = `${authEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=token&show_dialog=true`;
+      window.location = `${authEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&scope=${SPOTIFY_AUTH_SCOPES.join('%20')}&response_type=token&show_dialog=true`;
     }
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
@@ -66,17 +65,15 @@ class SpotifySetup extends Component {
       const { game, gameFunc } = this.props;
       const {
         surveyPlayers, nameGenerator,
-        questions, gamemode,
+        questions, gamemode, autoplay,
       } = this.state;
-      const minigame = {
-        surveyPlayers,
-        nameGenerator,
-        multiplayerMode,
-        gamemode,
-        questions,
-        currentq: 0,
-      };
-      game.minigame = minigame;
+      game.minigame.surveyPlayers = surveyPlayers;
+      game.minigame.nameGenerator = nameGenerator;
+      game.minigame.multiplayerMode = multiplayerMode;
+      game.minigame.gamemode = gamemode;
+      game.minigame.autoplay = autoplay;
+      game.minigame.questions = questions;
+      game.minigame.currentq = 0;
       game.phase = 'connection';
       game.status = 'IN_PROGRESS';
       gameFunc.update(game);
@@ -88,6 +85,7 @@ class SpotifySetup extends Component {
         gamemode,
         questions,
         invalidSpotifyToken,
+        autoplay,
       } = this.state;
       if (invalidSpotifyToken) {
         return (
@@ -111,6 +109,16 @@ class SpotifySetup extends Component {
                   />
                 )}
                 label="Generate names for players"
+              />
+              <FormControlLabel
+                control={(
+                  <Switch
+                    checked={autoplay}
+                    onChange={this.handleChangeBool('autoplay')}
+                    value="autoplay"
+                  />
+                )}
+                label="Autoplay questions"
               />
 
               <FormControl required>

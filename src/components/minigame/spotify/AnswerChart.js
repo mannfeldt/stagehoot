@@ -6,7 +6,7 @@ import {
 
 const MAX_PLAYERS = 30;
 const PLAYER_BAR_HEIGHT_INCREMENT = 22;
-const MAX_HEIGHT_CHART = 700;
+const MAX_HEIGHT_CHART = 620;
 
 function getRawData(game) {
   const currentAnswers = Object.values(game.answers).filter(a => a.question === game.minigame.currentq);
@@ -43,7 +43,7 @@ class AnswerChart extends Component {
         borderWidth: 1,
       }],
     };
-
+    if (!game.answers) return chartData;
     const answerPopulation = getRawData(game);
     const maxIndex = answerPopulation.length > MAX_PLAYERS ? MAX_PLAYERS : answerPopulation.length;
     for (let i = 0; i < maxIndex; i++) {
@@ -90,6 +90,11 @@ class AnswerChart extends Component {
             min: 0,
             fontSize: 16,
             fontColor: 'rgba(255, 255, 255, 0.7)',
+            userCallback(label, index, labels) {
+              if (Math.floor(label) === label) {
+                return label;
+              }
+            },
           },
         }],
       },
@@ -102,8 +107,8 @@ class AnswerChart extends Component {
       events: [],
       layout: {
         padding: {
-          left: 15,
-          right: 30,
+          left: 60,
+          right: 60,
           bottom: padding,
         },
       },

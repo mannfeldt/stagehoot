@@ -45,6 +45,13 @@ const styles = theme => ({
     fontWeight: 400,
     color: '#fff',
   },
+  subheader: {
+    fontSize: 24,
+    padding: 45,
+    fontWeight: 400,
+    color: '#fff',
+    opacity: 0.7,
+  },
 });
 class SpotifyConnection extends Component {
   constructor(props) {
@@ -54,7 +61,7 @@ class SpotifyConnection extends Component {
 
   nextPhase() {
     const { gameFunc } = this.props;
-    gameFunc.update({ phase: 'starting' });
+    gameFunc.update({ phase: 'gameplay' });
   }
 
   render() {
@@ -72,6 +79,7 @@ class SpotifyConnection extends Component {
             <span>Join game with Game PIN: </span>
             <span className={classes.pin}>{game.gameId}</span>
           </Typography>
+          <Typography className={classes.subheader}>mannfeldt.github.io/stagehoot</Typography>
           <Typography className={classes.title}>{game.title}</Typography>
         </div>
         <div className="quiz-middle-section">

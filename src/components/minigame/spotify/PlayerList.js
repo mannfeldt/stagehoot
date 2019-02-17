@@ -5,7 +5,6 @@ import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -30,17 +29,15 @@ const styles = theme => ({
     fontWeight: 400,
   },
 });
-function CorrectAnswer(props) {
-  const { classes, answer } = props;
-  if (!answer || answer.length === 0) {
+function PlayerList(props) {
+  const { classes, players } = props;
+  if (!players || players.length === 0) {
     return null;
   }
-  const useDense = answer.length > 3;
+  const useDense = players.length > 3;
 
   return (
     <div>
-      <Typography className={classes.header}>Rätt svar</Typography>
-      <Divider />
       <List dense={useDense} className={classes.root}>
         <Grid
           container
@@ -48,7 +45,7 @@ function CorrectAnswer(props) {
           justify="center"
           alignItems="flex-start"
         >
-          {answer.map(player => (
+          {players.map(player => (
             <Grid key={player.key} item>
               <ListItem className={classes.listitem}>
                 <ListItemAvatar>
@@ -68,9 +65,9 @@ function CorrectAnswer(props) {
     </div>
   );
 }
-CorrectAnswer.propTypes = {
+PlayerList.propTypes = {
   classes: PropTypes.object.isRequired,
-  answer: PropTypes.array.isRequired,
+  players: PropTypes.array.isRequired,
 };
 
-export default withStyles(styles)(CorrectAnswer);
+export default withStyles(styles)(PlayerList);

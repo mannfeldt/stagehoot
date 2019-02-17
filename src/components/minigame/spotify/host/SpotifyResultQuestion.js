@@ -1,15 +1,24 @@
+/* eslint no-case-declarations: 0 */
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import Divider from '@material-ui/core/Divider';
 import AnswerChart from '../AnswerChart';
 import Leaderboard from '../Leaderboard';
-import CorrectAnswer from '../CorrectAnswer';
+import PlayerList from '../PlayerList';
 import {
   SPOTIFY_GREEN,
+  SONG_VOLUME_FADE_TIME,
 } from '../SpotifyConstants';
+
+function getWinners(leaderboardData) {
+  const topScorer = leaderboardData.reduce((a, b) => ((a.totalScore + a.currentqScore) > (b.totalScore + b.currentqScore) ? a : b));
+  const topScore = topScorer.totalScore + topScorer.currentqScore;
+  return leaderboardData.filter(d => d.totalScore + d.currentqScore === topScore).map(x => x.key);
+}
 
 const styles = theme => ({
   pin: {
@@ -29,14 +38,27 @@ const styles = theme => ({
     overflow: 'hidden',
   },
   header: {
-    backgroundColor: '#282828',
-    padding: 10,
-    marginBottom: 10,
+    fontSize: 28,
+    padding: 15,
+    fontWeight: 400,
+  },
+  subheader: {
+    fontSize: 24,
+    padding: 15,
+    opacity: 0.7,
+    fontWeight: 400,
   },
   itemtextDense: {
     paddingLeft: 2,
     paddingRight: 2,
     overflow: 'hidden',
+  },
+  questionNumber: {
+    position: 'absolute',
+    top: 30,
+    fontSize: 16,
+    fontWeight: 300,
+    left: 30,
   },
   listitem: {
     paddingLeft: 12,
@@ -51,13 +73,22 @@ class SpotifyResultQuestion extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      view: 'answer',
     };
     this.nextQuestion = this.nextQuestion.bind(this);
     this.finalizeQuiz = this.finalizeQuiz.bind(this);
     this.getCorrectAnswer = this.getCorrectAnswer.bind(this);
     this.getLeaderboardData = this.getLeaderboardData.bind(this);
     this.answersCollected = this.answersCollected.bind(this);
-    this.getCorrectPlayers = this.getCorrectPlayers.bind(this);
+    this.getPlayers = this.getPlayers.bind(this);
+    this.toggleView = this.toggleView.bind(this);
+  }
+
+  componentDidMount() {
+    const { game } = this.props;
+    if (game.minigame.autoplay) {
+      setTimeout(this.toggleView, 10000);
+    }
   }
 
   // returnera en array med playerkeys för de som är rätt
@@ -65,26 +96,37 @@ class SpotifyResultQuestion extends Component {
     const {
       game, tracks, question, playlists,
     } = this.props;
+    if (!question) {
+      return null;
+    }
     switch (question.qtype) {
       case 'track_owner':
         return tracks.filter(t => t.id === question.track.id).map(tr => tr.playerKey);
       case 'popularity':
-        // popularity är samma metodik som size
-
-        return null;
-      case 'size':
-        const correctAnswers = playlist.reduce((a, b) => (a.totalTracks > b.totalTracks ? a : b));
-        const correctAnswers = playlist.reduce((a, b) => (a.totalTracks > b.totalTracks ? a : b), playlist[0]);
-        // sen ta playerkey från den
-
-        // alt
-        // tänk om flera har lika många? då ska svaret var alla dem?
-        const correctAnswers = playlist.sort((a, b) => a.totalTracks - b.totalTracks)[0].playerKey;
-
+      case 'danceability':
+      case 'energy':
+      case 'valence':
+      case 'tempo':
+      case 'totalTracks':
+        if (question.subtype === 'max') {
+          const maxSize = playlists.reduce((a, b) => (a[question.qtype] > b[question.qtype] ? a : b))[question.qtype];
+          const answer = playlists.filter(p => p[question.qtype] === maxSize).map(p => p.playerKey);
+          return answer;
+        }
+        if (question.subtype === 'min') {
+          const minSize = playlists.reduce((a, b) => (a[question.qtype] < b[question.qtype] ? a : b))[question.qtype];
+          const answer = playlists.filter(p => p[question.qtype] === minSize).map(p => p.playerKey);
+          return answer;
+        }
         return null;
       case 'artist':
-      // hämta ut alla playlists som har en key under playlist.artist som är = question.artist. ta sedan den som har högst värde
-        return null;
+        const maxArtist = playlists.reduce((a, b) => (a > b.artists[question.artist] ? a : b.artists[question.artist]));
+        const answer = playlists.filter(p => p.artists[question.artist] === maxArtist).map(p => p.playerKey);
+        return answer;
+      case 'genre':
+        const maxGenre = playlists.reduce((a, b) => (a > b.genres[question.genre] ? a : b.genres[question.genre]), 0);
+        const answerg = playlists.filter(p => p.genres[question.genre] === maxGenre).map(p => p.playerKey);
+        return answerg;
       default:
         return null;
     }
@@ -93,6 +135,7 @@ class SpotifyResultQuestion extends Component {
   getLeaderboardData(correctAnswer) {
     const { game } = this.props;
     const players = Object.values(game.players);
+    if (!game.answers) return [];
     const answers = Object.values(game.answers);
     const leaderboardData = players.map((p) => {
       // behövs den första listan?
@@ -100,8 +143,9 @@ class SpotifyResultQuestion extends Component {
       let currentScore = 0;
       const currentPlayerCurrentAnswer = answers.find(a => a.playerKey === p.key && a.question === game.minigame.currentq);
       if (currentPlayerCurrentAnswer && currentPlayerCurrentAnswer.answer) {
+        currentPlayerCurrentAnswer.answer = currentPlayerCurrentAnswer.answer.filter(x => x !== 'default');
         currentScore = currentPlayerCurrentAnswer.answer.reduce((acc, cur) => {
-          if (correctAnswer.includes(cur)) {
+          if (correctAnswer && correctAnswer.includes(cur)) {
             return acc + 1;
           }
           return acc - 1;
@@ -119,9 +163,10 @@ class SpotifyResultQuestion extends Component {
     return leaderboardData;
   }
 
-  getCorrectPlayers(keys) {
+  getPlayers(keys) {
     const { game } = this.props;
     const players = [];
+    if (!keys) return players;
     keys.forEach((key) => {
       const player = game.players[key];
       players.push({
@@ -133,9 +178,27 @@ class SpotifyResultQuestion extends Component {
     return players;
   }
 
+  toggleView() {
+    const { view } = this.state;
+    const { game } = this.props;
+    if (view === 'answer') {
+      if (game.minigame.autoplay) {
+        const isLastQuestion = game.minigame.currentq + 1 >= game.minigame.questions;
+        if (!isLastQuestion) {
+          setTimeout(this.nextQuestion, 6000);
+        } else {
+          setTimeout(this.finalizeQuiz, 8000);
+        }
+      }
+      this.setState(() => ({
+        view: 'leaderboard',
+      }));
+    }
+  }
+
   finalizeQuiz() {
-    const { gameFunc } = this.props;
-    gameFunc.update({ phase: 'final_result' });
+    const { gameFunc, game } = this.props;
+    // gameFunc.update({ phase: 'final_result' });
   }
 
   // jag måste hantera att alla svar inte finns på plats direkt när spotifyResultQuestion kör componentdidmount? lägg in en hård sleep eller så läser jag updates som kommer in där
@@ -153,6 +216,33 @@ class SpotifyResultQuestion extends Component {
     nextQuestion();
   }
 
+  playWinningSong(winners) {
+    const { tracks } = this.props;
+    const randomWinner = winners[Math.floor(Math.random() * winners.length)];
+    const celebrationTrack = tracks.filter(x => x.playerKey === randomWinner.key && x.audio).sort(() => Math.random() - 0.5)[0];
+    const audio = new Audio(celebrationTrack.audio);
+    audio.volume = 0.1;
+    audio.play();
+    audio.onended = () => {
+      // this.nextPhase();
+    };
+    audio.canplay = () => {
+      // this.setState(() => ({
+      //   songDuration: audio.duration,
+      // }));
+    };
+    // fade in and out
+    audio.ontimeupdate = () => {
+      const left = audio.duration - audio.currentTime;
+      const fadeout = left <= SONG_VOLUME_FADE_TIME;
+      if (fadeout) {
+        audio.volume = left / SONG_VOLUME_FADE_TIME;
+      } else if (audio.volume < 1) {
+        audio.volume = Math.min(1, audio.volume + 0.2);
+      }
+    };
+  }
+
   answersCollected() {
     const { game } = this.props;
     if (!game.answers) return false;
@@ -163,42 +253,87 @@ class SpotifyResultQuestion extends Component {
 
 
   render() {
-    const { game, gameFunc, classes } = this.props;
+    const {
+      game, gameFunc, classes, question,
+    } = this.props;
+    const { view } = this.state;
     const isAnswersCollected = this.answersCollected();
-    const isLastQuestion = game.minigame.currentq === game.minigame.questions;
-    if (isAnswersCollected) {
+    const isLastQuestion = game.minigame.currentq + 1 >= game.minigame.questions;
+    if (true) {
       const correctAnswer = this.getCorrectAnswer();
       const leaderboardData = this.getLeaderboardData(correctAnswer);
-      const correctPlayers = this.getCorrectPlayers(correctAnswer);
+      const correctPlayers = this.getPlayers(correctAnswer);
+      // delas upp i två vyer: först answerchart + correctanswer. sen leaderboard + knappar (första vyn har bara en knapp för att gå till vy 2)
+      // jag kan väl styra detta helt interna i state i denna komponent. och ha en condiftion på return i render här bara.
+      // precis här innne i isAnswersCollected så kollar jag state.view === 'answerchart' || 'answerleaderboard'
+      if (view === 'leaderboard') {
+        const winnerKeys = getWinners(leaderboardData);
+        const winners = this.getPlayers(winnerKeys);
+        if (isLastQuestion) {
+          this.playWinningSong(winners);
+        }
+        return (
+          <div className="phase-container">
+            <div className="quiz-top-section">
+              <Typography className={classes.questionNumber}>{`Fråga ${game.minigame.currentq + 1} av ${game.minigame.questions}  `}</Typography>
+
+              {isLastQuestion ? (
+                <React.Fragment>
+                  <Typography className={classes.header}>Winner</Typography>
+                  <Divider />
+                  <PlayerList players={winners} />
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <Typography className={classes.header}>Leaderboard</Typography>
+                  <Divider />
+                </React.Fragment>
+              )
+            }
+            </div>
+            <div className="quiz-middle-section">
+              <div>
+                <Leaderboard leaderboardData={leaderboardData} />
+              </div>
+            </div>
+            <div className="quiz-bottom-section">
+              {!game.minigame.autoplay
+              && (
+              <div className={classes.actions}>
+                {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}
+                {!isLastQuestion && <Button onClick={this.nextQuestion} color="primary">Next question</Button>}
+                <Button onClick={gameFunc.restart} color="secondary">Restart quiz</Button>
+                <Button onClick={gameFunc.quit} color="secondary">Quit quiz</Button>
+                <Button onClick={gameFunc.end} color="secondary">End quiz</Button>
+              </div>
+              )
+            }
+            </div>
+          </div>
+        );
+      }
       return (
         <div className="phase-container">
           <div className="quiz-top-section">
+            <Typography className={classes.questionNumber}>{`Fråga ${game.minigame.currentq + 1} av ${game.minigame.questions}  `}</Typography>
             <Typography className={classes.pin}>{`Game PIN:${game.gameId} `}</Typography>
-            <CorrectAnswer answer={correctPlayers} />
+            <Typography className={classes.header}>Rätt svar</Typography>
+            <Divider />
+            <PlayerList players={correctPlayers} />
           </div>
           <div className="quiz-middle-section">
-            <Grid container>
-              <Grid item md={6} xs={12}>
-                <div>
-                  <AnswerChart game={game} />
-                </div>
-              </Grid>
-              <Grid item md={6} xs={12}>
-                <div>
-                  <Leaderboard leaderboardData={leaderboardData} />
-                </div>
-              </Grid>
-            </Grid>
-
+            <div>
+              <Typography className={classes.subheader}>Svarsfördelning</Typography>
+              <AnswerChart game={game} />
+            </div>
           </div>
           <div className="quiz-bottom-section">
-            <div className={classes.actions}>
-              {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}
-              {!isLastQuestion && <Button onClick={this.nextQuestion} color="primary">Next question</Button>}
-              <Button onClick={gameFunc.restart} color="secondary">Restart quiz</Button>
-              <Button onClick={gameFunc.quit} color="secondary">Quit quiz</Button>
-              <Button onClick={gameFunc.end} color="secondary">End quiz</Button>
-            </div>
+            {!game.minigame.autoplay
+              && (
+              <div className={classes.actions}>
+                <Button onClick={this.toggleView} color="primary">Next</Button>
+              </div>
+              )}
           </div>
         </div>
       );
@@ -212,13 +347,16 @@ class SpotifyResultQuestion extends Component {
           <span>Rättar svaren...</span>
         </div>
         <div className="quiz-bottom-section">
-          <div>
-            {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}
-            {!isLastQuestion && <Button onClick={this.nextQuestion} color="primary">Next question</Button>}
-            <Button onClick={gameFunc.restart} color="secondary">Restart quiz</Button>
-            <Button onClick={gameFunc.quit} color="secondary">Quit quiz</Button>
-            <Button onClick={gameFunc.end} color="secondary">End quiz</Button>
-          </div>
+          {!game.minigame.autoplay
+              && (
+              <div>
+                {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}
+                {!isLastQuestion && <Button onClick={this.nextQuestion} color="primary">Next question</Button>}
+                <Button onClick={gameFunc.restart} color="secondary">Restart quiz</Button>
+                <Button onClick={gameFunc.quit} color="secondary">Quit quiz</Button>
+                <Button onClick={gameFunc.end} color="secondary">End quiz</Button>
+              </div>
+              )}
         </div>
       </div>
     );
@@ -227,6 +365,7 @@ class SpotifyResultQuestion extends Component {
 SpotifyResultQuestion.propTypes = {
   gameFunc: PropTypes.object.isRequired,
   game: PropTypes.object.isRequired,
+  playlists: PropTypes.array.isRequired,
   nextQuestion: PropTypes.func.isRequired,
   question: PropTypes.object,
   tracks: PropTypes.array.isRequired,
