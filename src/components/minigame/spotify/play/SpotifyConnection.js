@@ -50,8 +50,6 @@ class SpotifyConnection extends Component {
       headers: myHeaders,
     };
 
-    // Make a call using the token
-
     const profileResponse = await fetch('https://api.spotify.com/v1/me', getHeader);
     const profileResult = await profileResponse.json();
 
@@ -104,7 +102,6 @@ class SpotifyConnection extends Component {
     this.setState({ selectedPlaylist });
   }
 
-
   render() {
     const { game, playerKey } = this.props;
     const {
@@ -128,10 +125,12 @@ class SpotifyConnection extends Component {
               <div className="quiz-top-section" />
               <div className="quiz-middle-section">
                 <Typography variant="h5">
-                  <span>Welcome </span>
+                  <span>Välkommen </span>
                   <span className="dynamic-text">{playerName}</span>
                 </Typography>
-                <Typography variant="subtitle1"> Watch the screen, your name should show.</Typography>
+                <Typography variant="subtitle1" style={{ marginTop: 15 }}>
+                  {'Ditt namn syns nu på spelskärmen. När spelet startar kommer frågor att presenteras och du svarar här på din enhet. Du kan välja ett eller flera svarsalternativ. Du får ett poäng för varje rätt svar och ett minus för varje felaktigt svar. Du kan inte få minuspoäng på en fråga.'}
+                </Typography>
               </div>
               <div className="quiz-bottom-section" />
             </div>

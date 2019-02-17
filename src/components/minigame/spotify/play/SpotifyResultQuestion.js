@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
 import PropTypes from 'prop-types';
-// import AnswerOption from '../AnswerOption';
-// import AnswerChart from '../AnswerChart';
-// import Leaderboard from '../Leaderboard';
 
 class SpotifyResultQuestion extends Component {
   constructor(props) {
@@ -21,7 +18,7 @@ class SpotifyResultQuestion extends Component {
         <div className="quiz-top-section" />
         <div className="quiz-middle-section" />
         <div className="quiz-bottom-section">
-          <Typography variant="subtitle1">Look at the screen to se overall player results</Typography>
+          <Typography variant="subtitle1">Kolla på spelskrämen för att se ställningen</Typography>
         </div>
       </div>
     );

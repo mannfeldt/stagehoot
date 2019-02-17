@@ -61,7 +61,7 @@ function SpotifyPlayListSelector(props) {
           {slimPlaylists.map(playlist => (
             <Grid item md={4} xs={12} key={playlist.id}>
               <ListItem button onClick={() => setSelection(playlist.id)} className={classes.listitem}>
-                <img src={playlist.img.url} alt={playlist.name} className={classes.img} />
+                <img src={playlist.img.url} alt={playlist.name} className={classes.img} onError={(e) => { e.target.onerror = null; e.target.src = MISSING_ALBUM_COVER; }} />
                 <ListItemText
                   classes={{ primary: classes.primary }}
                   primary={playlist.name}

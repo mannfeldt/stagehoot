@@ -81,6 +81,7 @@ class AnswerChart extends Component {
           },
           display: true,
           beginAtZero: true,
+          maxBarThickness: 3,
         }],
         xAxes: [{
           display: true,
@@ -94,6 +95,7 @@ class AnswerChart extends Component {
               if (Math.floor(label) === label) {
                 return label;
               }
+              return null;
             },
           },
         }],

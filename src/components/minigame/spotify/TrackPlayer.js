@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import SpotifyTimer from './SpotifyTimer';
 import {
   SPOTIFY_GREEN,
+  MISSING_ALBUM_COVER,
 } from './SpotifyConstants';
 
 // kan användas för lite coolare shadows. tillsammans med en radio på 200px
@@ -78,7 +79,7 @@ function TrackPlayer(props) {
   return (
     <div className={classes.container}>
       <Typography className={classes.header}>{text}</Typography>
-      <img src={track.img} alt="cover art" className={classes.img} />
+      <img src={track.img} alt="cover art" className={classes.img} onError={(e) => { e.target.onerror = null; e.target.src = MISSING_ALBUM_COVER; }} />
       <div className={classes.footer}>
         <Typography className={classes.primaryText}>{track.name}</Typography>
         <Typography className={classes.secondaryText}>{track.artists}</Typography>

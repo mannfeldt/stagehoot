@@ -33,6 +33,9 @@ const styles = theme => ({
   playerText: {
     marginLeft: 15,
   },
+  faded: {
+    opacity: 0.7,
+  },
 });
 
 function getLeaderboardScore(data) {
@@ -138,7 +141,7 @@ class Leaderboard extends Component {
             <TableBody>
               {leaderboard.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((data, index) => (
                 <TableRow key={data.key}>
-                  <TableCell padding="dense" style={{ width: 40 }}>{index + 1}</TableCell>
+                  <TableCell padding="dense" className={classes.faded} style={{ width: 40 }}>{index + 1}</TableCell>
                   <TableCell padding="dense" style={{ width: 80 }}>
                     {!data.posChange && <RemoveIcon style={{ opacity: 0.7 }} />}
                     {data.posChange > 0 && <ArrowUpIcon style={{ color: SPOTIFY_GREEN }} />}
@@ -157,7 +160,7 @@ class Leaderboard extends Component {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell style={{ width: 100 }}>{data.totalScore}</TableCell>
+                  <TableCell align="right" className={classes.faded} style={{ width: 100 }}>{data.totalScore}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -11,6 +11,10 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Checkbox from '@material-ui/core/Checkbox';
 import Avatar from '@material-ui/core/Avatar';
 import PersonIcon from '@material-ui/icons/Person';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+
 import { fire } from '../../../../base';
 
 const styles = theme => ({
@@ -21,9 +25,7 @@ const styles = theme => ({
     overflow: 'hidden',
   },
   header: {
-    backgroundColor: '#282828',
     padding: 10,
-    marginBottom: 10,
   },
   itemtextDense: {
     paddingLeft: 2,
@@ -38,32 +40,44 @@ const styles = theme => ({
     height: '100vh',
     width: '100vw',
   },
+  headcontainer: {
+    backgroundColor: '#282828',
+    marginBottom: 10,
+  },
 });
 
 class SpotifyController extends Component {
   constructor(props) {
     super(props);
-    // sätt det här till rätt höjd. det ska vara windowheight - header - footer
-
     this.state = {
       answer: ['default'],
+      searchInput: '',
+      showSearch: false,
     };
     this.saveAnswer = this.saveAnswer.bind(this);
     this.toggleOption = this.toggleOption.bind(this);
+    this.toggleSearch = this.toggleSearch.bind(this);
   }
 
   componentDidMount() {
 
   }
 
-  // den körs automatiskt när tiden gått ut. finns ingen knapp för att skicka iväg svaren tidigare
-  // hur gör jag detta?
-  // componentWillUnmount()?
-  // jag måste hantera att alla svar inte finns på plats direkt när spotifyResultQuestion kör componentdidmount? lägg in en hård sleep eller så läser jag updates som kommer in där
-  // jag gör alla beräkningar på score i render() och jag sparar först score till firebase på nextphase
   componentWillUnmount() {
-    const { answer } = this.state;
     this.saveAnswer();
+  }
+
+  handleChange = name => (event) => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
+  toggleSearch = () => {
+    this.setState(state => ({
+      showSearch: !state.showSearch,
+      searchInput: '',
+    }));
   }
 
   toggleOption(playerKey) {
@@ -82,8 +96,6 @@ class SpotifyController extends Component {
   saveAnswer() {
     const { answer } = this.state;
     const { game, playerKey } = this.props;
-    // save answer to game.players[playerkey].answers
-    // eller till game.answers ? med ett extra attribut för playerkey. den känns bäst
     const answerObj = {
       answer,
       question: game.minigame.currentq,
@@ -94,32 +106,51 @@ class SpotifyController extends Component {
         alert(`error saving answer${error}`);
       }
     });
-    // call firebase here
   }
 
-  // man ska kunna swinga hela tiden men det är bara när player.state är 'STILL' som en boll rendreras och swingen kan sparas.
-  // lägg till en selectbox där man väljer klubba som står loftAngle.
-  // lägg till en snyggare powermätare. använd någon riktigt visuel mätare
   render() {
     const { classes, game } = this.props;
-    const { answer } = this.state;
+    const { answer, searchInput, showSearch } = this.state;
     const players = Object.values(game.players);
-    // skriv ut alla players med namn och avatar (fixa en default avatar till de som inte har någon)
-    // man ska kunna klicka på varje player så att den blir vald
-    // en multi select typ som matchas mot state.answer
-    // de som är med i answer ska stylas som att de är valda.
-
-    // ta bort checkboxen och ersätt med en conditional icon för om den är vald eller inte?
-    // den ikonen + bold text + någon border/color runt hela itemet?
-    // checkmetoden kollar om itemet finns i answer eller ej. tar bort / lägger till.
     const useDense = players.length > 11;
+    const filteredPlayers = players.filter(p => p.name.toLowerCase().includes(searchInput.toLowerCase()));
     return (
       <div className="phase-container">
         <div className={classes.container}>
-          <Typography className={classes.header} variant="subtitle1">Markera ditt svar</Typography>
+          <Grid
+            container
+            direction="row"
+            justify="space-between"
+            alignItems="center"
+            className={classes.headcontainer}
+          >
+            <Grid item>
+              <Typography className={classes.header} variant="subtitle1">Markera ditt svar</Typography>
+            </Grid>
+            <Grid item>
+              {showSearch ? (
+                <TextField
+                  value={searchInput}
+                  placeholder="Sök"
+                  onChange={this.handleChange('searchInput')}
+                />
+              ) : (
+                <IconButton
+                  key="close"
+                  aria-label="Close"
+                  color="inherit"
+                  className={classes.close}
+                  onClick={this.toggleSearch}
+                >
+                  <SearchIcon className={classes.icon} />
+                </IconButton>
+              )
+        }
+            </Grid>
+          </Grid>
           <List dense={useDense} className={classes.root}>
             <Grid container>
-              {players.map(player => (
+              {filteredPlayers.map(player => (
                 <Grid key={player.key} item md={4} xs={useDense ? 6 : 12}>
                   <ListItem button onClick={() => this.toggleOption(player.key)} className={classes.listitem}>
                     <ListItemAvatar>

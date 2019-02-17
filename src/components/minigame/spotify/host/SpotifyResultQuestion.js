@@ -21,13 +21,6 @@ function getWinners(leaderboardData) {
 }
 
 const styles = theme => ({
-  pin: {
-    position: 'absolute',
-    right: 0,
-    marginRight: 15,
-    fontSize: 16,
-
-  },
   actions: {
     position: 'absolute',
     bottom: 15,
@@ -53,13 +46,6 @@ const styles = theme => ({
     paddingRight: 2,
     overflow: 'hidden',
   },
-  questionNumber: {
-    position: 'absolute',
-    top: 30,
-    fontSize: 16,
-    fontWeight: 300,
-    left: 30,
-  },
   listitem: {
     paddingLeft: 12,
     paddingRight: 38,
@@ -67,6 +53,9 @@ const styles = theme => ({
   container: {
     height: '100vh',
     width: '100vw',
+  },
+  headcontainer: {
+    padding: 15,
   },
 });
 class SpotifyResultQuestion extends Component {
@@ -257,47 +246,55 @@ class SpotifyResultQuestion extends Component {
       game, gameFunc, classes, question,
     } = this.props;
     const { view } = this.state;
-    const isAnswersCollected = this.answersCollected();
+    // const isAnswersCollected = this.answersCollected();
     const isLastQuestion = game.minigame.currentq + 1 >= game.minigame.questions;
-    if (true) {
-      const correctAnswer = this.getCorrectAnswer();
-      const leaderboardData = this.getLeaderboardData(correctAnswer);
-      const correctPlayers = this.getPlayers(correctAnswer);
-      // delas upp i två vyer: först answerchart + correctanswer. sen leaderboard + knappar (första vyn har bara en knapp för att gå till vy 2)
-      // jag kan väl styra detta helt interna i state i denna komponent. och ha en condiftion på return i render här bara.
-      // precis här innne i isAnswersCollected så kollar jag state.view === 'answerchart' || 'answerleaderboard'
-      if (view === 'leaderboard') {
-        const winnerKeys = getWinners(leaderboardData);
-        const winners = this.getPlayers(winnerKeys);
-        if (isLastQuestion) {
-          this.playWinningSong(winners);
-        }
-        return (
-          <div className="phase-container">
-            <div className="quiz-top-section">
-              <Typography className={classes.questionNumber}>{`Fråga ${game.minigame.currentq + 1} av ${game.minigame.questions}  `}</Typography>
-
-              {isLastQuestion ? (
-                <React.Fragment>
+    const correctAnswer = this.getCorrectAnswer();
+    const leaderboardData = this.getLeaderboardData(correctAnswer);
+    const correctPlayers = this.getPlayers(correctAnswer);
+    // delas upp i två vyer: först answerchart + correctanswer. sen leaderboard + knappar (första vyn har bara en knapp för att gå till vy 2)
+    // jag kan väl styra detta helt interna i state i denna komponent. och ha en condiftion på return i render här bara.
+    // precis här innne i isAnswersCollected så kollar jag state.view === 'answerchart' || 'answerleaderboard'
+    if (view === 'leaderboard') {
+      const winnerKeys = getWinners(leaderboardData);
+      const winners = this.getPlayers(winnerKeys);
+      if (isLastQuestion) {
+        this.playWinningSong(winners);
+      }
+      return (
+        <div className="phase-container">
+          <div className="quiz-top-section">
+            <Grid
+              container
+              direction="row"
+              justify="space-between"
+              alignItems="center"
+              className={classes.headcontainer}
+            >
+              <Grid item>
+                <Typography className={classes.subheader}>{`Fråga ${game.minigame.currentq + 1} av ${game.minigame.questions}  `}</Typography>
+              </Grid>
+              <Grid item>
+                {isLastQuestion ? (
                   <Typography className={classes.header}>Winner</Typography>
-                  <Divider />
-                  <PlayerList players={winners} />
-                </React.Fragment>
-              ) : (
-                <React.Fragment>
+                ) : (
                   <Typography className={classes.header}>Leaderboard</Typography>
-                  <Divider />
-                </React.Fragment>
-              )
-            }
+                )
+              }
+              </Grid>
+              <Grid item>
+                <Typography className={classes.subheader}>{`${game.gameId}`}</Typography>
+              </Grid>
+            </Grid>
+            <Divider />
+            {isLastQuestion && <PlayerList players={winners} />}
+          </div>
+          <div className="quiz-middle-section">
+            <div>
+              <Leaderboard leaderboardData={leaderboardData} />
             </div>
-            <div className="quiz-middle-section">
-              <div>
-                <Leaderboard leaderboardData={leaderboardData} />
-              </div>
-            </div>
-            <div className="quiz-bottom-section">
-              {!game.minigame.autoplay
+          </div>
+          <div className="quiz-bottom-section">
+            {!game.minigame.autoplay
               && (
               <div className={classes.actions}>
                 {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}
@@ -308,32 +305,6 @@ class SpotifyResultQuestion extends Component {
               </div>
               )
             }
-            </div>
-          </div>
-        );
-      }
-      return (
-        <div className="phase-container">
-          <div className="quiz-top-section">
-            <Typography className={classes.questionNumber}>{`Fråga ${game.minigame.currentq + 1} av ${game.minigame.questions}  `}</Typography>
-            <Typography className={classes.pin}>{`Game PIN:${game.gameId} `}</Typography>
-            <Typography className={classes.header}>Rätt svar</Typography>
-            <Divider />
-            <PlayerList players={correctPlayers} />
-          </div>
-          <div className="quiz-middle-section">
-            <div>
-              <Typography className={classes.subheader}>Svarsfördelning</Typography>
-              <AnswerChart game={game} />
-            </div>
-          </div>
-          <div className="quiz-bottom-section">
-            {!game.minigame.autoplay
-              && (
-              <div className={classes.actions}>
-                <Button onClick={this.toggleView} color="primary">Next</Button>
-              </div>
-              )}
           </div>
         </div>
       );
@@ -341,20 +312,37 @@ class SpotifyResultQuestion extends Component {
     return (
       <div className="phase-container">
         <div className="quiz-top-section">
-          <Typography className={classes.pin}>{`Game PIN:${game.gameId} `}</Typography>
+          <Grid
+            container
+            direction="row"
+            justify="space-between"
+            alignItems="center"
+            className={classes.headcontainer}
+          >
+            <Grid item>
+              <Typography className={classes.subheader}>{`Fråga ${game.minigame.currentq + 1} av ${game.minigame.questions}  `}</Typography>
+            </Grid>
+            <Grid item>
+              <Typography className={classes.header}>Rätt svar</Typography>
+            </Grid>
+            <Grid item>
+              <Typography className={classes.subheader}>{`${game.gameId}`}</Typography>
+            </Grid>
+          </Grid>
+          <Divider />
+          <PlayerList players={correctPlayers} />
         </div>
         <div className="quiz-middle-section">
-          <span>Rättar svaren...</span>
+          <div>
+            <Typography className={classes.subheader}>Svarsfördelning</Typography>
+            <AnswerChart game={game} />
+          </div>
         </div>
         <div className="quiz-bottom-section">
           {!game.minigame.autoplay
               && (
-              <div>
-                {isLastQuestion && <Button onClick={this.finalizeQuiz} color="primary">Finalize result</Button>}
-                {!isLastQuestion && <Button onClick={this.nextQuestion} color="primary">Next question</Button>}
-                <Button onClick={gameFunc.restart} color="secondary">Restart quiz</Button>
-                <Button onClick={gameFunc.quit} color="secondary">Quit quiz</Button>
-                <Button onClick={gameFunc.end} color="secondary">End quiz</Button>
+              <div className={classes.actions}>
+                <Button onClick={this.toggleView} color="primary">Next</Button>
               </div>
               )}
         </div>
