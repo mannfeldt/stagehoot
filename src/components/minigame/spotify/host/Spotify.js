@@ -5,6 +5,7 @@ import SpotifyResultQuestion from './SpotifyResultQuestion';
 import SpotifyProgressbar from '../SpotifyProgressbar';
 import TrackPlayer from '../TrackPlayer';
 import * as util from '../SpotifyUtil';
+import * as SpotifyWS from '../SpotifyServiceInterface';
 import {
   AUTH_EXPIRE_MS,
   MISSING_ALBUM_COVER,
@@ -13,10 +14,37 @@ import {
   SPOTIFY_AUTH_SCOPES,
 } from '../SpotifyConstants';
 
+
+function testAudio(tracks) {
+  console.table(tracks);
+  let i = 0;
+  const audio = new Audio(tracks[i].audio);
+  audio.onerror = (e) => {
+    console.log(`error on track:${i}`);
+    console.log(e);
+    i += 1;
+    if (i < tracks.length) {
+      audio.src = tracks[i].audio;
+      audio.play();
+    }
+  };
+  audio.oncanplay = () => {
+    i += 1;
+    if (i < tracks.length) {
+      audio.pause();
+      audio.src = tracks[i].audio;
+      audio.play();
+    } else {
+      console.log(`done testing tracks:${i}`);
+    }
+  };
+  audio.play();
+}
+
 class Spotify extends Component {
   constructor(props) {
     super(props);
-
+    const nrOfPlayers = Object.values(props.game.players).length;
     this.state = {
       spotifytoken: localStorage.getItem('spotifytoken') || '',
       tokentimestamp: localStorage.getItem('spotifytoken_timestamp') || '',
@@ -25,19 +53,22 @@ class Spotify extends Component {
       questionTracks: [],
       questions: [],
       usedQuestions: [],
-      topArtistTracks: [],
+      topArtists: [],
       questionPlaying: false,
       progress: 0,
       progressText: '',
       songCurrentTime: 0,
       counter: 0,
-      songDuration: 30,
+      songDuration: nrOfPlayers < 10 ? 20 : 30,
     };
 
     this.nextPhase = this.nextPhase.bind(this);
     this.playQuestion = this.playQuestion.bind(this);
     this.saveGame = this.saveGame.bind(this);
     this.nextQuestion = this.nextQuestion.bind(this);
+    this.getArtistTopTrack = this.getArtistTopTrack.bind(this);
+    this.initQuiz = this.initQuiz.bind(this);
+    this.setProgress = this.setProgress.bind(this);
   }
 
 
@@ -54,43 +85,18 @@ class Spotify extends Component {
       window.location = `${authEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&scope=${SPOTIFY_AUTH_SCOPES.join('%20')}&response_type=token&show_dialog=true`;
     }
 
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${spotifytoken}`);
-    const getHeader = {
-      method: 'GET',
-      headers: myHeaders,
-    };
     const playerArray = Object.values(game.players);
     const maxQuestionsPerList = Math.ceil((game.minigame.questions) / playerArray.length);
-    const playerProgressRatio = 100 / playerArray.length;
-    // Get an Artist's Top Tracks. om minigame.qArtists är satt så ska ett till state objekt skapas. topArtists [{artist: 'kanye', img: 'url', song: 'prewview_url'}]
+    const playerProgressRatio = 80 / playerArray.length;
 
     for (let i = 0; i < playerArray.length; i++) {
       const player = playerArray[i];
-      this.setState(() => ({
-        progressText: `Läser spellista för ${player.name}`,
-      }));
-      let hasNext = true;
-      let offset = 0;
-      const playlistTracks = [];
-      while (hasNext) {
-        // from_token ska kunna hämta flera previewUrls. kanske lösa problem med låtar som får 404?
-        // &market=from_token
-        const playlistResponse = await fetch(`https://api.spotify.com/v1/playlists/${player.playlist}/tracks?offset=${offset}&market=from_token`, getHeader);
-        const playlistResult = await playlistResponse.json();
-        playlistTracks.push(...playlistResult.items);
-        if (playlistResult.items.length < 100) {
-          hasNext = false;
-        } else {
-          offset += 100;
-        }
-      }
-      this.setState(state => ({
-        progress: state.progress + playerProgressRatio / 2,
-      }));
+      this.setProgress(0, true, `Läser spellista för ${player.name}`);
+      const playlistTracks = await SpotifyWS.getPlaylistTracks(player.playlist, spotifytoken);
+      this.setProgress(playerProgressRatio / 2, true);
 
       const validTracks = util.getValidTracks(playlistTracks);
-      const tracksTmp = validTracks.map((t) => {
+      const minifiedTracks = validTracks.map((t) => {
         const track = {
           name: t.track.name,
           audio: t.track.preview_url,
@@ -108,34 +114,23 @@ class Spotify extends Component {
       const playlist = {
         playerKey: player.key,
         playerName: player.name,
-        totalTracks: tracksTmp.length,
+        totalTracks: minifiedTracks.length,
       };
-
-
+      // genre och artist kan vara bakvänt..
       // vill inte göra anrop i onödan om inte qtyp finns för den typen av fråga
-      let topArtistTrack = {};
+      // get artist toptracks kanske behöver ett filter på tracks som har preview_url?
+      // error on track audio:[object Object] på spellistan yaaaaaas postmalone sunflower tror jag. lösningen är att den låten inte ska kunna spelas upp alls?
+      // testa min validering som jag testat innan. behöver ha någon form av validering när frågorna genereras så att allt ljud fungerar..?
+
+
       if (game.minigame.qArtist || game.minigame.qGenre) {
-        const artistsIds = playlistTracks.map(t => t.track.artists.map(a => a.id).join(',')).join(',').split(',');
+        const artistsIds = validTracks.map(t => t.track.artists.map(a => a.id).join(',')).join(',').split(',');
         const artistIdsFrequencyMap = util.getIdFrequencyMap(artistsIds);
         const uniqArtistIds = Object.keys(artistIdsFrequencyMap);
-        const chunks = [];
-        const size = 50;
 
-        while (uniqArtistIds.length > 0) {
-          chunks.push(uniqArtistIds.splice(0, size));
-        }
-
-        const playlistArtists = [];
-        for (const ids of chunks) {
-          const inputids = ids.join(',');
-          const artistsResponse = await fetch(`https://api.spotify.com/v1/artists?ids=${inputids}`, getHeader);
-          const result = await artistsResponse.json();
-          playlistArtists.push(...result.artists);
-        }
-
+        const playlistArtists = await SpotifyWS.getArtists(uniqArtistIds, spotifytoken);
         const playlistGenres = [];
         playlistArtists.forEach((artist) => {
-          // optimerat så att jag bara använder api på de unika artisterna och sen räknar jag på frekvensen efteråt igen
           const frequency = artistIdsFrequencyMap[artist.id];
           for (let k = 0; k < frequency; k++) {
             playlistGenres.push(...artist.genres);
@@ -144,97 +139,56 @@ class Spotify extends Component {
         playlist.genres = util.getGenresFrequencyMap(playlistGenres, playlist.totalTracks);
 
         if (game.minigame.qArtist) {
-          playlist.artists = util.getArtistFrequencyMap(tracksTmp);
-          const topArtistName = Object.keys(playlist.artists).reduce((a, b) => (playlist.artists[a] > playlist.artists[b] ? a : b));
+          playlist.artists = util.getArtistFrequencyMap(minifiedTracks);
+          const topArtistName = Object.keys(playlist.artists).reduce((a, b) => ((playlist.artists[a] > playlist.artists[b]) && (minifiedTracks.find(x => x.artists.includes(a) && x.audio)) ? a : b));
           const topArtistRaw = playlistArtists.find(a => a.name === topArtistName);
-          const topTracksResponse = await fetch(`https://api.spotify.com/v1/artists/${topArtistRaw.id}/top-tracks?market=from_token`, getHeader);
-          const topTracksResult = await topTracksResponse.json();
-
-          topArtistTrack = {
-            name: topTracksResult.tracks[0].name,
-            topArtistName: topArtistRaw.name,
+          playlist.topArtist = {
+            id: topArtistRaw.id,
+            name: topArtistRaw.name,
             img: topArtistRaw.images.length > 0 ? topArtistRaw.images[0].url : MISSING_ALBUM_COVER,
-            audio: topTracksResult.tracks[0].preview_url,
-            artists: topTracksResult.tracks[0].artists.map(a => a.name).join(', '),
           };
         }
       }
 
       if (game.minigame.qFeatures) {
-        playlist.popularity = util.getAvaragePopularity(tracksTmp);
+        playlist.popularity = util.getAvaragePopularity(minifiedTracks);
 
-        const tracksIds = tracksTmp.map(t => t.id);
-        const chunks = [];
-        const size = 100;
-
-        while (tracksIds.length > 0) { chunks.push(tracksIds.splice(0, size)); }
-
-        const trackFeatures = [];
-        for (const ids of chunks) {
-          const inputids = ids.join(',');
-          const artistsResponse = await fetch(`https://api.spotify.com/v1/audio-features?ids=${inputids}`, getHeader);
-          const result = await artistsResponse.json();
-          trackFeatures.push(...result.audio_features);
-        }
+        const tracksIds = minifiedTracks.map(t => t.id);
+        const trackFeatures = await SpotifyWS.getTrackFeatures(tracksIds, spotifytoken);
 
         playlist.danceability = trackFeatures.reduce((acc, curr) => acc + curr.danceability, 0) / trackFeatures.length;
         playlist.energy = trackFeatures.reduce((acc, curr) => acc + curr.energy, 0) / trackFeatures.length;
         playlist.tempo = trackFeatures.reduce((acc, curr) => acc + curr.tempo, 0) / trackFeatures.length;
         playlist.valence = trackFeatures.reduce((acc, curr) => acc + curr.valence, 0) / trackFeatures.length;
       }
+      this.setProgress(playerProgressRatio / 2, true);
+
       this.setState(state => ({
         playlists: [...state.playlists, playlist],
-        tracks: [...state.tracks, ...tracksTmp],
-        topArtistTracks: [...state.topArtistTracks, topArtistTrack],
-        progress: state.progress + playerProgressRatio / 2,
+        tracks: [...state.tracks, ...minifiedTracks],
       }), () => {
         if (i + 1 === playerArray.length) {
-          const { playlists, tracks, topArtistTracks } = this.state;
-          const filteredQuestionTracks = [];
-          const questionTracksIds = [];
+          this.setProgress(85, false, 'Genererar frågor');
+          const { playlists, tracks } = this.state;
           const questionTracks = util.getQuestionTracks(tracks);
-          playlists.forEach((p) => {
-            const playerQuestionTracks = questionTracks.filter(x => x.playerKey === p.playerKey && !questionTracksIds.includes(x.id));
-            playerQuestionTracks.sort(() => Math.random() - 0.5);
-            let uniqAlbumTracks = playerQuestionTracks.filter((x, index) => index === playerQuestionTracks.findIndex(y => y.img === x.img && y.playerKey === x.playerKey));
-            if (uniqAlbumTracks.length > maxQuestionsPerList) {
-              uniqAlbumTracks.length = maxQuestionsPerList;
-            } else {
-              uniqAlbumTracks = playerQuestionTracks.filter((x, index) => index === playerQuestionTracks.findIndex(y => y.img === x.img && y.playerKey === x.playerKey && y.artists === x.artists));
-              if (uniqAlbumTracks.length > maxQuestionsPerList) {
-                uniqAlbumTracks.length = maxQuestionsPerList;
-              }
-            }
-            questionTracksIds.push(...uniqAlbumTracks.map(x => x.id));
-            filteredQuestionTracks.push(...uniqAlbumTracks);
-          });
+          // testAudio(questionTracks);
 
-          const questionsTmp = util.generateQuestions(playlists, filteredQuestionTracks, topArtistTracks, game.minigame);
-          questionsTmp.sort(() => Math.random() - 0.5);
-          if (questionsTmp.length > game.minigame.questions) {
-            questionsTmp.length = game.minigame.questions;
+          const filteredQuestionTracks = util.filterQuestionTracks(playlists, questionTracks, maxQuestionsPerList);
+
+          const generatedQuestions = util.generateQuestions(playlists, filteredQuestionTracks, game.minigame);
+          generatedQuestions.sort(() => Math.random() - 0.5);
+          if (generatedQuestions.length > game.minigame.questions) {
+            generatedQuestions.length = game.minigame.questions;
           }
-          // track_owner tenderar att läggas först. kanske kan byta taktik till att lägga ett visst antal track-owner qs först
-          questionsTmp.sort((a, b) => (b.qtype === 'track_owner') - (a.qtype === 'track_owner'));
 
-          const questionsFirst = questionsTmp.splice(0, Math.min(3, questionsTmp.length - 1));
-          const questionsSecond = questionsTmp.splice(0, questionsTmp.length);
-          questionsSecond.sort((a, b) => {
-            if (a.qtype === 'track_owner' && b.qtype !== 'track_owner') {
-              return Math.random() - 0.6;
-            }
-            if (a.qtype !== 'track_owner' && b.qtype === 'track_owner') {
-              return Math.random() - 0.4;
-            }
-            return Math.random() - 0.5;
-          });
-          const finalQuestions = questionsFirst.concat(questionsSecond);
+          const sortedQuestions = util.sortQuestions(generatedQuestions);
 
+          this.setProgress(90, false);
 
           this.setState(() => {
-            console.table(finalQuestions);
+            console.table(sortedQuestions);
             return ({
-              questions: finalQuestions,
+              questions: sortedQuestions,
             });
           }, () => {
             const { questions } = this.state;
@@ -243,10 +197,9 @@ class Spotify extends Component {
               this.saveGame(game);
             }
             const t1 = performance.now();
-            console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
-            if (game.phase === 'gameplay') {
-              this.playQuestion();
-            }
+            console.log(`componentDidMount took ${t1 - t0} milliseconds.`);
+
+            this.initQuiz();
           });
         }
       });
@@ -259,6 +212,45 @@ class Spotify extends Component {
     return true;
   }
 
+  async getArtistTopTrack(question) {
+    const { spotifytoken } = this.state;
+    const topTracks = await SpotifyWS.getArtistTopTracks(question.artistId, spotifytoken);
+
+    const trackIndex = Math.floor(Math.random() * Math.min(10, topTracks.length));
+    const track = {
+      img: question.img,
+      audio: topTracks[trackIndex].preview_url,
+    };
+    return track;
+  }
+
+  async getGenreTopTrack(question) {
+    const { spotifytoken } = this.state;
+    const topTracks = await SpotifyWS.getGenreTopTracks(question.genre, spotifytoken);
+
+    const usableTracks = topTracks.items.filter(x => x.preview_url);
+    const trackIndex = Math.floor(Math.random() * Math.min(10, usableTracks.length));
+    const selectedTrack = usableTracks[trackIndex];
+    const track = {
+      name: selectedTrack.name,
+      img: selectedTrack.album.images.length > 0 ? selectedTrack.album.images[0].url : MISSING_ALBUM_COVER,
+      audio: selectedTrack.preview_url,
+      artists: selectedTrack.artists.map(a => a.name).join(', '),
+    };
+    return track;
+  }
+
+  setProgress(progress, incremental, progressText) {
+    this.setState(state => ({
+      progress: incremental ? state.progress + progress : progress,
+      progressText: progressText || state.progressText,
+    }));
+  }
+
+  handleChangeSelect = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
 
   handleChange = name => (event) => {
     this.setState({
@@ -266,17 +258,49 @@ class Spotify extends Component {
     });
   };
 
-
-  handleChangeSelect = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
-  };
+  async initQuiz() {
+    const { questions, tracks } = this.state;
+    const { game } = this.props;
+    const t0 = performance.now();
+    const finalQuestions = [...questions];
+    // add questiondata from spotify API to just the questions that will be used
+    for (let i = 0, len = finalQuestions.length; i < len; i++) {
+      const question = finalQuestions[i];
+      switch (question.qtype) {
+        case 'artist':
+          question.track = await this.getArtistTopTrack(question);
+          if (!question.track.audio) {
+            const sampleTrack = tracks.find(x => x.artists.includes(question.artist) && x.audio);
+            if (sampleTrack) {
+              question.track.audio = sampleTrack.audio;
+            }
+          }
+          break;
+        case 'genre':
+          question.track = await this.getGenreTopTrack(question);
+          break;
+        default:
+          break;
+      }
+    }
+    this.setProgress(100, false);
+    this.setState(() => ({
+      questions: finalQuestions,
+    }), () => {
+      if (game.phase === 'gameplay') {
+        const t1 = performance.now();
+        console.log(`initQuiz took ${t1 - t0} milliseconds.`);
+        this.playQuestion();
+      }
+    });
+  }
 
   nextQuestion() {
     this.playQuestion();
   }
 
   playQuestion() {
-    const { questions, tracks } = this.state;
+    const { questions, tracks, songDuration } = this.state;
     const { game } = this.props;
     const currentQuestion = questions[game.minigame.currentq];
     this.setState({ questionPlaying: true });
@@ -286,24 +310,24 @@ class Spotify extends Component {
         console.log(`error on track audio:${currentQuestion.track}`);
         setTimeout(this.nextPhase(), 15000);
       };
-      audio.volume = 0.1;
+      audio.volume = 0;
       audio.play();
-      audio.onended = () => {
-        this.nextPhase();
-      };
-      audio.canplay = () => {
-        this.setState(() => ({
-          songDuration: audio.duration,
-        }));
-      };
+      // audio.onended = () => {
+      //   this.nextPhase();
+      // };
       // fade in and out
       audio.ontimeupdate = () => {
-        const left = audio.duration - audio.currentTime;
+        const left = (songDuration || audio.duration) - audio.currentTime;
+        if (left <= 0) {
+          audio.pause();
+          this.nextPhase();
+          return;
+        }
         const fadeout = left <= SONG_VOLUME_FADE_TIME;
         if (fadeout) {
           audio.volume = left / SONG_VOLUME_FADE_TIME;
         } else if (audio.volume < 1) {
-          audio.volume = Math.min(1, audio.volume + 0.2);
+          audio.volume = Math.min(1, audio.volume + 0.1);
         }
         this.setState(() => ({
           songCurrentTime: audio.currentTime,
@@ -312,17 +336,6 @@ class Spotify extends Component {
     } else {
       let counter = currentQuestion.time * 10;
       const i = setInterval(() => {
-        /*
-        Funktion för att avsluta om alla svar är inne
-        let answersCollected = 0;
-        for (let i = 0; i < playerKeys.length; i++) {
-          if (that.props.game.players[playerKeys[i]].answers && that.props.game.players[playerKeys[i]].answers[question.id]) {
-            answersCollected++;
-          }
-        }
-        if(answersCollected === playerKeys.lengt)
-        */
-
         counter -= 1;
         this.setState(() => ({
           counter,
@@ -333,12 +346,6 @@ class Spotify extends Component {
           }
         });
       }, 100);
-      // om det inte finns en track som ska spelas och styra när frågan är klar så skapas en timer
-      // alt skapa ett interval som räknas ner sekundrar och använd det till att visa en progress likt den i trackPlayer. kolla på quiz
-      // testa igenom hela flödet
-      // fixa till jest testfall
-      // testa massa olika testfall för olika scenarion för frågor quiz playlists tracks etc
-      // denna fungerar inte
     }
   }
 
@@ -387,6 +394,7 @@ class Spotify extends Component {
     switch (question.qtype) {
       case 'track_owner':
       case 'artist':
+      case 'genre':
         return (
           <div>
             <TrackPlayer text={question.text} track={{ ...question.track, currentTime: songCurrentTime, duration: songDuration }} />
@@ -398,7 +406,6 @@ class Spotify extends Component {
       case 'valence':
       case 'danceability':
       case 'totalTracks':
-      case 'genre':
         return (
           <div>
             <TrackPlayer text={question.text} track={{ img: MISSING_ALBUM_COVER, currentTime: progressTime, duration: question.time }} />

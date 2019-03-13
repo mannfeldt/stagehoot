@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import PropTypes from 'prop-types';
 import {
-  SPOTIFY_GREEN,
+  SPOTIFY_GREEN, SPOTIFY_GRAY,
 } from './SpotifyConstants';
 
 const MAX_PLAYERS = 30;
@@ -14,6 +15,7 @@ function getRawData(game) {
   const answerPopulation = players.map((p) => {
     const popularity = {
       name: p.name,
+      playerKey: p.key,
       nr: currentAnswers.reduce((init, curr) => init + (curr.answer && curr.answer.includes(p.key) ? 1 : 0), 0),
     };
     return popularity;
@@ -32,7 +34,7 @@ class AnswerChart extends Component {
   }
 
   getChartData() {
-    const { game } = this.props;
+    const { game, correctAnswer } = this.props;
 
     const chartData = {
       labels: [],
@@ -49,7 +51,8 @@ class AnswerChart extends Component {
     for (let i = 0; i < maxIndex; i++) {
       chartData.labels.push(answerPopulation[i].name);
       chartData.datasets[0].data.push(answerPopulation[i].nr);
-      chartData.datasets[0].backgroundColor.push(SPOTIFY_GREEN);
+      const lineColor = correctAnswer.includes(answerPopulation[i].playerKey) ? SPOTIFY_GREEN : SPOTIFY_GRAY;
+      chartData.datasets[0].backgroundColor.push(lineColor);
     }
 
     return chartData;
@@ -131,5 +134,8 @@ class AnswerChart extends Component {
     );
   }
 }
-
+AnswerChart.propTypes = {
+  game: PropTypes.object.isRequired,
+  correctAnswer: PropTypes.array.isRequired,
+};
 export default AnswerChart;

@@ -5,9 +5,11 @@ export const MIN_SONGS_PLAYLIST = 10;
 export const SONG_VOLUME_FADE_TIME = 3;
 export const SPOTIFY_GREEN = '#1DB954';
 export const SPOTIFY_BLACK = '#191414';
+export const SPOTIFY_GRAY = '#b3b3b3';
 export const SPOTIFY_WHITE = '#fff';
 export const SPOTIFY_AUTH_SCOPES = [
   'user-top-read',
+  'user-read-private',
   'playlist-read-private',
   'playlist-read-collaborative',
 ];

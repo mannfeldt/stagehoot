@@ -18,7 +18,6 @@ export function getQuestionTracks(tracks) {
   return uniqTracks;
 }
 
-// SKRIV TESTFALL TILL ALLA METODER HÄR
 export function getAvaragePopularity(tracks) {
   const popularity = tracks.reduce((acc, cur) => acc + cur.popularity, 0) / tracks.length;
   return popularity;
@@ -33,6 +32,45 @@ export function getGenresFrequencyMap(genres, totalTracks) {
     result[`${genre}`] = result[`${genre}`] / totalTracks;
   });
   return result;
+}
+export function sortQuestions(questions) {
+  // track_owner tenderar att läggas först. kanske kan byta taktik till att lägga ett visst antal track-owner qs först
+  questions.sort((a, b) => (b.qtype === 'track_owner') - (a.qtype === 'track_owner'));
+
+  const questionsFirst = questions.splice(0, Math.min(3, questions.length - 1));
+  const questionsSecond = questions.splice(0, questions.length);
+  questionsSecond.sort((a, b) => {
+    if (a.qtype === 'track_owner' && b.qtype !== 'track_owner') {
+      return Math.random() - 0.6;
+    }
+    if (a.qtype !== 'track_owner' && b.qtype === 'track_owner') {
+      return Math.random() - 0.4;
+    }
+    return Math.random() - 0.5;
+  });
+
+  const finalQuestions = questionsFirst.concat(questionsSecond);
+  return finalQuestions;
+}
+export function filterQuestionTracks(playlists, questionTracks, maxQuestionsPerList) {
+  const filteredQuestionTracks = [];
+  const questionTracksIds = [];
+  playlists.forEach((p) => {
+    const playerQuestionTracks = questionTracks.filter(x => x.playerKey === p.playerKey && !questionTracksIds.includes(x.id));
+    playerQuestionTracks.sort(() => Math.random() - 0.5);
+    let uniqAlbumTracks = playerQuestionTracks.filter((x, index) => index === playerQuestionTracks.findIndex(y => y.img === x.img && y.playerKey === x.playerKey));
+    if (uniqAlbumTracks.length > maxQuestionsPerList) {
+      uniqAlbumTracks.length = maxQuestionsPerList;
+    } else {
+      uniqAlbumTracks = playerQuestionTracks.filter((x, index) => index === playerQuestionTracks.findIndex(y => y.img === x.img && y.playerKey === x.playerKey && y.artists === x.artists));
+      if (uniqAlbumTracks.length > maxQuestionsPerList) {
+        uniqAlbumTracks.length = maxQuestionsPerList;
+      }
+    }
+    questionTracksIds.push(...uniqAlbumTracks.map(x => x.id));
+    filteredQuestionTracks.push(...uniqAlbumTracks);
+  });
+  return filteredQuestionTracks;
 }
 
 export function getIdFrequencyMap(ids) {
@@ -66,7 +104,7 @@ export function getAvarageReleasedate(tracks) {
 }
 
 // TEST: testa att radion av alla olika quiztyper är rätt med lite olika size på tracks och playlists. och att qtype fungerar
-export function generateQuestions(playlists, tracks, topArtists, minigame) {
+export function generateQuestions(playlists, tracks, minigame) {
   // jag vet inte riktigt rätt svar när jag genererar då tracks som kommer in bara är en players tracks
   // så vilka som har en track i sin lista får jag kolla senare live.
 
@@ -76,19 +114,20 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
   const result = [];
 
   if (minigame.qFeatures) {
+    const time = playlists.length < 10 ? 10 : 15;
     result.push({
       qtype: 'popularity',
       atype: 'single',
       subtype: 'max',
       text: 'Vem har den trendigaste spellistan?',
-      time: 10,
+      time,
     });
     result.push({
       qtype: 'popularity',
       atype: 'single',
       subtype: 'min',
       text: 'Vem har den minst trendiga spellistan?',
-      time: 10,
+      time,
     });
 
     result.push({
@@ -96,7 +135,7 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
       atype: 'single',
       subtype: 'max',
       text: 'Vem har den dansvänligaste spellistan?',
-      time: 10,
+      time,
     });
 
     result.push({
@@ -104,7 +143,7 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
       atype: 'single',
       subtype: 'min',
       text: 'Vem har den minst dansvänliga spellistan?',
-      time: 10,
+      time,
     });
 
     result.push({
@@ -112,14 +151,14 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
       atype: 'single',
       subtype: 'max',
       text: 'Vems spellista har högst tempo?',
-      time: 10,
+      time,
     });
     result.push({
       qtype: 'tempo',
       atype: 'single',
       subtype: 'min',
       text: 'Vems spellista har lägst tempo?',
-      time: 10,
+      time,
     });
 
     result.push({
@@ -127,7 +166,7 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
       atype: 'single',
       subtype: 'max',
       text: 'Vem har den mest energifyllda spellistan?',
-      time: 10,
+      time,
     });
 
     result.push({
@@ -135,14 +174,14 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
       atype: 'single',
       subtype: 'max',
       text: 'Vem har den gladaste spellistan?',
-      time: 10,
+      time,
     });
     result.push({
       qtype: 'valence',
       atype: 'single',
       subtype: 'min',
       text: 'Vem har den dystraste spellistan?',
-      time: 10,
+      time,
     });
 
     // skapa två frågor
@@ -156,19 +195,21 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
     // size: max/min
   }
   if (minigame.qSize) {
+    const time = playlists.length < 10 ? 10 : 15;
+
     result.push({
       qtype: 'totalTracks',
       atype: 'single',
       subtype: 'min',
       text: 'Vem har kortast spellista?',
-      time: 10,
+      time,
     });
     result.push({
       qtype: 'totalTracks',
       atype: 'single',
       subtype: 'max',
       text: 'Vem har längst spellista?',
-      time: 10,
+      time,
     });
     // skapa två frågor vem har störst lista vem har minst lista
 
@@ -181,23 +222,22 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
     const artistQs = [];
 
     playlists.forEach((playlist) => {
-      const mostCommonArtist = Object.keys(playlist.artists).reduce((a, b) => (playlist.artists[a] > playlist.artists[b] ? a : b));
-      const topArtist = topArtists.find(a => a.topArtistName === mostCommonArtist);
       const question = {
         qtype: 'artist',
         subtype: 'max',
         atype: 'single',
-        artist: mostCommonArtist,
-        text: `Vem har flest låtar med ${mostCommonArtist}?`,
-        track: topArtist,
+        artist: playlist.topArtist.name,
+        text: `Vem har flest låtar med ${playlist.topArtist.name}?`,
+        img: playlist.topArtist.img,
+        artistId: playlist.topArtist.id,
       };
-      if (!artistQs.some(a => a.text === question.text)) {
+      if (!artistQs.some(a => a.artistId === question.artistId)) {
         artistQs.push(question);
       }
     });
     // ?
-    if (artistQs.length > tracks.length / 2) {
-      artistQs.length = Math.floor(tracks.length / 2);
+    if (artistQs.length > tracks.length) {
+      artistQs.length = Math.floor(tracks.length);
     }
     result.push(...artistQs);
 
@@ -212,14 +252,14 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
     // gör om det till andelar %av tracks som är en viss genre. alltså ge varje genre i playlist.grenres ett värde så att det totalt blir 1000?
     // ta de två vanligaste från varje player och lägg till fråga på dem om de inte redan finns med
     playlists.forEach((playlist) => {
-      const mostCommonGenre = Object.keys(playlist.genres).reduce((a, b) => (playlist.genres[a] > playlist.genres[b] ? a : b));
+      const mostCommonGenre = Object.keys(playlist.genres).reduce((a, b) => ((playlist.genres[a] > playlist.genres[b]) && a !== 'pop' ? a : b));
       const question = {
         qtype: 'genre',
         subtype: 'max',
         atype: 'single',
         genre: mostCommonGenre,
         text: `Vem har störst andel låtar i genren "${mostCommonGenre}"?`,
-        time: 15,
+        time: playlists.length < 10 ? 15 : 20,
       };
       if (!genreQs.some(a => a.text === question.text)) {
         genreQs.push(question);
@@ -231,7 +271,7 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
         atype: 'single',
         genre: secondMostCommonGenre,
         text: `Vem har störst andel låtar i genren "${mostCommonGenre}"?`,
-        time: 15,
+        time: playlists.length < 10 ? 15 : 20,
       };
       if (!genreQs.some(a => a.text === secondQuestion.text)) {
         genreQs.push(secondQuestion);
@@ -260,21 +300,21 @@ export function generateQuestions(playlists, tracks, topArtists, minigame) {
       return q;
     }));
   }
-  if (!minigame.qTrackOwner && result.length < minigame.questions) {
-    const trackowner = [];
-    tracks.sort(() => Math.random() - 0.5);
-    trackowner.push(...tracks.map((t) => {
-      const q = {
-        qtype: 'track_owner',
-        atype: 'multi',
-        track: t,
-        text: 'Vem har denna låt i sin spellista?',
-      };
-      return q;
-    }));
-    trackowner.length = Math.min(minigame.questions - result.length, trackowner.length);
-    result.push(...trackowner);
-  }
+  // if (!minigame.qTrackOwner && result.length < minigame.questions) {
+  //   const trackowner = [];
+  //   tracks.sort(() => Math.random() - 0.5);
+  //   trackowner.push(...tracks.map((t) => {
+  //     const q = {
+  //       qtype: 'track_owner',
+  //       atype: 'multi',
+  //       track: t,
+  //       text: 'Vem har denna låt i sin spellista?',
+  //     };
+  //     return q;
+  //   }));
+  //   trackowner.length = Math.min(minigame.questions - result.length, trackowner.length);
+  //   result.push(...trackowner);
+  // }
 
   console.table(result);
   return result;

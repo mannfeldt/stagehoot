@@ -9,24 +9,21 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import PersonIcon from '@material-ui/icons/Person';
+import Fade from '@material-ui/core/Fade';
 
 const styles = theme => ({
-  img: {
-    height: 64,
-  },
-  listitem: {
-
-  },
   primary: {
     fontSize: 16,
   },
   root: {
     backgroundColor: 'inherit',
   },
-  header: {
-    fontSize: 28,
-    padding: 15,
-    fontWeight: 400,
+  avatar: {
+    height: 120,
+    width: 120,
+  },
+  itemtext: {
+    fontSize: 30,
   },
 });
 function PlayerList(props) {
@@ -47,17 +44,20 @@ function PlayerList(props) {
         >
           {players.map(player => (
             <Grid key={player.key} item>
-              <ListItem className={classes.listitem}>
-                <ListItemAvatar>
-                  {player.avatar ? (
-                    <Avatar
-                      alt={player.name}
-                      src={player.avatar}
-                    />
-                  ) : <Avatar><PersonIcon /></Avatar>}
-                </ListItemAvatar>
-                <ListItemText className={useDense ? classes.itemtextDense : classes.itemtext} primary={player.name} />
-              </ListItem>
+              <Fade in>
+                <ListItem className={classes.listitem}>
+                  <ListItemAvatar>
+                    {player.avatar ? (
+                      <Avatar
+                        className={classes.avatar}
+                        alt={player.name}
+                        src={player.avatar}
+                      />
+                    ) : <Avatar><PersonIcon /></Avatar>}
+                  </ListItemAvatar>
+                  <ListItemText className={classes.itemtext} primary={player.name} />
+                </ListItem>
+              </Fade>
             </Grid>
           ))}
         </Grid>

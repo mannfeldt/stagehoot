@@ -113,7 +113,7 @@ class SpotifyController extends Component {
     const { answer, searchInput, showSearch } = this.state;
     const players = Object.values(game.players);
     const useDense = players.length > 11;
-    const filteredPlayers = players.filter(p => p.name.toLowerCase().includes(searchInput.toLowerCase()));
+    const filteredPlayers = players.filter(p => answer.includes(p.playerKey) || p.name.toLowerCase().includes(searchInput.toLowerCase()));
     return (
       <div className="phase-container">
         <div className={classes.container}>
