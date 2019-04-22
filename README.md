@@ -1,4 +1,7 @@
 A web based multiplayer game platform inspired be kahoot.
+One device is hosting the game while all participants connects as players.
+couch gaming as it should be.
+
 games:
 - Quiz
     - custom questions or auto generated
