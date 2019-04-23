@@ -28,3 +28,8 @@ This is a Progressive Web App (PWA). For best experience make sure to install it
 
 
 <h1>Live at: https://mannfeldt.github.io/stagehoot</h1>
+
+
+<img src="https://i.imgur.com/2nI9y0f.jpg" width="400"/>
+<img src="https://i.imgur.com/1pUWP24.jpg" width="400"/>
+<img src="https://i.imgur.com/UW3D7Wc.jpg" width="400"/>
