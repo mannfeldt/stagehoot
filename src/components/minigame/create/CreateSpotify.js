@@ -53,7 +53,6 @@ import { Typography } from '@material-ui/core';
 //   });
 // };
 
-
 // TESTA ATT SPELA UPP EN LÅT FRÅN EN AV SPELLISTORNA. kolla på  https://developer.spotify.com/documentation/web-playback-sdk/reference/#playing-a-spotify-uri
 
 // $.ajax({
@@ -77,8 +76,6 @@ class CreateSpotify extends Component {
       gametype: 'spotify',
       questions: 18,
       password: '',
-      gamemode: 'classic',
-      difficulty: '300',
       autoplay: true,
       qFeatures: true,
       qSize: true,
@@ -111,45 +108,53 @@ class CreateSpotify extends Component {
     this.createGame = this.createGame.bind(this);
   }
 
-    handleChange = name => (event) => {
-      this.setState({
-        [name]: event.target.value,
-      });
+  handleChange = name => (event) => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
+  handleChangeBool = name => (event) => {
+    this.setState({ [name]: event.target.checked });
+  };
+
+  handleChangeSelect = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
+  createGame() {
+    const { createGame } = this.props;
+    const {
+      password,
+      gametype,
+      title,
+      questions,
+      qArtist,
+      qFeatures,
+      qSize,
+      qTrackOwner,
+      qGenre,
+      autoplay,
+    } = this.state;
+    const minigame = {
+      autoplay,
+      questions,
+      qGenre,
+      qArtist,
+      qFeatures,
+      qSize,
+      qTrackOwner,
     };
-
-    handleChangeBool = name => (event) => {
-      this.setState({ [name]: event.target.checked });
+    const game = {
+      password,
+      gametype,
+      title,
+      minigame,
     };
+    createGame(game);
+  }
 
-    handleChangeSelect = (event) => {
-      this.setState({ [event.target.name]: event.target.value });
-    };
-
-    createGame() {
-      const { createGame } = this.props;
-      const {
-        password, gametype, title, gamemode, questions, qArtist, qFeatures, qSize, qTrackOwner, qGenre, autoplay,
-      } = this.state;
-      const minigame = {
-        gamemode,
-        autoplay,
-        questions,
-        qGenre,
-        qArtist,
-        qFeatures,
-        qSize,
-        qTrackOwner,
-      };
-      const game = {
-        password,
-        gametype,
-        title,
-        minigame,
-      };
-      createGame(game);
-    }
-
-    /*
+  /*
     validateGame(game) {
       // validera lösenord är tillräckligt starkt här
       //eller direkt efter input om det finns någon smart lösning.
@@ -161,157 +166,141 @@ class CreateSpotify extends Component {
 
     }
 */
-    render() {
-      const {
-        password, title, gamemode,
-        questions, qTrackOwner, qArtist, qFeatures, qSize, qGenre, autoplay,
-      } = this.state;
-      return (
-        <div className="app-page create-page">
-          <Grid container spacing={24}>
-            <form autoComplete="off">
-              <Grid item xs={12}>
-                <Typography variant="h4">New Spotify game</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl required fullWidth>
-                  <InputLabel htmlFor="gametype-required">Game mode</InputLabel>
-                  <Select
-                    value={gamemode || ''}
-                    fullWidth
-                    onChange={this.handleChangeSelect}
-                    name="gamemode"
-                    inputProps={{
-                      id: 'gamemode-required',
-                    }}
-                  >
-                    <MenuItem value="classic">Classic</MenuItem>
-                    <MenuItem value="wild">Wild</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-
-                {gamemode === 'classic'
-                                && (
-                                <FormControl>
-                                  <TextField
-                                    label="questions to play"
-                                    name="questions"
-                                    type="number"
-                                    value={questions}
-                                    margin="normal"
-                                    onChange={this.handleChange('questions')}
-                                  />
-                                </FormControl>
-                                )
-                            }
-              </Grid>
-              <Typography variant="h5">Question types</Typography>
-              <Grid item xs={12}>
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    control={(
-                      <Checkbox
-                        checked={qTrackOwner}
-                        onChange={this.handleChangeBool('qTrackOwner')}
-                        value="qTrackOwner"
-                      />
-                    )}
-                    label="Tracks"
-                  />
-                </FormControl>
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    control={(
-                      <Checkbox
-                        checked={qFeatures}
-                        onChange={this.handleChangeBool('qFeatures')}
-                        value="qFeatures"
-                      />
-                    )}
-                    label="Features"
-                  />
-                </FormControl>
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    control={(
-                      <Checkbox
-                        checked={qArtist}
-                        onChange={this.handleChangeBool('qArtist')}
-                        value="qArtist"
-                      />
-                    )}
-                    label="Artist"
-                  />
-                </FormControl>
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    control={(
-                      <Checkbox
-                        checked={qGenre}
-                        onChange={this.handleChangeBool('qGenre')}
-                        value="qGenre"
-                      />
-                    )}
-                    label="Genres"
-                  />
-                </FormControl>
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    control={(
-                      <Checkbox
-                        checked={qSize}
-                        onChange={this.handleChangeBool('qSize')}
-                        value="qSize"
-                      />
-                    )}
-                    label="Playlist size"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
+  render() {
+    const {
+      password,
+      title,
+      questions,
+      qTrackOwner,
+      qArtist,
+      qFeatures,
+      qSize,
+      qGenre,
+      autoplay,
+    } = this.state;
+    return (
+      <div className="app-page create-page">
+        <Grid container spacing={24}>
+          <form autoComplete="off">
+            <Grid item xs={12}>
+              <Typography variant="h4">New Spotify game</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl>
+                <TextField
+                  label="questions to play"
+                  name="questions"
+                  type="number"
+                  value={questions}
+                  margin="normal"
+                  onChange={this.handleChange('questions')}
+                />
+              </FormControl>
+            </Grid>
+            <Typography variant="h5">Question types</Typography>
+            <Grid item xs={12}>
+              <FormControl component="fieldset">
                 <FormControlLabel
                   control={(
-                    <Switch
-                      checked={autoplay}
-                      onChange={this.handleChangeBool('autoplay')}
-                      value="autoplay"
+                    <Checkbox
+                      checked={qTrackOwner}
+                      onChange={this.handleChangeBool('qTrackOwner')}
+                      value="qTrackOwner"
                     />
-                )}
-                  label="Autoplay questions"
+)}
+                  label="Tracks"
                 />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl>
-                  <TextField
-                    label="Title"
-                    name="title"
-                    value={title}
-                    margin="normal"
-                    onChange={this.handleChange('title')}
+              </FormControl>
+              <FormControl component="fieldset">
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      checked={qFeatures}
+                      onChange={this.handleChangeBool('qFeatures')}
+                      value="qFeatures"
+                    />
+)}
+                  label="Features"
+                />
+              </FormControl>
+              <FormControl component="fieldset">
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      checked={qArtist}
+                      onChange={this.handleChangeBool('qArtist')}
+                      value="qArtist"
+                    />
+)}
+                  label="Artist"
+                />
+              </FormControl>
+              <FormControl component="fieldset">
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      checked={qGenre}
+                      onChange={this.handleChangeBool('qGenre')}
+                      value="qGenre"
+                    />
+)}
+                  label="Genres"
+                />
+              </FormControl>
+              <FormControl component="fieldset">
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      checked={qSize}
+                      onChange={this.handleChangeBool('qSize')}
+                      value="qSize"
+                    />
+)}
+                  label="Playlist size"
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={(
+                  <Switch
+                    checked={autoplay}
+                    onChange={this.handleChangeBool('autoplay')}
+                    value="autoplay"
                   />
-                </FormControl>
-                <FormControl>
-                  <TextField
-                    label="Password"
-                    type="password"
-                    name="password"
-                    margin="normal"
-                    value={password}
-                    onChange={this.handleChange('password')}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Button onClick={this.createGame} variant="contained">Create</Button>
-              </Grid>
-            </form>
-
-          </Grid>
-        </div>
-      );
-    }
+)}
+                label="Autoplay questions"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl>
+                <TextField
+                  label="Title"
+                  name="title"
+                  value={title}
+                  margin="normal"
+                  onChange={this.handleChange('title')}
+                />
+              </FormControl>
+              <FormControl>
+                <TextField
+                  label="Password"
+                  type="password"
+                  name="password"
+                  margin="normal"
+                  value={password}
+                  onChange={this.handleChange('password')}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button onClick={this.createGame} variant="contained">Create</Button>
+            </Grid>
+          </form>
+        </Grid>
+      </div>
+    );
+  }
 }
 CreateSpotify.propTypes = {
   createGame: PropTypes.func.isRequired,

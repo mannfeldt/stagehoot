@@ -3,10 +3,7 @@ import { Typography } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Switch from '@material-ui/core/Switch';
@@ -82,7 +79,6 @@ class SpotifySetup extends Component {
     render() {
       const {
         nameGenerator,
-        gamemode,
         questions,
         invalidSpotifyToken,
         autoplay,
@@ -95,9 +91,7 @@ class SpotifySetup extends Component {
       return (
         <div className="phase-container">
           <Typography variant="h4">Game Settings</Typography>
-          <Button onClick={() => this.startGame('classic')} color="primary">Classic</Button>
-          <Button onClick={() => this.startGame('coop')} color="primary">Co-op multiplayer</Button>
-          <Button onClick={() => this.startGame('team')} color="primary">Team multiplayer</Button>
+          <Button onClick={() => this.startGame('classic')} color="primary">Start</Button>
           <FormControl component="fieldset">
             <FormGroup>
               <FormControlLabel
@@ -120,22 +114,6 @@ class SpotifySetup extends Component {
                 )}
                 label="Autoplay questions"
               />
-
-              <FormControl required>
-                <InputLabel htmlFor="gametype-required">Game mode</InputLabel>
-                <Select
-                  value={gamemode || ''}
-                  onChange={this.handleChangeSelect}
-                  name="gamemode"
-                  inputProps={{
-                    id: 'gamemode-required',
-                  }}
-                >
-                  <MenuItem value="classic">Classic</MenuItem>
-                  <MenuItem value="wild">Wild</MenuItem>
-
-                </Select>
-              </FormControl>
               <FormControl>
                 <TextField
                   label="Questions to play"

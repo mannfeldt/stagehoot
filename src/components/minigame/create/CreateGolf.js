@@ -22,50 +22,50 @@ class CreateGolf extends Component {
       speedmode: true,
       opponentCollision: false,
       password: '',
-      gamemode: 'classic',
-      difficulty: '300',
     };
 
     this.createGame = this.createGame.bind(this);
   }
 
-    handleChange = name => (event) => {
-      this.setState({
-        [name]: event.target.value,
-      });
+  handleChange = name => (event) => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
+  handleChangeBool = name => (event) => {
+    this.setState({ [name]: event.target.checked });
+  };
+
+  handleChangeSelect = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
+  createGame() {
+    const { createGame } = this.props;
+    const {
+      password,
+      gametype,
+      title,
+      holes,
+      scoremode,
+      speedmode,
+    } = this.state;
+    const minigame = {
+      scoremode,
+      speedmode,
+      holes,
     };
-
-    handleChangeBool = name => (event) => {
-      this.setState({ [name]: event.target.checked });
+    const game = {
+      password,
+      gametype,
+      title,
+      minigame,
     };
+    createGame(game);
+  }
 
-    handleChangeSelect = (event) => {
-      this.setState({ [event.target.name]: event.target.value });
-    };
-
-    createGame() {
-      const { createGame } = this.props;
-      const {
-        password, gametype, title, gamemode, holes, scoremode, speedmode,
-        difficulty,
-      } = this.state;
-      const minigame = {
-        gamemode,
-        scoremode,
-        speedmode,
-        holes,
-        difficulty,
-      };
-      const game = {
-        password,
-        gametype,
-        title,
-        minigame,
-      };
-      createGame(game);
-    }
-
-    /*
+  /*
     validateGame(game) {
       // validera lösenord är tillräckligt starkt här
       //eller direkt efter input om det finns någon smart lösning.
@@ -77,132 +77,98 @@ class CreateGolf extends Component {
 
     }
 */
-    render() {
-      const {
-        password, title, gamemode,
-        holes, difficulty, scoremode, speedmode,
-      } = this.state;
-      return (
-        <div className="app-page create-page">
-          <Grid container spacing={24}>
-            <form autoComplete="off">
-              <Grid item xs={12}>
-                <Typography variant="h4">New Golf game</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl required fullWidth>
-                  <InputLabel htmlFor="gametype-required">Game mode</InputLabel>
-                  <Select
-                    value={gamemode || ''}
-                    fullWidth
-                    onChange={this.handleChangeSelect}
-                    name="gamemode"
-                    inputProps={{
-                      id: 'gamemode-required',
-                    }}
-                  >
-                    <MenuItem value="classic">Classic</MenuItem>
-                    <MenuItem value="wild">Wild</MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl required fullWidth>
-                  <InputLabel htmlFor="scoremode-required">Score mode</InputLabel>
-                  <Select
-                    value={scoremode || ''}
-                    fullWidth
-                    onChange={this.handleChangeSelect}
-                    name="scoremode"
-                    inputProps={{
-                      id: 'scoremode-required',
-                    }}
-                  >
-                    <MenuItem value="strokes">Strokes</MenuItem>
-                    <MenuItem value="time">Time</MenuItem>
-                    <MenuItem value="compedetive">Compedetive</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl required fullWidth>
-                  <InputLabel htmlFor="gametype-required">difficulty</InputLabel>
-                  <Select
-                    value={difficulty || ''}
-                    fullWidth
-                    onChange={this.handleChangeSelect}
-                    name="difficulty"
-                    inputProps={{
-                      id: 'difficulty-required',
-                    }}
-                  >
-                    <MenuItem value="500">Easy</MenuItem>
-                    <MenuItem value="300">Medium</MenuItem>
-                    <MenuItem value="100">Hard</MenuItem>
-                    <MenuItem value="75">Pro</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
+  render() {
+    const {
+      password,
+      title,
+      holes,
+      scoremode,
+      speedmode,
+    } = this.state;
+    return (
+      <div className="app-page create-page">
+        <Grid container spacing={24}>
+          <form autoComplete="off">
+            <Grid item xs={12}>
+              <Typography variant="h4">New Golf game</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl required fullWidth>
+                <InputLabel htmlFor="scoremode-required">Score mode</InputLabel>
+                <Select
+                  value={scoremode || ''}
+                  fullWidth
+                  onChange={this.handleChangeSelect}
+                  name="scoremode"
+                  inputProps={{
+                    id: 'scoremode-required',
+                  }}
+                >
+                  <MenuItem value="strokes">Strokes</MenuItem>
+                  <MenuItem value="time">Time</MenuItem>
+                  <MenuItem value="compedetive">Compedetive</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl>
+                <TextField
+                  label="Holes to play"
+                  name="holes"
+                  type="number"
+                  value={holes}
+                  margin="normal"
+                  onChange={this.handleChange('holes')}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl component="fieldset">
+                <FormControlLabel
+                  control={(
+                    <Switch
+  checked={speedmode}
+  onChange={this.handleChangeBool('speedmode')}
+  value="speedmode"
+/>
+)}
+                  label="Speed mode"
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl>
+                <TextField
+                  label="Title"
+                  name="title"
+                  value={title}
+                  margin="normal"
+                  onChange={this.handleChange('title')}
+                />
+              </FormControl>
+              <FormControl>
+                <TextField
+                  label="Password"
+                  type="password"
+                  name="password"
+                  margin="normal"
+                  value={password}
+                  onChange={this.handleChange('password')}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button onClick={this.createGame} variant="contained">
 
-                {gamemode === 'classic'
-                                && (
-                                <FormControl>
-                                  <TextField
-                                    label="Holes to play"
-                                    name="holes"
-                                    type="number"
-                                    value={holes}
-                                    margin="normal"
-                                    onChange={this.handleChange('holes')}
-                                  />
-                                </FormControl>
-                                )
-                            }
-              </Grid>
-              <Grid item xs={12}>
 
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    control={(
-                      <Switch
-                        checked={speedmode}
-                        onChange={this.handleChangeBool('speedmode')}
-                        value="speedmode"
-                      />
-                    )}
-                    label="Speed mode"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl>
-                  <TextField
-                    label="Title"
-                    name="title"
-                    value={title}
-                    margin="normal"
-                    onChange={this.handleChange('title')}
-                  />
-                </FormControl>
-                <FormControl>
-                  <TextField
-                    label="Password"
-                    type="password"
-                    name="password"
-                    margin="normal"
-                    value={password}
-                    onChange={this.handleChange('password')}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Button onClick={this.createGame} variant="contained">Create</Button>
-              </Grid>
-            </form>
-
-          </Grid>
-        </div>
-      );
-    }
+                Create
+                            </Button>
+            </Grid>
+          </form>
+        </Grid>
+      </div>
+    );
+  }
 }
 CreateGolf.propTypes = {
   createGame: PropTypes.func.isRequired,
