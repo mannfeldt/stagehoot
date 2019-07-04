@@ -21,7 +21,6 @@ class SpotifySetup extends Component {
       questions: props.game.minigame.questions,
       nameGenerator: false,
       autoplay: props.game.minigame.autoplay,
-      gamemode: props.game.minigame.gamemode,
       invalidSpotifyToken: !localStorage.getItem('spotifytoken') || Date.now() - localStorage.getItem('spotifytoken_timestamp') > AUTH_EXPIRE_MS,
     };
   }
@@ -62,12 +61,11 @@ class SpotifySetup extends Component {
       const { game, gameFunc } = this.props;
       const {
         surveyPlayers, nameGenerator,
-        questions, gamemode, autoplay,
+        questions, autoplay,
       } = this.state;
       game.minigame.surveyPlayers = surveyPlayers;
       game.minigame.nameGenerator = nameGenerator;
       game.minigame.multiplayerMode = multiplayerMode;
-      game.minigame.gamemode = gamemode;
       game.minigame.autoplay = autoplay;
       game.minigame.questions = questions;
       game.minigame.currentq = 0;

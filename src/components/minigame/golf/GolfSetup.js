@@ -17,11 +17,9 @@ class GolfSetup extends Component {
     this.state = {
       surveyPlayers: false,
       nameGenerator: false,
-      gamemode: props.game.minigame.gamemode,
       holes: props.game.minigame.holes,
       scoremode: props.game.minigame.scoremode,
       speedmode: props.game.minigame.speedmode,
-      difficulty: props.game.minigame.difficulty,
     };
   }
 
@@ -45,8 +43,6 @@ class GolfSetup extends Component {
       surveyPlayers,
       nameGenerator,
       holes,
-      difficulty,
-      gamemode,
       scoremode,
       speedmode,
     } = this.state;
@@ -56,8 +52,6 @@ class GolfSetup extends Component {
       speedmode,
       multiplayerMode,
       holes,
-      difficulty,
-      gamemode,
       scoremode,
     };
     game.minigame = minigame;
@@ -71,8 +65,6 @@ class GolfSetup extends Component {
       surveyPlayers,
       nameGenerator,
       holes,
-      difficulty,
-      gamemode,
       scoremode,
       speedmode,
     } = this.state;
