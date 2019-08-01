@@ -1,10 +1,10 @@
 {
   "main.css": "/stagehoot/static/css/main.b8f86843.chunk.css",
-  "main.js": "/stagehoot/static/js/main.c8dde788.chunk.js",
-  "main.js.map": "/stagehoot/static/js/main.c8dde788.chunk.js.map",
+  "main.js": "/stagehoot/static/js/main.073fee05.chunk.js",
+  "main.js.map": "/stagehoot/static/js/main.073fee05.chunk.js.map",
   "static/css/1.6ef8a7cf.chunk.css": "/stagehoot/static/css/1.6ef8a7cf.chunk.css",
-  "static/js/1.90b99166.chunk.js": "/stagehoot/static/js/1.90b99166.chunk.js",
-  "static/js/1.90b99166.chunk.js.map": "/stagehoot/static/js/1.90b99166.chunk.js.map",
+  "static/js/1.5f73cf07.chunk.js": "/stagehoot/static/js/1.5f73cf07.chunk.js",
+  "static/js/1.5f73cf07.chunk.js.map": "/stagehoot/static/js/1.5f73cf07.chunk.js.map",
   "runtime~main.js": "/stagehoot/static/js/runtime~main.a27241d7.js",
   "runtime~main.js.map": "/stagehoot/static/js/runtime~main.a27241d7.js.map",
   "static/media/fingerprint.svg": "/stagehoot/static/media/fingerprint.deabfcc6.svg",
@@ -22,9 +22,9 @@
   "static/media/putterIcon.svg": "/stagehoot/static/media/putterIcon.017c75cd.svg",
   "static/media/golfbag.svg": "/stagehoot/static/media/golfbag.c7fbd966.svg",
   "static/media/golfwood2.wav": "/stagehoot/static/media/golfwood2.ca14b160.wav",
-  "static/css/1.6ef8a7cf.chunk.css.map": "/stagehoot/static/css/1.6ef8a7cf.chunk.css.map",
   "static/css/main.b8f86843.chunk.css.map": "/stagehoot/static/css/main.b8f86843.chunk.css.map",
+  "static/css/1.6ef8a7cf.chunk.css.map": "/stagehoot/static/css/1.6ef8a7cf.chunk.css.map",
   "index.html": "/stagehoot/index.html",
-  "precache-manifest.fad8b4accf8c12ed73b61c360416c2d6.js": "/stagehoot/precache-manifest.fad8b4accf8c12ed73b61c360416c2d6.js",
+  "precache-manifest.2b550b78d4bda222ff93b48ad5f0031a.js": "/stagehoot/precache-manifest.2b550b78d4bda222ff93b48ad5f0031a.js",
   "service-worker.js": "/stagehoot/service-worker.js"
 }
