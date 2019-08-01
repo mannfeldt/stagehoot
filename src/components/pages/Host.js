@@ -1,16 +1,23 @@
 import React, { Component } from 'react';
-import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
 import PropTypes from 'prop-types';
-import { fire } from '../../base';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 import Quiz from '../quiz/host/Quiz';
+import { fire, fireGolf } from '../../base';
 import Minigame from '../minigame/host/Minigame';
 
-function fetchGame(gameId, callback) {
-  fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
-    .once('value', callback);
+function fetchGame(gametype, gameId, callback) {
+  if (gametype === 'golf') {
+    fireGolf.database().ref('games').orderByChild('gameId').equalTo(gameId)
+      .once('value', callback);
+  } else {
+    fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
+      .once('value', callback);
+  }
 }
 
 class Host extends Component {
@@ -18,6 +25,7 @@ class Host extends Component {
     super(props);
     this.state = {
       game: {},
+      gametype: 'other',
       gameId: localStorage.getItem('RecentGameId') || '',
       password: '',
       isRedirected: Date.now() - localStorage.getItem('spotifytoken_timestamp') < 2000,
@@ -37,6 +45,10 @@ class Host extends Component {
     }
   }
 
+  handleChangeSelect = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
     handleChange = name => (event) => {
       this.setState({
         [name]: event.target.value,
@@ -49,15 +61,27 @@ class Host extends Component {
       // se till att inte updatera game.players...
       // game som kommer in här ska bara innehålla det som ska uppdateras.
       // updateras med gamesettings, phasechanges, currenquestionId etc
-      fire.database().ref(`games/${game.key}`).update(gameupdate, (error) => {
-        if (error) {
-          const snack = {
-            variant: 'error',
-            message: 'Unexpected internal error',
-          };
-          showSnackbar(snack);
-        }
-      });
+      if (game.gametype === 'golf') {
+        fireGolf.database().ref(`games/${game.key}`).update(gameupdate, (error) => {
+          if (error) {
+            const snack = {
+              variant: 'error',
+              message: 'Unexpected internal error',
+            };
+            showSnackbar(snack);
+          }
+        });
+      } else {
+        fire.database().ref(`games/${game.key}`).update(gameupdate, (error) => {
+          if (error) {
+            const snack = {
+              variant: 'error',
+              message: 'Unexpected internal error',
+            };
+            showSnackbar(snack);
+          }
+        });
+      }
     }
 
     restartGame() {
@@ -79,17 +103,17 @@ class Host extends Component {
 
 
     joinGame(gameId) {
-      const { password } = this.state;
+      const { password, gametype } = this.state;
       const { showSnackbar, toggleHeader } = this.props;
       const that = this;
-      fetchGame(gameId, (snapshot) => {
+      fetchGame(gametype, gameId, (snapshot) => {
         if (snapshot.val()) {
           let game;
           snapshot.forEach((child) => {
             game = child.val();
           });
           if (game.password === password) {
-            that.initGameListiner(game.key);
+            that.initGameListiner(game);
             toggleHeader();
           } else {
             const snack = {
@@ -108,8 +132,13 @@ class Host extends Component {
       });
     }
 
-    initGameListiner(gameKey) {
-      const gameRef = fire.database().ref(`games/${gameKey}`);
+    initGameListiner(_game) {
+      let gameRef;
+      if (_game.gametype === 'golf') {
+        gameRef = fireGolf.database().ref(`games/${_game.key}`);
+      } else {
+        gameRef = fire.database().ref(`games/${_game.key}`);
+      }
       const that = this;
       gameRef.on('value', (snapshot) => {
         const game = snapshot.val();
@@ -150,7 +179,7 @@ class Host extends Component {
       // final_result shows result of all players. top 3 and/or all. sets phase to end on action
       // end shows options for replay, export result, etc.
       const {
-        gameId, password, game, isRedirected,
+        gameId, password, game, isRedirected, gametype,
       } = this.state;
       const { showSnackbar, toggleHeader } = this.props;
       const gameFunctions = {
@@ -171,6 +200,21 @@ class Host extends Component {
       if (!game.phase) {
         return (
           <div className="page-container host-page">
+            <FormControl>
+              <InputLabel htmlFor="gametype-required">Score mode</InputLabel>
+              <Select
+                value={gametype || ''}
+                fullWidth
+                onChange={this.handleChangeSelect}
+                name="gametype"
+                inputProps={{
+                  id: 'gametype-required',
+                }}
+              >
+                <MenuItem value="golf">Golf</MenuItem>
+                <MenuItem value="other">Other</MenuItem>
+              </Select>
+            </FormControl>
             <FormControl>
               <TextField
                 label="Game PIN"

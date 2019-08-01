@@ -6,7 +6,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import { fire } from '../../../base';
+import { fireGolf } from '../../../base';
 import golfwood1Audio from './audio/golfwood.wav';
 import golfwood2Audio from './audio/golfwood2.wav';
 import golfwood3Audio from './audio/golfwood3.wav';
@@ -565,6 +565,7 @@ class Golf extends Component {
     }, game.players);
     game.status = 'IN_PROGRESS';
     game.minigame.levelColor = level.color;
+    game.currentPar = level.par;
     game.minigame.round = 1;
     this.saveGame(game);
   }
@@ -789,7 +790,7 @@ class Golf extends Component {
   initControllerListener(player) {
     const { game } = this.props;
     const { balls } = this.state;
-    const swingRef = fire.database().ref(`/games/${game.key}/players/${player.key}/swing`);
+    const swingRef = fireGolf.database().ref(`/games/${game.key}/players/${player.key}/swing`);
     const that = this;
     swingRef.on('value', (snapshot) => {
       const { game: _game } = that.props;

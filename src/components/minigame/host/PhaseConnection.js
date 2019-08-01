@@ -30,7 +30,10 @@ class PhaseConnection extends Component {
             <span>Join game with Game PIN: </span>
             <span className="dynamic-text">{game.gameId}</span>
           </Typography>
-          <Typography variant="h4" style={{ marginTop: 40 }}>mannfeldt.github.io/stagehoot</Typography>
+          {game.gametype === 'golf'
+            ? <Typography variant="h4" style={{ marginTop: 40 }}>mannfeldt.github.io/golf</Typography>
+            : <Typography variant="h4" style={{ marginTop: 40 }}>mannfeldt.github.io/stagehoot</Typography>
+          }
           <Typography variant="subtitle1" style={{ marginTop: 20 }}>{game.title}</Typography>
         </div>
         <div className="quiz-middle-section">

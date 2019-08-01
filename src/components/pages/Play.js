@@ -11,26 +11,34 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import GameIcon from '@material-ui/icons/VideogameAsset';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 import GolfIcon from '@material-ui/icons/GolfCourse';
 import SpotifyIcon from '@material-ui/icons/MusicNote';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core';
-import { fire } from '../../base';
+import { fire, fireGolf } from '../../base';
 import Quiz from '../quiz/play/Quiz';
 import Minigame from '../minigame/play/Minigame';
 
 
-function fetchGame(gameId, callback) {
-  fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
-    .once('value', callback);
+function fetchGame(gametype, gameId, callback) {
+  if (gametype === 'golf') {
+    fireGolf.database().ref('games').orderByChild('gameId').equalTo(gameId)
+      .once('value', callback);
+  } else {
+    fire.database().ref('games').orderByChild('gameId').equalTo(gameId)
+      .once('value', callback);
+  }
 }
-
 class Play extends Component {
   constructor(props) {
     super(props);
     this.state = {
       game: {},
       gameId: '',
+      gametype: 'other',
       recentGameId: localStorage.getItem('RecentGameIdPlay') || '',
       playerKey: '',
       recentGame: null,
@@ -46,7 +54,8 @@ class Play extends Component {
       this.joinGame(recentGameId);
     }
     if (recentGameId) {
-      fetchGame(recentGameId, (snapshot) => {
+      // behöver spara recentgametype?
+      fetchGame('default', recentGameId, (snapshot) => {
         if (snapshot.val()) {
           let game;
           snapshot.forEach((child) => {
@@ -60,6 +69,10 @@ class Play extends Component {
     }
   }
 
+  handleChangeSelect = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
   handleChange = name => (event) => {
     this.setState({
       [name]: event.target.value,
@@ -69,8 +82,9 @@ class Play extends Component {
 
   joinGame(gameId) {
     const { showSnackbar, toggleHeader } = this.props;
+    const { gametype } = this.state;
     const that = this;
-    fetchGame(gameId, (snapshot) => {
+    fetchGame(gametype, gameId, (snapshot) => {
       if (snapshot.val()) {
         let game;
         snapshot.forEach((child) => {
@@ -82,7 +96,7 @@ class Play extends Component {
           if (storedPlayerKey && game.players && game.players[storedPlayerKey]) {
             that.setState({ playerKey: storedPlayerKey });
           }
-          that.initGameListiner(game.key);
+          that.initGameListiner(game);
           const snack = {
             variant: 'success',
             message: 'Connected to game',
@@ -100,7 +114,7 @@ class Play extends Component {
           if (storedPlayerKey && game.players && game.players[storedPlayerKey]) {
             that.setState({ playerKey: storedPlayerKey });
             localStorage.setItem('RecentGameIdPlay', game.gameId);
-            that.initGameListiner(game.key);
+            that.initGameListiner(game);
             const snack = {
               variant: 'success',
               message: 'Connected to game',
@@ -125,8 +139,13 @@ class Play extends Component {
     });
   }
 
-  initGameListiner(gameKey) {
-    const gameRef = fire.database().ref(`games/${gameKey}`);
+  initGameListiner(_game) {
+    let gameRef;
+    if (_game.gametype === 'golf') {
+      gameRef = fireGolf.database().ref(`games/${_game.key}`);
+    } else {
+      gameRef = fire.database().ref(`games/${_game.key}`);
+    }
     const that = this;
     gameRef.on('value', (snapshot) => {
       const game = snapshot.val();
@@ -146,7 +165,12 @@ class Play extends Component {
   createPlayer(player) {
     const { game } = this.state;
     const { showSnackbar } = this.props;
-    const playerRef = fire.database().ref(`/games/${game.key}/players`).push();
+    let playerRef;
+    if (game.gametype === 'golf') {
+      playerRef = fireGolf.database().ref(`/games/${game.key}/players`).push();
+    } else {
+      playerRef = fire.database().ref(`/games/${game.key}/players`).push();
+    }
     const newPlayer = Object.assign({ key: playerRef.key }, player);
     const that = this;
     playerRef.set(newPlayer, (error) => {
@@ -167,7 +191,7 @@ class Play extends Component {
 
   render() {
     const {
-      game, playerKey, gameId, recentGameId, recentGame, isRedirected,
+      game, playerKey, gameId, recentGameId, recentGame, isRedirected, gametype,
     } = this.state;
     const { showSnackbar } = this.props;
     const gameAvatars = {
@@ -187,6 +211,21 @@ class Play extends Component {
       return (
         <div className="page-container play-page">
           <div>
+            <FormControl>
+              <InputLabel htmlFor="gametype-required">Score mode</InputLabel>
+              <Select
+                value={gametype || ''}
+                fullWidth
+                onChange={this.handleChangeSelect}
+                name="gametype"
+                inputProps={{
+                  id: 'gametype-required',
+                }}
+              >
+                <MenuItem value="golf">Golf</MenuItem>
+                <MenuItem value="other">other</MenuItem>
+              </Select>
+            </FormControl>
             <FormControl>
               <TextField
                 label="Game PIN"

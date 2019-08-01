@@ -6,7 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import CreateQuiz from '../quiz/create/CreateQuiz';
-import { fire } from '../../base';
+import { fire, fireGolf } from '../../base';
 import CreateMinigame from '../minigame/create/CreateMinigame';
 import { generateGameId } from '../common/utils/appUtil';
 
@@ -26,6 +26,7 @@ class Create extends Component {
     };
 
     createGame(g) {
+      const { gametype } = this.state;
       const game = g;
       game.gameId = generateGameId();
       game.created = Date.now();
@@ -34,7 +35,12 @@ class Create extends Component {
 
       const that = this;
       // game push få ett id.
-      const gameRef = fire.database().ref('/games').push();
+      let gameRef;
+      if (game.gametype === 'golf') {
+        gameRef = fireGolf.database().ref('/games').push();
+      } else {
+        gameRef = fire.database().ref('/games').push();
+      }
       game.key = gameRef.key;
       gameRef.set(game, (error) => {
         if (error) {

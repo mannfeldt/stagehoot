@@ -7,7 +7,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import ReactSpeedometer from 'react-d3-speedometer';
 import * as util from './GolfUtil';
-import { fire } from '../../../base';
+import { fireGolf } from '../../../base';
 import './golf.css';
 import {
   MAX_POWER,
@@ -313,7 +313,7 @@ class GolfController extends Component {
     // test
 
 
-    fire.database().ref(`/games/${game.key}/players/${playerKey}/swing`).set(swing, (error) => {
+    fireGolf.database().ref(`/games/${game.key}/players/${playerKey}/swing`).set(swing, (error) => {
       if (error) {
         console.log('error updated swing move');
       } else {
