@@ -1,39 +1,39 @@
-import React, { Component } from 'react';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import PropTypes from 'prop-types';
-import Button from '@material-ui/core/Button';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import { Typography } from '@material-ui/core';
+import React, { Component } from "react";
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
+import PropTypes from "prop-types";
+import Button from "@material-ui/core/Button";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
+import { Typography } from "@material-ui/core";
 
 class CreateGolf extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      title: '',
-      gametype: 'golf',
+      title: "",
+      gametype: "golf",
       holes: 18,
-      scoremode: 'strokes',
+      scoremode: "strokes",
       speedmode: true,
       opponentCollision: false,
-      password: '',
+      password: "",
     };
 
     this.createGame = this.createGame.bind(this);
   }
 
-  handleChange = name => (event) => {
+  handleChange = (name) => (event) => {
     this.setState({
       [name]: event.target.value,
     });
   };
 
-  handleChangeBool = name => (event) => {
+  handleChangeBool = (name) => (event) => {
     this.setState({ [name]: event.target.checked });
   };
 
@@ -78,13 +78,7 @@ class CreateGolf extends Component {
     }
 */
   render() {
-    const {
-      password,
-      title,
-      holes,
-      scoremode,
-      speedmode,
-    } = this.state;
+    const { password, title, holes, scoremode, speedmode } = this.state;
     return (
       <div className="app-page create-page">
         <Grid container spacing={24}>
@@ -96,12 +90,12 @@ class CreateGolf extends Component {
               <FormControl required fullWidth>
                 <InputLabel htmlFor="scoremode-required">Score mode</InputLabel>
                 <Select
-                  value={scoremode || ''}
+                  value={scoremode || ""}
                   fullWidth
                   onChange={this.handleChangeSelect}
                   name="scoremode"
                   inputProps={{
-                    id: 'scoremode-required',
+                    id: "scoremode-required",
                   }}
                 >
                   <MenuItem value="strokes">Strokes</MenuItem>
@@ -118,20 +112,20 @@ class CreateGolf extends Component {
                   type="number"
                   value={holes}
                   margin="normal"
-                  onChange={this.handleChange('holes')}
+                  onChange={this.handleChange("holes")}
                 />
               </FormControl>
             </Grid>
             <Grid item xs={12}>
               <FormControl component="fieldset">
                 <FormControlLabel
-                  control={(
+                  control={
                     <Switch
-  checked={speedmode}
-  onChange={this.handleChangeBool('speedmode')}
-  value="speedmode"
-/>
-)}
+                      checked={speedmode}
+                      onChange={this.handleChangeBool("speedmode")}
+                      value="speedmode"
+                    />
+                  }
                   label="Speed mode"
                 />
               </FormControl>
@@ -143,7 +137,7 @@ class CreateGolf extends Component {
                   name="title"
                   value={title}
                   margin="normal"
-                  onChange={this.handleChange('title')}
+                  onChange={this.handleChange("title")}
                 />
               </FormControl>
               <FormControl>
@@ -153,16 +147,14 @@ class CreateGolf extends Component {
                   name="password"
                   margin="normal"
                   value={password}
-                  onChange={this.handleChange('password')}
+                  onChange={this.handleChange("password")}
                 />
               </FormControl>
             </Grid>
             <Grid item xs={12}>
               <Button onClick={this.createGame} variant="contained">
-
-
                 Create
-                            </Button>
+              </Button>
             </Grid>
           </form>
         </Grid>

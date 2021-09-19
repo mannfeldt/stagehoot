@@ -1,27 +1,26 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import * as p2 from 'p2';
-import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import { fireGolf } from '../../../base';
-import golfwood1Audio from './audio/golfwood.wav';
-import golfwood2Audio from './audio/golfwood2.wav';
-import golfwood3Audio from './audio/golfwood3.wav';
-import golfiron1Audio from './audio/golfiron.wav';
-import golfiron2Audio from './audio/golfiron2.wav';
-import golfiron3Audio from './audio/golfiron3.wav';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import * as p2 from "p2";
+import TextField from "@material-ui/core/TextField";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import { fireGolf } from "../../../base";
+import golfwood1Audio from "./audio/golfwood.wav";
+import golfwood2Audio from "./audio/golfwood2.wav";
+import golfwood3Audio from "./audio/golfwood3.wav";
+import golfiron1Audio from "./audio/golfiron.wav";
+import golfiron2Audio from "./audio/golfiron2.wav";
+import golfiron3Audio from "./audio/golfiron3.wav";
 
-import countdownAudio from './audio/countdown.wav';
-import golfclapAudio from './audio/golfclap.wav';
-import golfputtAudio from './audio/golfputt.wav';
-import golfscoreAudio from './audio/golfscore.wav';
-
+import countdownAudio from "./audio/countdown.wav";
+import golfclapAudio from "./audio/golfclap.wav";
+import golfputtAudio from "./audio/golfputt.wav";
+import golfscoreAudio from "./audio/golfscore.wav";
 
 // http://jsfiddle.net/AceJJ/1748/ fireworks
-import * as util from './GolfUtil';
+import * as util from "./GolfUtil";
 import {
   HURRY_UP_MS,
   GRASS_COLOR,
@@ -29,7 +28,7 @@ import {
   BALL_RADIUS,
   PENALTY_STROKES,
   CLUBS,
-} from './GolfConstants';
+} from "./GolfConstants";
 
 let ctx;
 let canvas;
@@ -53,7 +52,17 @@ let lastTime;
 // skapa winConditions. alltså när alla bollar har status: inhole så är det klart.
 // 3. lägg till golfController där man lyssnar på balls[playerkey] likt snake. och när bollen har status WAITING_SWING så kan man svinga med mobilen och data synkas till firebase
 // och läses in i host som sätter en veolocify på ball.body
-function drawBall(x, y, fill, stroke, playerState) {
+function drawBall(
+  x,
+  y,
+  stroke,
+  playerColor,
+  playerIndex,
+  playerState,
+  showNameTag,
+  playerName,
+  canvasHeight
+) {
   // ball border width
   ctx.lineWidth = 1;
 
@@ -65,7 +74,7 @@ function drawBall(x, y, fill, stroke, playerState) {
   //   ctx.fillStyle = fill;
   //   ctx.strokeStyle = stroke;
   // }
-  ctx.fillStyle = fill;
+  ctx.fillStyle = playerColor;
   ctx.strokeStyle = stroke;
   ctx.beginPath();
   ctx.arc(x, y, BALL_RADIUS, 0, 2 * Math.PI);
@@ -76,6 +85,31 @@ function drawBall(x, y, fill, stroke, playerState) {
   ctx.arc(x, y, BALL_RADIUS - ctx.lineWidth / 2, 0, 2 * Math.PI);
   ctx.stroke();
   ctx.closePath();
+
+  if (
+    showNameTag &&
+    playerState &&
+    (playerState === "STILL" || playerState === "MOVING")
+  ) {
+    let ballIndexMod = playerIndex % 10;
+    let poleMin = Math.max(100, canvasHeight * 0.2);
+    let poleMax = Math.max(150, canvasHeight * 0.4);
+    let indexFactor = (poleMax - poleMin) / 10;
+    let poleHeight = poleMin + ballIndexMod * indexFactor;
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = playerColor;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - poleHeight);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.font = "20px roboto";
+    ctx.fillStyle = "#000000";
+    ctx.textAlign = "center";
+    ctx.fillText(playerName, x, y - poleHeight - 5);
+  }
 }
 
 class Golf extends Component {
@@ -166,7 +200,9 @@ class Golf extends Component {
     this.renderFrame = this.renderFrame.bind(this);
     this.animate = this.animate.bind(this);
     this.testSwing = this.testSwing.bind(this);
-    this.syncPlayersObjectToFirebase = this.syncPlayersObjectToFirebase.bind(this);
+    this.syncPlayersObjectToFirebase = this.syncPlayersObjectToFirebase.bind(
+      this
+    );
     this.initControllerListener = this.initControllerListener.bind(this);
     this.isLevelCompleted = this.isLevelCompleted.bind(this);
     this.nextPhase = this.nextPhase.bind(this);
@@ -176,7 +212,6 @@ class Golf extends Component {
     this.saveGame = this.saveGame.bind(this);
     this.setEventHandlers = this.setEventHandlers.bind(this);
   }
-
 
   componentDidMount() {
     this.init();
@@ -189,9 +224,15 @@ class Golf extends Component {
   }
 
   setEventHandlers(world) {
-    world.on('beginContact', (evt) => {
+    world.on("beginContact", (evt) => {
       const {
-        balls, holeSensor, startTime, expTime, scorers, soundEffects, level,
+        balls,
+        holeSensor,
+        startTime,
+        expTime,
+        scorers,
+        soundEffects,
+        level,
       } = this.state;
       const { game: _game } = this.props;
       const players = Object.values(_game.players);
@@ -206,7 +247,8 @@ class Golf extends Component {
       // update players state with whatever. and uppdate firebase
       ballBody.scored = true;
       let newExpTime = expTime;
-      if (_game.minigame.speedmode && expTime > Date.now() + (HURRY_UP_MS * 2)) {
+
+      if (_game.minigame.speedmode && expTime > Date.now() + HURRY_UP_MS * 2) {
         newExpTime = expTime - HURRY_UP_MS;
       }
 
@@ -214,7 +256,7 @@ class Golf extends Component {
       const scorer = {
         playerKey,
         time: scoreTime,
-        strokes: ballBody.strokes,
+        strokes: Math.min(ballBody.strokes, PENALTY_STROKES),
         hole: _game.minigame.round,
         par: level.par,
       };
@@ -225,26 +267,40 @@ class Golf extends Component {
         scorers,
       }));
 
-      const newPlayerState = players.map(p => (p.key === playerKey ? { ...p, state: 'SCORED', scoreTime } : p));
+      const newPlayerState = players.map((p) =>
+        p.key === playerKey ? { ...p, state: "SCORED", scoreTime } : p
+      );
       this.syncPlayersToFirebase(newPlayerState);
     });
 
-    world.on('postStep', (evt) => {
+    world.on("postStep", (evt) => {
       // createHoleSensor body
       const { balls, level } = this.state;
       const { game: _game } = this.props;
       const players = Object.values(_game.players);
-      const stillBalls = balls.filter(x => x.velocity[0] === 0 && x.velocity[1] === 0);
+      const stillBalls = balls.filter(
+        (x) => x.velocity[0] === 0 && x.velocity[1] === 0
+      );
       if (stillBalls.length === 0) {
         return;
       }
-      const playersToUpdateState = players.filter(x => x.state === 'MOVING' && stillBalls.some(b => x.key === b.playerKey));
+      const playersToUpdateState = players.filter(
+        (x) =>
+          x.state === "MOVING" && stillBalls.some((b) => x.key === b.playerKey)
+      );
       if (playersToUpdateState.length === 0) {
         return;
       }
       const newPlayerState = players.map((player, index) => {
-        if (playersToUpdateState.some(x => x.key === player.key)) {
-          return { ...player, state: 'STILL', distance: util.getDistanceYards(level.hole[0], balls[player.ballIndex].interpolatedPosition[0]) };
+        if (playersToUpdateState.some((x) => x.key === player.key)) {
+          return {
+            ...player,
+            state: "STILL",
+            distance: util.getDistanceYards(
+              level.hole[0],
+              balls[player.ballIndex].interpolatedPosition[0]
+            ),
+          };
         }
         return player;
       });
@@ -255,12 +311,11 @@ class Golf extends Component {
     });
   }
 
-  handleChange = name => (event) => {
+  handleChange = (name) => (event) => {
     this.setState({
       [name]: event.target.value,
     });
   };
-
 
   handleChangeSelect = (event) => {
     this.setState({ [event.target.name]: event.target.value });
@@ -270,7 +325,10 @@ class Golf extends Component {
     const { balls, canvasWidth, level } = this.state;
     const ensuredBalls = balls.map((ball) => {
       const result = ball;
-      if (ball.interpolatedPosition[0] < 0 || ball.interpolatedPosition[0] > canvasWidth) {
+      if (
+        ball.interpolatedPosition[0] < 0 ||
+        ball.interpolatedPosition[0] > canvasWidth
+      ) {
         result.position = [ball.lastPos[0], ball.lastPos[1] - 20];
         result.velocity = [0, 0];
       }
@@ -313,7 +371,7 @@ class Golf extends Component {
   }
 
   drawBalls() {
-    const { balls } = this.state;
+    const { balls, canvasHeight } = this.state;
     const { game } = this.props;
     const players = Object.values(game.players);
 
@@ -321,9 +379,18 @@ class Golf extends Component {
     for (let i = 0; i < len; i++) {
       const player = players[i];
       const pos = balls[player.ballIndex].interpolatedPosition;
-      drawBall(pos[0], pos[1], player.color, 'gray', player.state);
+      drawBall(
+        pos[0],
+        pos[1],
+        "gray",
+        player.color,
+        player.ballIndex,
+        player.state,
+        player.showNameTag,
+        player.name,
+        canvasHeight
+      );
     }
-
 
     // players.forEach((player) => {
     //   // Don't render ghost for the current player
@@ -345,7 +412,6 @@ class Golf extends Component {
   drawGround() {
     const { level, canvasHeight, canvasWidth } = this.state;
     const { points } = level;
-
 
     ctx.fillStyle = level.color;
     const groundLineWidth = 3;
@@ -375,50 +441,72 @@ class Golf extends Component {
 
   drawLevelCompleteHud() {
     const {
-      nextLevelTimer, level, canvasHeight, canvasWidth, leaderboard,
+      nextLevelTimer,
+      level,
+      canvasHeight,
+      canvasWidth,
+      leaderboard,
     } = this.state;
     const { game } = this.props;
-    ctx.font = '24px roboto';
-    ctx.fillStyle = '#000000';
-    ctx.fillText('Level completed!', 15, 24);
-    ctx.font = '20px roboto';
-    ctx.textAlign = 'right';
+    ctx.font = "24px roboto";
+    ctx.fillStyle = "#000000";
+    ctx.fillText("Level completed!", 15, 24);
+    ctx.font = "20px roboto";
+    ctx.textAlign = "right";
     ctx.fillText(`pin: ${game.gameId}`, canvasWidth - 20, 24);
-    ctx.textAlign = 'left';
-
+    ctx.textAlign = "left";
 
     const timeRemaining = Math.floor((nextLevelTimer - Date.now()) / 1000);
     ctx.fillText(timeRemaining, canvasWidth / 2, 24);
     for (let i = 0; i < leaderboard.length; i++) {
       const data = leaderboard[i];
-      ctx.fillText(`${game.players[data.playerKey].name}: ${data.totalScore} poäng`, canvasWidth / 2, 60 + (30 * i));
+      ctx.fillText(
+        `${game.players[data.playerKey].name}: ${data.totalScore} poäng`,
+        canvasWidth / 2,
+        60 + 30 * i
+      );
     }
   }
 
   drawPlayHud() {
     const {
-      expTime, level, canvasHeight, canvasWidth, soundEffects, scorers,
+      expTime,
+      level,
+      canvasHeight,
+      canvasWidth,
+      soundEffects,
+      scorers,
     } = this.state;
     const { game } = this.props;
-    ctx.font = '24px roboto';
-    ctx.fillStyle = '#000000';
+    ctx.font = "24px roboto";
+    ctx.fillStyle = "#000000";
     ctx.fillText(`Hole ${game.minigame.round} Par ${level.par}`, 15, 24);
-    ctx.font = '20px roboto';
-    ctx.textAlign = 'right';
+    ctx.font = "20px roboto";
+    ctx.textAlign = "right";
     ctx.fillText(`pin: ${game.gameId}`, canvasWidth - 30, 24);
-    ctx.textAlign = 'left';
+    ctx.textAlign = "left";
 
     const timeRemaining = Math.floor((expTime - Date.now()) / 1000);
     if (timeRemaining === 10) {
       soundEffects.countdown.audio.play();
     }
-    ctx.textAlign = 'center';
+    ctx.textAlign = "center";
     ctx.fillText(timeRemaining, canvasWidth / 2, 24);
-    ctx.textAlign = 'left';
+    ctx.textAlign = "left";
     const scoredTextHeight = 40;
-    scorers.filter(x => x.hole === game.minigame.round)
+    scorers
+      .filter((x) => x.hole === game.minigame.round)
       .slice(0, 3)
-      .forEach((s, index) => ctx.fillText(`${game.players[s.playerKey].name} gjorde ${util.getScoreName(s.strokes, s.par)} efter ${s.time} sekunder`, canvasWidth / 2, scoredTextHeight * (1 + index)));
+      .forEach((s, index) =>
+        ctx.fillText(
+          `${game.players[s.playerKey].name} gjorde ${util.getScoreName(
+            s.strokes,
+            s.par
+          )} efter ${s.time} sekunder`,
+          canvasWidth / 2,
+          scoredTextHeight * (1 + index)
+        )
+      );
 
     // Object.values(game.players).filter(x => x.state === 'SCORED')
     //   .sort((a, b) => a.scoreTime > b.scoreTime)
@@ -439,10 +527,12 @@ class Golf extends Component {
 
   swing(velocity, ballIndex, test) {
     const { balls, holeSensor, soundEffects } = this.state;
-    const { game: { players } } = this.props;
+    const {
+      game: { players },
+    } = this.props;
     const clubtype = util.identifyClubType(velocity);
     const power = velocity.x + velocity.y;
-    const soundEffect = soundEffects[clubtype].find(x => power > x.minpower);
+    const soundEffect = soundEffects[clubtype].find((x) => power > x.minpower);
     // ljudet borde styras mer av var på banan jag slår. spawn så är det en ren smäll. utanför spawn så är det lite mer "gräsljud"?
     // iron och wood blir samma. wood ska jag inte kunna välja utanför spawn?
     if (soundEffect) {
@@ -450,8 +540,9 @@ class Golf extends Component {
       soundEffect.audio.play();
     }
 
-    const ballToHit = balls.find(b => b.ballIndex === ballIndex);
-    players[ballToHit.playerKey].state = 'MOVING';
+    const ballToHit = balls.find((b) => b.ballIndex === ballIndex);
+    players[ballToHit.playerKey].state = "MOVING";
+    players[ballToHit.playerKey].showNameTag = false;
 
     const holeX = holeSensor.interpolatedPosition[0];
     const ballX = ballToHit.interpolatedPosition[0];
@@ -476,11 +567,13 @@ class Golf extends Component {
   init() {
     const { game } = this.props;
     const { canvasHeight, canvasWidth } = this.state;
-    canvas = document.getElementById('golfcanvas');
-    ctx = canvas.getContext('2d');
+    canvas = document.getElementById("golfcanvas");
+    ctx = canvas.getContext("2d");
     ctx.lineWidth = 5;
 
-    const level = util.addHolePoints(util.levelGen(canvasWidth, canvasHeight, false));
+    const level = util.addHolePoints(
+      util.levelGen(canvasWidth, canvasHeight, false)
+    );
     const world = util.createWorld();
 
     //
@@ -507,14 +600,18 @@ class Golf extends Component {
       ball.strokes = 0;
       ball.lastPos = [...ball.position];
       world.addBody(ball);
-      const player = Object.assign({
-        ballIndex: i,
-        key: playerKeys[i],
-        color: playerColors[i],
-        state: 'STILL',
-        distance: util.getDistanceYards(level.hole[0], level.spawn[0]),
-        score: 0,
-      }, game.players[playerKeys[i]]);
+      const player = Object.assign(
+        {
+          ballIndex: i,
+          key: playerKeys[i],
+          color: playerColors[i],
+          state: "STILL",
+          distance: util.getDistanceYards(level.hole[0], level.spawn[0]),
+          score: 0,
+          showNameTag: false,
+        },
+        game.players[playerKeys[i]]
+      );
       balls.push(ball);
       createdPlayers.push(player);
     }
@@ -529,14 +626,13 @@ class Golf extends Component {
       expTime: Date.now() + level.time,
     }));
 
-    createdPlayers.forEach(player => this.initControllerListener(player));
+    createdPlayers.forEach((player) => this.initControllerListener(player));
     // event ball in hole
     this.setEventHandlers(world);
 
     this.syncToFirebase(createdPlayers, level);
     requestAnimationFrame(this.animate);
   }
-
 
   syncPlayersToFirebase(players) {
     const { game, gameFunc } = this.props;
@@ -563,7 +659,7 @@ class Golf extends Component {
       result[player.key] = player;
       return result;
     }, game.players);
-    game.status = 'IN_PROGRESS';
+    game.status = "IN_PROGRESS";
     game.minigame.levelColor = level.color;
     game.currentPar = level.par;
     game.minigame.round = 1;
@@ -579,14 +675,14 @@ class Golf extends Component {
     const { game, gameFunc } = this.props;
     const { soundEffects, leaderboard } = this.state;
     if (`${game.minigame.round}` === game.minigame.holes) {
-      game.minigame.leaderboard = leaderboard.map(x => ({
+      game.minigame.leaderboard = leaderboard.map((x) => ({
         ...x,
         currentRoundScore: null,
       }));
-      game.phase = 'final_result';
+      game.phase = "final_result";
     } else {
       soundEffects.golfclap.audio.play();
-      game.phase = 'level_completed';
+      game.phase = "level_completed";
       this.setState(() => ({
         nextLevelTimer: Date.now() + MATCH_OVER_MS,
       }));
@@ -596,7 +692,9 @@ class Golf extends Component {
 
   animate(time) {
     const { world } = this.state;
-    const { game: { phase } } = this.props;
+    const {
+      game: { phase },
+    } = this.props;
     requestAnimationFrame(this.animate);
 
     const deltaTime = lastTime ? (time - lastTime) / 400 : 0;
@@ -606,7 +704,7 @@ class Golf extends Component {
     world.step(fixedTimeStep, deltaTime, maxSubSteps);
     lastTime = time;
 
-    if (phase === 'gameplay') {
+    if (phase === "gameplay") {
       this.ensurePlayersInBounds();
       this.renderFrame();
       this.drawPlayHud();
@@ -614,7 +712,7 @@ class Golf extends Component {
         this.distributeScore();
         this.nextPhase();
       }
-    } else if (phase === 'level_completed') {
+    } else if (phase === "level_completed") {
       this.renderFrame();
       this.drawLevelCompleteHud();
       if (this.isLoadNextLevel()) {
@@ -635,13 +733,13 @@ class Golf extends Component {
 
   loadNextLevel() {
     const { game, gameFunc } = this.props;
-    const {
-      balls, canvasHeight, canvasWidth,
-    } = this.state;
+    const { balls, canvasHeight, canvasWidth } = this.state;
     // börja med att testa att bara updatera states bodies med nya värden. annars kanske jag måste köra remove body på world. eller world.clear();
     // frågan är om events.on är kvar?
 
-    const level = util.addHolePoints(util.levelGen(canvasWidth, canvasHeight, false));
+    const level = util.addHolePoints(
+      util.levelGen(canvasWidth, canvasHeight, false)
+    );
     const world = util.createWorld();
     //
     const groundBodies = util.createGround(level);
@@ -654,10 +752,7 @@ class Golf extends Component {
     world.addBody(createdHoleSensor);
 
     balls.forEach((ball) => {
-      ball.position = [
-        level.spawn[0],
-        level.spawn[1] - BALL_RADIUS,
-      ];
+      ball.position = [level.spawn[0], level.spawn[1] - BALL_RADIUS];
       ball.velocity = [0, 0];
       ball.scored = false;
       ball.strokes = 0;
@@ -671,11 +766,12 @@ class Golf extends Component {
     // sätt alla players state till STILL, nollställ swing och distance
 
     // sätt alla bollars pos till level.spawn.
-    const playerUpdates = Object.values(game.players).map(p => ({
-      ...p,
-      state: 'STILL',
-      distance: util.getDistanceYards(level.hole[0], level.spawn[0]),
-    }))
+    const playerUpdates = Object.values(game.players)
+      .map((p) => ({
+        ...p,
+        state: "STILL",
+        distance: util.getDistanceYards(level.hole[0], level.spawn[0]),
+      }))
       .reduce((_result, player) => {
         const result = _result;
         result[player.key] = player;
@@ -692,7 +788,7 @@ class Golf extends Component {
       expTime: Date.now() + level.time,
     }));
 
-    game.phase = 'gameplay';
+    game.phase = "gameplay";
     game.players = playerUpdates;
     game.minigame.round += 1;
     this.saveGame(game);
@@ -714,10 +810,15 @@ class Golf extends Component {
 
     const players = Object.values(game.players);
     // give default penalty scores to players who didnt score on this round
-    const currentScorers = _scorers.filter(x => x.hole === game.minigame.round);
+    const currentScorers = _scorers.filter(
+      (x) => x.hole === game.minigame.round
+    );
     if (!currentScorers || currentScorers.length < players.length) {
       players.forEach((player) => {
-        if (!currentScorers || !currentScorers.some(x => x.playerKey === player.key)) {
+        if (
+          !currentScorers ||
+          !currentScorers.some((x) => x.playerKey === player.key)
+        ) {
           const scorer = {
             playerKey: player.key,
             par: level.par,
@@ -732,50 +833,89 @@ class Golf extends Component {
 
     let board;
     switch (game.minigame.scoremode) {
-      case 'strokes':
-
-        board = players.map((player) => {
-          const totalScore = completteScorers.filter(x => x.playerKey === player.key);
-          const currentScore = totalScore.find(x => x.hole === game.minigame.round);
-          const playerScore = {
-            currentRoundScore: util.calculateStrokeScore(currentScore.strokes, level),
-            totalScore: totalScore.reduce((r, s) => r + util.calculateStrokeScore(s.strokes, level), 0),
-            playerKey: player.key,
-          };
-          return playerScore;
-        }).sort((a, b) => b.totalScore - a.totalScore);
-        break;
-      case 'time':
-        board = players.map((player) => {
-          const totalScore = completteScorers.filter(x => x.playerKey === player.key);
-          const currentScore = totalScore.find(x => x.hole === game.minigame.round);
-          const playerScore = {
-            currentRoundScore: util.calculateTimeScore(currentScore.time, level),
-            totalScore: totalScore.reduce((r, s) => r + util.calculateTimeScore(s.time, level), 0),
-            playerKey: player.key,
-          };
-          return playerScore;
-        })
+      case "strokes":
+        board = players
+          .map((player) => {
+            const totalScore = completteScorers.filter(
+              (x) => x.playerKey === player.key
+            );
+            const currentScore = totalScore.find(
+              (x) => x.hole === game.minigame.round
+            );
+            const playerScore = {
+              currentRoundScore: util.calculateStrokeScore(
+                currentScore.strokes,
+                level
+              ),
+              totalScore: totalScore.reduce(
+                (r, s) => r + util.calculateStrokeScore(s.strokes, level),
+                0
+              ),
+              playerKey: player.key,
+            };
+            return playerScore;
+          })
           .sort((a, b) => b.totalScore - a.totalScore);
         break;
-      case 'compedetive':
-      // fixa till. rälkna ut poäng genom strokes och level.par
-      // sätt ett max antal slag till 10, hämta från constants
-      // fixa namn på alla scored i constans? -2 = eagle +2 = double boogie etc +5 vad heter det?
-      // använd namnen vid drawPlayHud
-        board = players.map((player) => {
-          const totalScore = completteScorers.filter(x => x.playerKey === player.key);
-          const currentScore = totalScore.find(x => x.hole === game.minigame.round);
-          const playerScore = {
-            currentRoundScore: currentScore.strokes - currentScore.par,
-            totalScore: totalScore.reduce((r, s) => r + (s.strokes - currentScore.par), 0),
-            playerKey: player.key,
-          };
-          return playerScore;
-        }).sort((a, b) => a.totalScore - b.totalScore);
+      case "time":
+        board = players
+          .map((player) => {
+            const totalScore = completteScorers.filter(
+              (x) => x.playerKey === player.key
+            );
+            const currentScore = totalScore.find(
+              (x) => x.hole === game.minigame.round
+            );
+            const playerScore = {
+              currentRoundScore: util.calculateTimeScore(
+                currentScore.time,
+                level
+              ),
+              totalScore: totalScore.reduce(
+                (r, s) => r + util.calculateTimeScore(s.time, level),
+                0
+              ),
+              playerKey: player.key,
+            };
+            return playerScore;
+          })
+          .sort((a, b) => b.totalScore - a.totalScore);
         break;
-      case 'position':
-        // läg till för positon likt manygolf. strokes och sen time avgör vilken position som ges
+      case "compedetive":
+        // fixa till. rälkna ut poäng genom strokes och level.par
+        // sätt ett max antal slag till 10, hämta från constants
+        // fixa namn på alla scored i constans? -2 = eagle +2 = double boogie etc +5 vad heter det?
+        // använd namnen vid drawPlayHud
+        board = players
+          .map((player) => {
+            const totalScore = completteScorers.filter(
+              (x) => x.playerKey === player.key
+            );
+            const currentScore = totalScore.find(
+              (x) => x.hole === game.minigame.round
+            );
+            // 1.
+            // måste lägga till en koll på om man hann i hålet. om man inte hann ner i hålet får man PENALTY_STROKES. det är maxstroke + 1?
+            // kom man i hålet på över maxstroke så får man maxstroke också.
+
+            // 2. testa deploya detta till githubpages...
+            //    antar att det var typ githubpages deploy bara? kanske något bygg steg. googla lite.
+
+            //kan kolla på player.state för att se om man är i hålt eller? "scored"?
+            const playerScore = {
+              currentRoundScore: currentScore.strokes - currentScore.par,
+              totalScore: totalScore.reduce(
+                (r, s) => r + (s.strokes - currentScore.par),
+                0
+              ),
+              playerKey: player.key,
+            };
+            return playerScore;
+          })
+          .sort((a, b) => a.totalScore - b.totalScore);
+        break;
+      case "position":
+        //TODO läg till för positon likt manygolf. strokes och sen time avgör vilken position som ges
         break;
       default:
         break;
@@ -786,20 +926,49 @@ class Golf extends Component {
     }));
   }
 
-
   initControllerListener(player) {
     const { game } = this.props;
     const { balls } = this.state;
-    const swingRef = fireGolf.database().ref(`/games/${game.key}/players/${player.key}/swing`);
+    const swingRef = fireGolf
+      .database()
+      .ref(`/games/${game.key}/players/${player.key}/swing`);
+    //har kan jag lägga till en ref för att se var man är på kartan. man togglar den på av flaggan?
+    //Knapp "find my ball" som då visar flagga med namn ovanför bollen. den döljs från och med nästa slag. tills man trycker find my ball igen..
+    //så får nog vara en int eller något som räknas upp här i lyssnare?
+
+    //JA en lokal bool här som sätts till true vid en ändring här i lyssnaren (int som räknas upp eller vad som)
+    //sen lokalt har vi en bool också som sätts till false efter en swing.
+    //så en ball/player behöver ha en bool "showPlayerName" den är default false. men kan bli true här i lyssnaren.
+    //och sen sätts den tillbaka till false efter varje swing.
+
     const that = this;
-    swingRef.on('value', (snapshot) => {
+    swingRef.on("value", (snapshot) => {
       const { game: _game } = that.props;
       const currentPlayer = _game.players[player.key];
       const swingData = snapshot.val();
       if (swingData) {
         that.swing(swingData, currentPlayer.ballIndex);
       } else {
-        console.log('move error');
+        console.log("move error");
+      }
+    });
+
+    const findMyBallRef = fireGolf
+      .database()
+      .ref(`/games/${game.key}/players/${player.key}/showNameTag`);
+
+    findMyBallRef.on("value", (snapshot) => {
+      const { game: _game } = that.props;
+      const currentPlayer = _game.players[player.key];
+      const findData = snapshot.val();
+
+      if (findData) {
+        currentPlayer.showNameTag = true;
+        // this.setState(() => ({ balls })); kanske behöver trigga denna?
+      } else {
+        currentPlayer.showNameTag = false;
+
+        console.log("findmyball error");
       }
     });
   }
@@ -819,7 +988,7 @@ class Golf extends Component {
     if (now > expTime) {
       return true;
     }
-    if (!balls.some(x => !x.scored)) {
+    if (!balls.some((x) => !x.scored)) {
       return true;
     }
     return false;
@@ -841,12 +1010,19 @@ class Golf extends Component {
   // informationen mellan varje bana är i en annan phase? en annan komponent?
   render() {
     const {
-      canvasHeight, canvasWidth, testClubIndex, testacceleration, testBallIndex, balls,
+      canvasHeight,
+      canvasWidth,
+      testClubIndex,
+      testacceleration,
+      testBallIndex,
+      balls,
     } = this.state;
     return (
       <div className="phase-container" id="golfboard">
         <canvas id="golfcanvas" height={canvasHeight} width={canvasWidth} />
-        <button type="button" onClick={this.testSwing}>swing</button>
+        <button type="button" onClick={this.testSwing}>
+          swing
+        </button>
         <FormControl>
           <InputLabel htmlFor="clubc-required">Club</InputLabel>
           <Select
@@ -854,13 +1030,14 @@ class Golf extends Component {
             onChange={this.handleChangeSelect}
             name="testClubIndex"
             inputProps={{
-              id: 'club-required',
+              id: "club-required",
             }}
           >
             {CLUBS.map((c, index) => (
-              <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+              <MenuItem key={c.id} value={c.id}>
+                {c.name}
+              </MenuItem>
             ))}
-
           </Select>
         </FormControl>
         <TextField
@@ -869,25 +1046,26 @@ class Golf extends Component {
           type="number"
           value={testacceleration}
           margin="normal"
-          onChange={this.handleChange('testacceleration')}
+          onChange={this.handleChange("testacceleration")}
         />
-        { balls && (
-        <FormControl>
-          <InputLabel htmlFor="ball-required">Ball</InputLabel>
-          <Select
-            value={testBallIndex || 0}
-            onChange={this.handleChangeSelect}
-            name="testBallIndex"
-            inputProps={{
-              id: 'ball-required',
-            }}
-          >
-            {balls.map((b, index) => (
-              <MenuItem key={b.ballIndex} value={b.ballIndex}>{b.ballIndex}</MenuItem>
-            ))}
-
-          </Select>
-        </FormControl>
+        {balls && (
+          <FormControl>
+            <InputLabel htmlFor="ball-required">Ball</InputLabel>
+            <Select
+              value={testBallIndex || 0}
+              onChange={this.handleChangeSelect}
+              name="testBallIndex"
+              inputProps={{
+                id: "ball-required",
+              }}
+            >
+              {balls.map((b, index) => (
+                <MenuItem key={b.ballIndex} value={b.ballIndex}>
+                  {b.ballIndex}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         )}
       </div>
     );

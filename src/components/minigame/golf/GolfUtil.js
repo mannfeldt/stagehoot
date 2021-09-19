@@ -1,6 +1,6 @@
-import { sample } from 'lodash';
-import tinycolor from 'tinycolor2';
-import * as p2 from 'p2';
+import { sample } from "lodash";
+import tinycolor from "tinycolor2";
+import * as p2 from "p2";
 import {
   HOLE_HEIGHT,
   HOLE_CURVE_DEPTH,
@@ -9,7 +9,7 @@ import {
   BALL_RADIUS,
   CLUBS,
   SCORE_TERMS,
-} from './GolfConstants';
+} from "./GolfConstants";
 
 /* get an int between min and max inclusive */
 function randInt(min, max) {
@@ -93,10 +93,7 @@ function newBall(position) {
 }
 // spawn: I.List<number>
 export function createBall(spawn) {
-  return newBall([
-    spawn[0],
-    spawn[1] - BALL_RADIUS,
-  ]);
+  return newBall([spawn[0], spawn[1] - BALL_RADIUS]);
 }
 export function getDistanceYards(a, b) {
   if (a > b) {
@@ -107,12 +104,12 @@ export function getDistanceYards(a, b) {
 export function identifyClubType(velocity) {
   const yRatio = velocity.y / (velocity.x + velocity.y);
   const loft = yRatio * 90;
-  if (loft < 5) return 'putt';
-  const firstIron = CLUBS.find(x => x.type === 'iron');
+  if (loft < 5) return "putt";
+  const firstIron = CLUBS.find((x) => x.type === "iron");
   if (loft < firstIron.loft - 1) {
-    return 'wood';
+    return "wood";
   }
-  return 'iron';
+  return "iron";
 }
 export function createBallFromInitial(position, velocity) {
   const ball = newBall(position);
@@ -121,8 +118,8 @@ export function createBallFromInitial(position, velocity) {
 }
 export function createAudio(file) {
   const snd = new Audio();
-  const src = document.createElement('source');
-  src.type = 'audio/mpeg';
+  const src = document.createElement("source");
+  src.type = "audio/mpeg";
   src.src = file;
   snd.appendChild(src);
   return snd;
@@ -139,9 +136,9 @@ export function getSwingData(club, acceleration) {
 }
 
 export function getScoreName(strokes, par) {
-  if (strokes === 1) return 'Hole in one!';
+  if (strokes === 1) return "Hole in one!";
   const score = strokes - par;
-  const term = SCORE_TERMS.find(x => x.score === score);
+  const term = SCORE_TERMS.find((x) => x.score === score);
   if (term) return term.name;
   return `${score} over par`;
 }
@@ -168,14 +165,14 @@ export function validateSwingMovement(acceleration, clubIndex) {
 
   const club = CLUBS[clubIndex];
   switch (club.type) {
-    case 'wood':
-    // z måste vara negativ och den får inte vara mer än 50% av xpower
+    case "wood":
+      // z måste vara negativ och den får inte vara mer än 50% av xpower
       return xpower > zpower;
-    case 'iron':
+    case "iron":
       if (acceleration.z < 0) return false;
       const angleRatio = xpower / zpower;
       return angleRatio > 0.5 && angleRatio < 5;
-    case 'putt':
+    case "putt":
       return xpower / 2 > zpower;
     default:
       break;
@@ -188,7 +185,7 @@ export function addHolePoints(level) {
 
   // points has to start with x=0 and end with x=WIDTH
   if (level.points[0][0] !== 0) {
-    throw new Error('invalid points: first x !== 0');
+    throw new Error("invalid points: first x !== 0");
   }
   if (level.points[level.points.length - 1][0] !== width) {
     throw new Error(`invalid points: last x !== WIDTH (${width})`);
@@ -196,18 +193,20 @@ export function addHolePoints(level) {
 
   // insert hole
   // get the first point after the hole...
-  const idxAfterHole = level.points.findIndex(point => point[0] > level.hole[0]);
+  const idxAfterHole = level.points.findIndex(
+    (point) => point[0] > level.hole[0]
+  );
   // const idxAfterHole = level.points.findIndex(point => point.get(0) > level.hole.get(0));
 
   const x1 = level.hole[0] - HOLE_WIDTH / 2;
   const x2 = level.hole[0] + HOLE_WIDTH / 2;
 
   if (x1 <= level.points[idxAfterHole - 1][0]) {
-    throw new Error('invalid points: hole x1 cannot be <= the previous x');
+    throw new Error("invalid points: hole x1 cannot be <= the previous x");
   }
 
   if (x2 >= level.points[idxAfterHole][0]) {
-    throw new Error('invalid points: hole x2 cannot be >= the previous x');
+    throw new Error("invalid points: hole x2 cannot be >= the previous x");
   }
 
   // ...then insert hole between points
@@ -232,8 +231,8 @@ export function createGround(level) {
   // This used to create a single ground shape.
   // Now it creates 3 because this mysteriously fixes a bug where the ground after the hole wasn't
   // working correctly? man I don't even know
-  const beforeHole = level.points.filter(point => point[0] < level.hole[0]);
-  const afterHole = level.points.filter(point => point[0] > level.hole[0]);
+  const beforeHole = level.points.filter((point) => point[0] < level.hole[0]);
+  const afterHole = level.points.filter((point) => point[0] > level.hole[0]);
 
   const vertsBeforeHole = beforeHole.concat([
     [beforeHole[beforeHole.length - 1][0], height],
@@ -294,10 +293,7 @@ export function createHoleSensor(pos) {
 
   // Sensor is purposely built halfway into the ground so top edge collisions are avoided
   const sensorBody = new p2.Body({
-    position: [
-      pos[0],
-      pos[1] + (Math.ceil(HOLE_HEIGHT * 1.4)),
-    ],
+    position: [pos[0], pos[1] + Math.ceil(HOLE_HEIGHT * 1.4)],
   });
   sensorBody.damping = 0;
   sensorBody.addShape(sensorShape);
@@ -335,14 +331,14 @@ export function getSegmentWidths(totalWidth, minWidth) {
 }
 export function calculateStrokeScore(strokes, level) {
   const parScore = {
-    3: strokes === 1 ? 25 : 25 - (strokes * 2),
-    4: strokes === 1 ? 25 : 25 - (strokes * 2),
-    5: strokes === 1 ? 25 : 25 - (strokes * 2),
+    3: strokes === 1 ? 25 : 25 - strokes * 2,
+    4: strokes === 1 ? 25 : 25 - strokes * 2,
+    5: strokes === 1 ? 25 : 25 - strokes * 2,
   };
   return Math.abs(Math.round(parScore[level.par]));
 }
 export function calculateTimeScore(scoretime, level) {
-  return Math.round((((level.time / 1000) * 1.5) - scoretime) / 10);
+  return Math.round(((level.time / 1000) * 1.5 - scoretime) / 10);
 }
 export function getPlayerColors(len) {
   const goldenRatio = 0.618033988749895;
@@ -368,13 +364,10 @@ export function getPlayerColors(len) {
 export function levelGen(width, height, test) {
   if (test) {
     const testLevel = {
-      points: [
-        [0, 400],
-        [width, 400],
-      ],
+      points: [[0, 400], [width, 400]],
       hole: [width / 1.5, 400],
       spawn: [100, 400],
-      color: 'brown',
+      color: "brown",
       par: 4,
       height,
       time: 20 * 1000,
@@ -404,13 +397,17 @@ export function levelGen(width, height, test) {
   const parSetting = {
     hole: {
       5: numSegments - randInt(2, Math.floor(numSegments / 4)),
-      4: numSegments - randInt(Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)),
-      3: numSegments - randInt(Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)),
+      4:
+        numSegments -
+        randInt(Math.floor(numSegments / 4), Math.floor(numSegments / 2.5)),
+      3:
+        numSegments -
+        randInt(Math.floor(numSegments / 2.5), Math.floor(numSegments / 2)),
     },
     time: {
       5: 100 * 1000,
-      4: 80 * 1000,
-      3: 60 * 1000,
+      4: 90 * 1000,
+      3: 80 * 1000,
     },
     flatRatio: {
       5: 40,
@@ -435,8 +432,8 @@ export function levelGen(width, height, test) {
   for (let idx = 0; idx <= numSegments; idx++) {
     const segmentWidth = segmentWidths[idx - 1];
 
-    let x; let
-      y;
+    let x;
+    let y;
 
     if (idx === 0) {
       x = 0;
@@ -463,12 +460,12 @@ export function levelGen(width, height, test) {
         // clamp high/low bounds so that if they go out of screen bounds, the bounds shift to
         // contain the same range but clamped
         if (boundLow < minY) {
-          boundHigh -= (boundLow - minY);
+          boundHigh -= boundLow - minY;
           boundLow = minY;
         }
 
         if (boundHigh > maxY) {
-          boundLow -= (boundHigh - maxY);
+          boundLow -= boundHigh - maxY;
           boundHigh = maxY;
         }
 

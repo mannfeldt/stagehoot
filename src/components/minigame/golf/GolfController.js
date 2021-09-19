@@ -1,14 +1,14 @@
-import React, { Component, Fragment } from 'react';
-import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import ReactSpeedometer from 'react-d3-speedometer';
-import * as util from './GolfUtil';
-import { fireGolf } from '../../../base';
-import './golf.css';
+import React, { Component, Fragment } from "react";
+import { Typography } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
+import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu";
+import ReactSpeedometer from "react-d3-speedometer";
+import * as util from "./GolfUtil";
+import { fireGolf } from "../../../base";
+import "./golf.css";
 import {
   MAX_POWER,
   MIN_POWER,
@@ -17,35 +17,35 @@ import {
   AIR_COLOR,
   GRASS_COLOR,
   BALL_RADIUS_CONTROLLER,
-} from './GolfConstants';
-import driverIcon from './img/driverIcon.svg';
-import ironIcon from './img/ironIcon.svg';
-import putterIcon from './img/putterIcon.svg';
-import golfbagIcon from './img/golfbag.svg';
-import fingerprintIcon from './img/fingerprint.svg';
+} from "./GolfConstants";
+import driverIcon from "./img/driverIcon.svg";
+import ironIcon from "./img/ironIcon.svg";
+import putterIcon from "./img/putterIcon.svg";
+import golfbagIcon from "./img/golfbag.svg";
+import fingerprintIcon from "./img/fingerprint.svg";
+import skyImage from "./img/sky.png";
 
-const styles = theme => ({
+const styles = (theme) => ({
   container: {
-    height: '100vh',
-    width: '100vw',
+    height: "100vh",
+    width: "100vw",
   },
-  canvas: {
-  },
+  canvas: {},
   header: {
     height: 80,
   },
   footer: {
     height: 180,
-    marginTop: '-4px',
+    marginTop: "-4px",
   },
   clubwrapper: {
-    display: 'flex',
-    marginTop: '-120px',
-    position: 'absolute',
-    alignItems: 'flex-end',
+    display: "flex",
+    marginTop: "-120px",
+    position: "absolute",
+    alignItems: "flex-end",
   },
   menuitemicon: {
-    height: '100%',
+    height: "100%",
     paddingRight: 10,
   },
 });
@@ -77,10 +77,13 @@ function drawSwing(swingData) {
   // så en liten eller stor swing blir lika
 
   // skapa en förutbestämd bana och använd bara x från swingen?
-  const prevSwing = { y: canvas.height / 2 - (BALL_RADIUS_CONTROLLER * 2), x: canvas.width / 2 };
+  const prevSwing = {
+    y: canvas.height / 2 - BALL_RADIUS_CONTROLLER * 2,
+    x: canvas.width / 2,
+  };
   for (let i = 0; i < len; i++) {
-    const newY = prevSwing.y + (Math.round(swingData[i].z));
-    const newX = prevSwing.x + (Math.round(swingData[i].x));
+    const newY = prevSwing.y + Math.round(swingData[i].z);
+    const newX = prevSwing.x + Math.round(swingData[i].x);
     ctx.beginPath();
     ctx.moveTo(prevSwing.x, prevSwing.y);
     ctx.lineTo(newX, newY);
@@ -98,23 +101,27 @@ function drawEnvironment(x, y, groundColor, stroke) {
   // AIR_COLOR är överdelen
 }
 function drawStrokes(x, y, strokes) {
-  ctx.font = '28px roboto';
-  ctx.fillStyle = '#000000';
-  ctx.textAlign = 'center';
+  ctx.font = "28px roboto";
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "center";
   ctx.fillText(`Slag: ${strokes}`, x, y);
 }
 
 function drawDistance(x, y, distance) {
-  ctx.font = '24px roboto';
-  ctx.fillStyle = '#000000';
-  ctx.textAlign = 'center';
+  ctx.font = "24px roboto";
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "center";
   ctx.fillText(`Distance: ${distance} yards`, x, y);
 }
 function drawScoreText(x, y, player, strokes) {
-  ctx.font = '22px roboto';
-  ctx.fillStyle = '#000000';
-  ctx.textAlign = 'center';
-  ctx.fillText(`You scored with ${strokes} strokes in ${player.scoreTime} seconds`, x, y);
+  ctx.font = "22px roboto";
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    `You scored with ${strokes} strokes in ${player.scoreTime} seconds`,
+    x,
+    y
+  );
 }
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -159,79 +166,95 @@ class GolfController extends Component {
   }
 
   componentDidMount() {
-    canvas = document.getElementById('swingcanvas');
-    ctx = canvas.getContext('2d');
+    canvas = document.getElementById("swingcanvas");
+    ctx = canvas.getContext("2d");
     ctx.translate(0.5, 0.5);
     const that = this;
-    canvas.addEventListener('touchstart', (e) => {
-      const event = e || window.event;
-      event.preventDefault();
-      event.stopPropagation();
-      that.setState(() => {
-        const highestAcceleration = 0;
-        const swingData = [];
-        const isSwinging = true;
-        return { highestAcceleration, swingData, isSwinging };
-      });
-      // this.renderFrame();
+    canvas.addEventListener(
+      "touchstart",
+      (e) => {
+        const event = e || window.event;
+        event.preventDefault();
+        event.stopPropagation();
+        that.setState(() => {
+          const highestAcceleration = 0;
+          const swingData = [];
+          const isSwinging = true;
+          return { highestAcceleration, swingData, isSwinging };
+        });
+        // this.renderFrame();
 
-      // e.preventDefault();
-    }, false);
+        // e.preventDefault();
+      },
+      false
+    );
 
-    canvas.addEventListener('touchend', (e) => {
-      const event = e || window.event;
-      event.preventDefault();
-      event.stopPropagation();
-      const { highestAcceleration, clubIndex } = that.state;
-      that.setState(() => {
-        const isSwinging = false;
-        return { isSwinging };
-      });
-      this.saveSwing(highestAcceleration, clubIndex);
-      // this.renderFrame();
-      // e.preventDefault();
-    }, false);
+    canvas.addEventListener(
+      "touchend",
+      (e) => {
+        const event = e || window.event;
+        event.preventDefault();
+        event.stopPropagation();
+        const { highestAcceleration, clubIndex } = that.state;
+        that.setState(() => {
+          const isSwinging = false;
+          return { isSwinging };
+        });
+        this.saveSwing(highestAcceleration, clubIndex);
+        // this.renderFrame();
+        // e.preventDefault();
+      },
+      false
+    );
 
+    window.addEventListener(
+      "devicemotion",
+      (e) => {
+        const event = e || window.event;
+        event.preventDefault();
+        event.stopPropagation();
+        const {
+          isSwinging,
+          swingData,
+          highestAcceleration,
+          clubIndex,
+        } = that.state;
+        if (isSwinging) {
+          const { x, y, z } = event.acceleration;
+          swingData.push({
+            x: Math.round(x * 2),
+            y: Math.round(y * 2),
+            z: Math.round(z * 2),
+          });
+          // this.drawSwing([{ x: Math.round(x * 2), y: Math.round(y * 2), z: Math.round(z * 2) }]);
 
-    window.addEventListener('devicemotion', (e) => {
-      const event = e || window.event;
-      event.preventDefault();
-      event.stopPropagation();
-      const {
-        isSwinging, swingData, highestAcceleration, clubIndex,
-      } = that.state;
-      if (isSwinging) {
-        const { x, y, z } = event.acceleration;
-        swingData.push({ x: Math.round(x * 2), y: Math.round(y * 2), z: Math.round(z * 2) });
-        // this.drawSwing([{ x: Math.round(x * 2), y: Math.round(y * 2), z: Math.round(z * 2) }]);
+          // hur är detta legit? både x och z kan ju vara minusvärden? jag borde lägga om dem till positiva?
+          // eller kan jag använda detta för att bara mäta nersvingen?? genom att bara läsa av negative eller positiva värden
+          // vilekt som nu är neråt
+          // måste göra flera tester, ska y inte tas med?
+          // koppla i telefonen och debuga
+          const xpower = Math.abs(x);
+          const zpower = Math.abs(z);
 
-        // hur är detta legit? både x och z kan ju vara minusvärden? jag borde lägga om dem till positiva?
-        // eller kan jag använda detta för att bara mäta nersvingen?? genom att bara läsa av negative eller positiva värden
-        // vilekt som nu är neråt
-        // måste göra flera tester, ska y inte tas med?
-        // koppla i telefonen och debuga
-        const xpower = Math.abs(x);
-        const zpower = Math.abs(z);
+          const power = Math.floor(xpower + zpower);
+          // const power2 = Math.floor(Math.abs(y) + Math.abs(z));
+          // const power3 = Math.floor(Math.abs(x) + Math.abs(y));
 
-        const power = Math.floor(xpower + zpower);
-        // const power2 = Math.floor(Math.abs(y) + Math.abs(z));
-        // const power3 = Math.floor(Math.abs(x) + Math.abs(y));
-
-        // && util.validateSwingMovement(event.acceleration, clubIndex)
-        if (power > highestAcceleration) {
-          that.setState(() => ({ highestAcceleration: power, swingData }));
-        } else {
-          that.setState({ swingData });
+          // && util.validateSwingMovement(event.acceleration, clubIndex)
+          if (power > highestAcceleration) {
+            that.setState(() => ({ highestAcceleration: power, swingData }));
+          } else {
+            that.setState({ swingData });
+          }
         }
-      }
-    }, true);
+      },
+      true
+    );
     this.renderFrame();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const {
-      swingData, isSwinging, strokes, anchorEl, clubIndex,
-    } = this.state;
+    const { swingData, isSwinging, strokes, anchorEl, clubIndex } = this.state;
     if (nextState.isSwinging !== isSwinging) {
       return true;
     }
@@ -270,7 +293,7 @@ class GolfController extends Component {
     this.setState({ anchorEl: null });
   };
 
-  handleChange = name => (event) => {
+  handleChange = (name) => (event) => {
     this.setState({
       [name]: event.target.value,
       anchorEl: null,
@@ -290,36 +313,59 @@ class GolfController extends Component {
     const { playerKey, game } = this.props;
     const { swingData } = this.state;
     const currentPlayer = game.players[playerKey];
-    if (currentPlayer.state !== 'STILL') {
-      alert('ball is not still');
+    if (currentPlayer.state !== "STILL") {
+      alert("ball is not still");
       return;
     }
-    if (game.phase !== 'gameplay') {
-      alert('game is not playing');
+    if (game.phase !== "gameplay") {
+      alert("game is not playing");
       return;
     }
 
     if (util.isInvalidSwing(swingData) && !test) {
-      alert('invalid swing');
+      alert("invalid swing");
       return;
     }
     // ska bara kunna används wood på första slaget? ge det lite extra power
     const club = CLUBS[clubIndex];
     const swing = util.getSwingData(club, acceleration);
-    this.setState(state => ({
+    this.setState((state) => ({
       strokes: state.strokes + 1,
     }));
     // test
     // test
 
+    fireGolf
+      .database()
+      .ref(`/games/${game.key}/players/${playerKey}/swing`)
+      .set(swing, (error) => {
+        if (error) {
+          console.log("error updated swing move");
+        } else {
+          console.log("saved swing success");
+        }
+      });
+  }
 
-    fireGolf.database().ref(`/games/${game.key}/players/${playerKey}/swing`).set(swing, (error) => {
-      if (error) {
-        console.log('error updated swing move');
-      } else {
-        console.log('saved swing success');
-      }
-    });
+  saveFindMyBall() {
+    const { playerKey, game } = this.props;
+    const currentPlayer = game.players[playerKey];
+
+    if (game.phase !== "gameplay") {
+      alert("game is not playing");
+      return;
+    }
+
+    fireGolf
+      .database()
+      .ref(`/games/${game.key}/players/${playerKey}/showNameTag`)
+      .set(!currentPlayer.showNameTag, (error) => {
+        if (error) {
+          console.log("error updated showNameTag");
+        } else {
+          console.log("saved showNameTag success");
+        }
+      });
   }
 
   renderFrame() {
@@ -332,26 +378,45 @@ class GolfController extends Component {
 
     ctx.lineWidth = 4;
     const background = new Image();
-    background.src = 'https://i.imgur.com/DE8oR5A.png';
+    background.src = skyImage;
 
-    background.onload = function () {
+    //TODO competedive är broken då det går på tid. man kan vänta ut och få bra poäng...
+    //TODO ta bort tiden? ja tror det bäst.
+
+    background.onload = function() {
       clearCanvas();
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
       const fingerprint = new Image();
-      fingerprint.onload = function () {
+      fingerprint.onload = function() {
         ctx.globalAlpha = 0.3;
-        ctx.drawImage(fingerprint, (canvas.width / 4), (canvas.height / 4), canvas.width / 2, canvas.width / 2);
+        ctx.drawImage(
+          fingerprint,
+          canvas.width / 4,
+          canvas.height / 4,
+          canvas.width / 2,
+          canvas.width / 2
+        );
         ctx.globalAlpha = 1;
       };
       fingerprint.src = fingerprintIcon;
       drawSwing(swingData);
-      drawEnvironment(canvas.width, canvas.height, game.minigame.levelColor, 'gray');
-      if (currentPlayer.state === 'STILL') {
+      drawEnvironment(
+        canvas.width,
+        canvas.height,
+        game.minigame.levelColor,
+        "gray"
+      );
+      if (currentPlayer.state === "STILL") {
         drawStrokes(canvas.width / 2, 48, strokes);
-        drawBall(canvas.width / 2, canvas.height - (BALL_RADIUS_CONTROLLER * 2) + 4, currentPlayer.color, 'gray');
+        drawBall(
+          canvas.width / 2,
+          canvas.height - BALL_RADIUS_CONTROLLER * 2 + 4,
+          currentPlayer.color,
+          "gray"
+        );
         drawDistance(canvas.width / 2, 24, currentPlayer.distance);
-      } else if (currentPlayer.state === 'SCORED') {
+      } else if (currentPlayer.state === "SCORED") {
         drawScoreText(canvas.width / 2, 72 / 2, currentPlayer, strokes);
       }
     };
@@ -363,7 +428,13 @@ class GolfController extends Component {
   render() {
     const { game, playerKey, classes } = this.props;
     const {
-      highestAcceleration, isSwinging, canvasHeight, canvasWidth, clubIndex, anchorEl, clubIcons,
+      highestAcceleration,
+      isSwinging,
+      canvasHeight,
+      canvasWidth,
+      clubIndex,
+      anchorEl,
+      clubIcons,
     } = this.state;
     const open = Boolean(anchorEl);
     const choosenClub = CLUBS[clubIndex];
@@ -371,12 +442,17 @@ class GolfController extends Component {
     return (
       <div className="phase-container">
         <div className={classes.container}>
-          <canvas id="swingcanvas" className={classes.canvas} height={canvasHeight} width={canvasWidth} />
+          <canvas
+            id="swingcanvas"
+            className={classes.canvas}
+            height={canvasHeight}
+            width={canvasWidth}
+          />
           <div className={classes.clubwrapper}>
             <Button
-              aria-owns={open ? 'club-menu' : undefined}
+              aria-owns={open ? "club-menu" : undefined}
               aria-haspopup="true"
-              style={{ marginLeft: '-20px', marginRight: '-20px' }}
+              style={{ marginLeft: "-20px", marginRight: "-20px" }}
               onClick={this.handleClick}
             >
               <img src={golfbagIcon} alt="choose club" height="100" />
@@ -387,20 +463,33 @@ class GolfController extends Component {
               open={open}
               onClose={this.handleClose}
             >
-              {CLUBS.map(c => (
-                <MenuItem onClick={this.handleChange('clubIndex')} key={c.id} value={c.id}>
-                  <img src={clubIcons[c.type]} alt={c.name} className={classes.menuitemicon} />
+              {CLUBS.map((c) => (
+                <MenuItem
+                  onClick={this.handleChange("clubIndex")}
+                  key={c.id}
+                  value={c.id}
+                >
+                  <img
+                    src={clubIcons[c.type]}
+                    alt={c.name}
+                    className={classes.menuitemicon}
+                  />
                   {c.name}
                 </MenuItem>
               ))}
             </Menu>
-            <Typography variant="body2" style={{ display: 'grid', paddingBottom: '8px' }}>
+            <Typography
+              variant="body2"
+              style={{ display: "grid", paddingBottom: "8px" }}
+            >
               <span>{choosenClub.name}</span>
               <img src={clubIcons[choosenClub.type]} alt="club" height="60" />
             </Typography>
-
           </div>
-          <div className={classes.footer} style={{ backgroundColor: game.minigame.levelColor }}>
+          <div
+            className={classes.footer}
+            style={{ backgroundColor: game.minigame.levelColor }}
+          >
             <ReactSpeedometer
               minValue={0}
               height={174}
@@ -417,7 +506,25 @@ class GolfController extends Component {
               value={highestAcceleration / 2}
             />
           </div>
-          <button style={{ position: 'absolute', top: '0', left: '0' }} type="button" onClick={this.testSwing}>swing</button>
+          <button
+            style={{ position: "absolute", top: "0", left: "0" }}
+            type="button"
+            onClick={this.testSwing}
+          >
+            swing
+          </button>
+          <Button
+            onClick={() => this.saveFindMyBall()}
+            variant="contained"
+            style={{
+              position: "absolute",
+              top: "60px",
+              left: "0",
+              opacity: "0.85",
+            }}
+          >
+            Find my ball
+          </Button>
         </div>
       </div>
     );
