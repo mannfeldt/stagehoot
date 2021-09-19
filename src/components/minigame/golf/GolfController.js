@@ -1,3 +1,4 @@
+//! OBS: för att ändringarna ska she på /golf så behöver vi göra samma ändringar i report "golfing"
 import React, { Component, Fragment } from "react";
 import { Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
