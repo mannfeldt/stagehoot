@@ -23,21 +23,12 @@ import Quiz from "../quiz/play/Quiz";
 import Minigame from "../minigame/play/Minigame";
 
 function fetchGame(gametype, gameId, callback) {
-  if (gametype === "golf") {
-    fireGolf
-      .database()
-      .ref("games")
-      .orderByChild("gameId")
-      .equalTo(gameId)
-      .once("value", callback);
-  } else {
-    fire
-      .database()
-      .ref("games")
-      .orderByChild("gameId")
-      .equalTo(gameId)
-      .once("value", callback);
-  }
+  fire
+    .database()
+    .ref("games")
+    .orderByChild("gameId")
+    .equalTo(gameId)
+    .once("value", callback);
 }
 class Play extends Component {
   constructor(props) {
@@ -155,12 +146,8 @@ class Play extends Component {
   }
 
   initGameListiner(_game) {
-    let gameRef;
-    if (_game.gametype === "golf") {
-      gameRef = fireGolf.database().ref(`games/${_game.key}`);
-    } else {
-      gameRef = fire.database().ref(`games/${_game.key}`);
-    }
+    let gameRef = fire.database().ref(`games/${_game.key}`);
+
     const that = this;
     gameRef.on("value", (snapshot) => {
       const game = snapshot.val();
@@ -180,18 +167,11 @@ class Play extends Component {
   createPlayer(player) {
     const { game } = this.state;
     const { showSnackbar } = this.props;
-    let playerRef;
-    if (game.gametype === "golf") {
-      playerRef = fireGolf
-        .database()
-        .ref(`/games/${game.key}/players`)
-        .push();
-    } else {
-      playerRef = fire
-        .database()
-        .ref(`/games/${game.key}/players`)
-        .push();
-    }
+    let playerRef = fire
+      .database()
+      .ref(`/games/${game.key}/players`)
+      .push();
+
     const newPlayer = Object.assign({ key: playerRef.key }, player);
     const that = this;
     playerRef.set(newPlayer, (error) => {
@@ -238,21 +218,6 @@ class Play extends Component {
       return (
         <div className="page-container play-page">
           <div>
-            <FormControl>
-              <InputLabel htmlFor="gametype-required">Game type</InputLabel>
-              <Select
-                value={gametype || ""}
-                fullWidth
-                onChange={this.handleChangeSelect}
-                name="gametype"
-                inputProps={{
-                  id: "gametype-required",
-                }}
-              >
-                <MenuItem value="golf">Golf</MenuItem>
-                <MenuItem value="other">other</MenuItem>
-              </Select>
-            </FormControl>
             <FormControl>
               <TextField
                 label="Game PIN"
@@ -311,14 +276,6 @@ class Play extends Component {
           />
         )}
         {game.gametype === "tetris" && (
-          <Minigame
-            game={game}
-            createPlayer={this.createPlayer}
-            playerKey={playerKey}
-            showSnackbar={showSnackbar}
-          />
-        )}
-        {game.gametype === "golf" && (
           <Minigame
             game={game}
             createPlayer={this.createPlayer}
