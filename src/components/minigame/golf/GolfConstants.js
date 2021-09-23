@@ -25,9 +25,8 @@ export const FAIRWAY_COLOR = "green";
 export const GREEN_COLOR = "green";
 export const BUNKER_COLOR = "green";
 export const WATER_COLOR = "blue";
-export const MAX_STROKES_COMPEDETIVE = 15;
-export const MAX_STROKES_TIME = 12;
-export const MAX_STROKES_STROKES = 12;
+
+export const PENALTY_STROKES = 12;
 
 export const PHYSICS_SPEED_FACTOR = 3;
 
