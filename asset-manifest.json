@@ -1,7 +1,7 @@
 {
   "main.css": "/stagehoot/static/css/main.a275854d.chunk.css",
-  "main.js": "/stagehoot/static/js/main.a94195fe.chunk.js",
-  "main.js.map": "/stagehoot/static/js/main.a94195fe.chunk.js.map",
+  "main.js": "/stagehoot/static/js/main.2252e230.chunk.js",
+  "main.js.map": "/stagehoot/static/js/main.2252e230.chunk.js.map",
   "static/css/1.c54eaf3c.chunk.css": "/stagehoot/static/css/1.c54eaf3c.chunk.css",
   "static/js/1.ece819b4.chunk.js": "/stagehoot/static/js/1.ece819b4.chunk.js",
   "static/js/1.ece819b4.chunk.js.map": "/stagehoot/static/js/1.ece819b4.chunk.js.map",
@@ -20,6 +20,6 @@
   "static/css/1.c54eaf3c.chunk.css.map": "/stagehoot/static/css/1.c54eaf3c.chunk.css.map",
   "static/css/main.a275854d.chunk.css.map": "/stagehoot/static/css/main.a275854d.chunk.css.map",
   "index.html": "/stagehoot/index.html",
-  "precache-manifest.64cfcf13b82e29f3cfe63fd33e27fb9d.js": "/stagehoot/precache-manifest.64cfcf13b82e29f3cfe63fd33e27fb9d.js",
+  "precache-manifest.b32ffa693b56728489057946bb053f75.js": "/stagehoot/precache-manifest.b32ffa693b56728489057946bb053f75.js",
   "service-worker.js": "/stagehoot/service-worker.js"
 }
