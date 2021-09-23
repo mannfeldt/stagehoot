@@ -20,7 +20,7 @@ class CreateGolf extends Component {
       holes: 18,
       scoremode: "strokes",
       speedmode: true,
-      opponentCollision: false,
+      collisionmode: false,
       password: "",
     };
 
@@ -50,10 +50,12 @@ class CreateGolf extends Component {
       holes,
       scoremode,
       speedmode,
+      collisionmode,
     } = this.state;
     const minigame = {
       scoremode,
       speedmode,
+      collisionmode,
       holes,
     };
     const game = {
@@ -78,7 +80,14 @@ class CreateGolf extends Component {
     }
 */
   render() {
-    const { password, title, holes, scoremode, speedmode } = this.state;
+    const {
+      password,
+      title,
+      holes,
+      scoremode,
+      speedmode,
+      collisionmode,
+    } = this.state;
     return (
       <div className="app-page create-page">
         <Grid container spacing={24}>
@@ -127,6 +136,18 @@ class CreateGolf extends Component {
                     />
                   }
                   label="Speed mode"
+                />
+              </FormControl>
+              <FormControl component="fieldset">
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={collisionmode}
+                      onChange={this.handleChangeBool("collisionmode")}
+                      value="collisionmode"
+                    />
+                  }
+                  label="Collision mode"
                 />
               </FormControl>
             </Grid>

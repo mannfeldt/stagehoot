@@ -69,11 +69,11 @@ export function isInvalidSwing(swingData) {
  * Resets the ball position to level spawn if ball fell off world.
  */
 
-function newBall(position) {
+function newBall(position, collisionMode) {
   const ballShape = new p2.Circle({
     radius: BALL_RADIUS,
     collisionGroup: BALL_GROUP,
-    collisionMask: GROUND_GROUP,
+    collisionMask: collisionMode ? GROUND_GROUP | BALL_GROUP : GROUND_GROUP,
   });
 
   ballShape.material = ballMaterial;
@@ -92,8 +92,8 @@ function newBall(position) {
   return ballBody;
 }
 // spawn: I.List<number>
-export function createBall(spawn) {
-  return newBall([spawn[0], spawn[1] - BALL_RADIUS]);
+export function createBall(spawn, collisionMode) {
+  return newBall([spawn[0], spawn[1] - BALL_RADIUS], collisionMode);
 }
 export function getDistanceYards(a, b) {
   if (a > b) {

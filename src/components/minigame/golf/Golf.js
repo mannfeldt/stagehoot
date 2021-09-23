@@ -270,6 +270,17 @@ class Golf extends Component {
       const newPlayerState = players.map((p) =>
         p.key === playerKey ? { ...p, state: "SCORED", scoreTime } : p
       );
+
+      if (_game.minigame.collisionmode) {
+        setTimeout(
+          function(body) {
+            body.collisionResponse = false;
+          },
+          500,
+          ballBody
+        );
+      }
+
       this.syncPlayersToFirebase(newPlayerState);
     });
 
@@ -592,7 +603,7 @@ class Golf extends Component {
     const balls = [];
     const playerColors = util.getPlayerColors(len);
     for (let i = 0; i < len; i++) {
-      const ball = util.createBall(level.spawn);
+      const ball = util.createBall(level.spawn, game.minigame.collisionmode);
       // hur håller jag koll på vilken boll som är vilken spelare?
       ball.playerKey = playerKeys[i];
       ball.ballIndex = i;
@@ -757,6 +768,8 @@ class Golf extends Component {
       ball.scored = false;
       ball.strokes = 0;
       ball.lastPos = [...ball.position];
+      ball.collisionResponse = true;
+
       world.addBody(ball);
     });
     this.setEventHandlers(world);

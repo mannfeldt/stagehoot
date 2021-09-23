@@ -20,6 +20,7 @@ class GolfSetup extends Component {
       holes: props.game.minigame.holes,
       scoremode: props.game.minigame.scoremode,
       speedmode: props.game.minigame.speedmode,
+      collisionmode: props.game.minigame.collisionmode,
     };
   }
 
@@ -45,11 +46,13 @@ class GolfSetup extends Component {
       holes,
       scoremode,
       speedmode,
+      collisionmode,
     } = this.state;
     const minigame = {
       surveyPlayers,
       nameGenerator,
       speedmode,
+      collisionmode,
       multiplayerMode,
       holes,
       scoremode,
@@ -67,6 +70,7 @@ class GolfSetup extends Component {
       holes,
       scoremode,
       speedmode,
+      collisionmode,
     } = this.state;
     return (
       <div className="phase-container">
@@ -124,6 +128,19 @@ class GolfSetup extends Component {
                   />
                 }
                 label="Speed mode"
+              />
+            </FormControl>
+
+            <FormControl component="fieldset">
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={collisionmode}
+                    onChange={this.handleChangeBool("collisionmode")}
+                    value="collisionmode"
+                  />
+                }
+                label="Collision mode"
               />
             </FormControl>
             <FormControlLabel
