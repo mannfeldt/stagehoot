@@ -49,6 +49,11 @@ class Play extends Component {
 
   componentDidMount() {
     const { recentGameId, isRedirected } = this.state;
+
+    let gamePinParam = window.location.href.split("pin=")[1];
+    if (gamePinParam) {
+      this.joinGame(gamePinParam);
+    }
     if (isRedirected) {
       this.joinGame(recentGameId);
     }

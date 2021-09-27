@@ -1,24 +1,25 @@
-import React, { Component } from 'react';
-import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import PropTypes from 'prop-types';
-import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
-import PersonIcon from '@material-ui/icons/Person';
+import React, { Component } from "react";
+import { Typography } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import PropTypes from "prop-types";
+import Grid from "@material-ui/core/Grid";
+import { withStyles } from "@material-ui/core/styles";
+import PersonIcon from "@material-ui/icons/Person";
+import QRCode from "qrcode.react";
 
-const styles = theme => ({
+const styles = (theme) => ({
   container: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexFlow: 'column',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexFlow: "column",
   },
   avatar: {
     marginBottom: 5,
     height: 120,
-    borderRadius: '50%',
-    webkitBboxShadow: '0 0 10px rgba(0,0,0,.3)',
-    boxShadow: '0 0 10px rgba(0,0,0,.3)',
+    borderRadius: "50%",
+    webkitBboxShadow: "0 0 10px rgba(0,0,0,.3)",
+    boxShadow: "0 0 10px rgba(0,0,0,.3)",
   },
   icon: {
     height: 120,
@@ -27,12 +28,12 @@ const styles = theme => ({
   },
   primaryText: {
     fontSize: 18,
-    color: '#fff',
+    color: "#fff",
     fontWeight: 500,
   },
   secondaryText: {
     fontSize: 16,
-    color: '#fff',
+    color: "#fff",
     fontWeight: 400,
     opacity: 0.6,
   },
@@ -43,13 +44,13 @@ const styles = theme => ({
     fontSize: 28,
     padding: 45,
     fontWeight: 400,
-    color: '#fff',
+    color: "#fff",
   },
   subheader: {
     fontSize: 24,
     padding: 45,
     fontWeight: 400,
-    color: '#fff',
+    color: "#fff",
     opacity: 0.7,
   },
 });
@@ -61,7 +62,7 @@ class SpotifyConnection extends Component {
 
   nextPhase() {
     const { gameFunc } = this.props;
-    gameFunc.update({ phase: 'gameplay' });
+    gameFunc.update({ phase: "gameplay" });
   }
 
   render() {
@@ -79,7 +80,17 @@ class SpotifyConnection extends Component {
             <span>Join game with Game PIN: </span>
             <span className={classes.pin}>{game.gameId}</span>
           </Typography>
-          <Typography className={classes.subheader}>mannfeldt.github.io/stagehoot</Typography>
+          <QRCode
+            value={
+              "https://mannfeldt.github.io/stagehoot/#/play/?pin=" + game.gameId
+            }
+            fgColor="#FFFFFF"
+            bgColor="#1DB954"
+            size={200}
+          />
+          <Typography className={classes.subheader}>
+            mannfeldt.github.io/stagehoot
+          </Typography>
           <Typography className={classes.title}>{game.title}</Typography>
         </div>
         <div className="quiz-middle-section">
@@ -89,20 +100,32 @@ class SpotifyConnection extends Component {
             justify="center"
             alignItems="flex-start"
           >
-            {players.map(player => (
+            {players.map((player) => (
               <Grid
                 key={player.key}
                 item
-                style={{ padding: '15px 30px 30px 30px' }}
+                style={{ padding: "15px 30px 30px 30px" }}
               >
-                {player.avatar ? (<img className={classes.avatar} src={player.avatar} alt={player.name} />) : (<PersonIcon classes={{ root: classes.icon }} />) }
-                <Typography className={classes.secondaryText}>{player.name}</Typography>
+                {player.avatar ? (
+                  <img
+                    className={classes.avatar}
+                    src={player.avatar}
+                    alt={player.name}
+                  />
+                ) : (
+                  <PersonIcon classes={{ root: classes.icon }} />
+                )}
+                <Typography className={classes.secondaryText}>
+                  {player.name}
+                </Typography>
               </Grid>
             ))}
           </Grid>
         </div>
         <div className="quiz-bottom-section">
-          <Button onClick={this.nextPhase} color="primary">Start</Button>
+          <Button onClick={this.nextPhase} color="primary">
+            Start
+          </Button>
         </div>
       </div>
     );

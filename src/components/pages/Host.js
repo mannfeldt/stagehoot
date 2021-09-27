@@ -1,14 +1,15 @@
 import React, { Component } from "react";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import FormControl from "@material-ui/core/FormControl";
 import PropTypes from "prop-types";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import Quiz from "../quiz/host/Quiz";
 import { fire, fireGolf } from "../../base";
 import Minigame from "../minigame/host/Minigame";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormControl from "@material-ui/core/FormControl";
+import FormLabel from "@material-ui/core/FormLabel";
 
 function fetchGame(gametype, gameId, callback) {
   if (gametype === "golf") {
@@ -48,8 +49,29 @@ class Host extends Component {
 
   componentDidMount() {
     const { gameId, isRedirected } = this.state;
-    if (isRedirected) {
-      this.joinGame(gameId);
+    let href = window.location.href;
+    let hasParams =
+      href.indexOf("?pin=") > -1 && href.indexOf("&gametype=") > -1;
+    let urlParams = href.split("?")[1];
+
+    // testa det här. ska vara instant host nu när man klikcar på länken.. testa både golf och inte golf och en där man går vanligt via host
+
+    if (hasParams) {
+      let pinParam = urlParams.substring(
+        urlParams.indexOf("pin=") + 4,
+        urlParams.lastIndexOf("&gametype")
+      );
+      let gametypeParam = urlParams.substring(
+        urlParams.indexOf("gametype=") + 9
+      );
+      if (gametypeParam) {
+        this.setState({ gametype: gametypeParam });
+      }
+      if (pinParam) {
+        this.joinGame(pinParam, gametypeParam);
+      }
+    } else if (isRedirected) {
+      this.joinGame(gameId, null);
     }
   }
 
@@ -115,11 +137,14 @@ class Host extends Component {
     this.updateGame({ phase: "final_result" });
   }
 
-  joinGame(gameId) {
+  joinGame(gameId, type) {
     const { password, gametype } = this.state;
     const { showSnackbar, toggleHeader } = this.props;
     const that = this;
-    fetchGame(gametype, gameId, (snapshot) => {
+    if (!type) {
+      type = gametype;
+    }
+    fetchGame(type, gameId, (snapshot) => {
       if (snapshot.val()) {
         let game;
         snapshot.forEach((child) => {
@@ -210,21 +235,22 @@ class Host extends Component {
 
     if (!game.phase) {
       return (
-        <div className="page-container host-page">
-          <FormControl>
-            <InputLabel htmlFor="gametype-required">Game type</InputLabel>
-            <Select
-              value={gametype || ""}
-              fullWidth
-              onChange={this.handleChangeSelect}
+        <div className="page-container host-page" style={{ marginTop: 30 }}>
+          <FormControl component="fieldset" style={{ marginRight: 30 }}>
+            <FormLabel component="legend">Game type</FormLabel>
+            <RadioGroup
+              aria-label="gametype"
               name="gametype"
-              inputProps={{
-                id: "gametype-required",
-              }}
+              value={gametype || ""}
+              onChange={this.handleChangeSelect}
             >
-              <MenuItem value="golf">Golf</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-            </Select>
+              <FormControlLabel
+                value="other"
+                control={<Radio />}
+                label="Other"
+              />
+              <FormControlLabel value="golf" control={<Radio />} label="Golf" />
+            </RadioGroup>
           </FormControl>
           <FormControl>
             <TextField
@@ -245,7 +271,10 @@ class Host extends Component {
               onChange={this.handleChange("password")}
             />
           </FormControl>
-          <Button onClick={() => this.joinGame(gameId)} variant="contained">
+          <Button
+            onClick={() => this.joinGame(gameId, gametype)}
+            variant="contained"
+          >
             Host
           </Button>
         </div>
