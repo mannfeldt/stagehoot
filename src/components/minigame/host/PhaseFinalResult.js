@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import { Typography } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
 let canvas;
 let context;
@@ -17,11 +17,11 @@ let particles = [];
 let rockets = [];
 const MAX_PARTICLES = 400;
 const colorCode = 0;
-const img = new Image();
-img.src = 'https://www.golfworldtravel.se/wp-content/uploads/2013/12/Arabella-Sheraton-Golf-4.jpg';
+const golfimg = new Image();
+golfimg.src =
+  "https://www.golfworldtravel.se/wp-content/uploads/2013/12/Arabella-Sheraton-Golf-4.jpg";
 
-
-function loop() {
+function loop(gametype) {
   // update screen size
   if (SCREEN_WIDTH != window.innerWidth) {
     canvas.width = SCREEN_WIDTH = window.innerWidth;
@@ -37,9 +37,13 @@ function loop() {
   } else {
     context.globalAlpha = 0.2;
   }
-  context.drawImage(img, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  if (gametype === "golf") {
+    context.drawImage(golfimg, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  } else {
+    context.fillStyle = "#26262e";
+    context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  }
   context.restore();
-
 
   // clear canvas
   // context.fillStyle = "rgba(0, 0, 0, 0.05)";
@@ -53,10 +57,16 @@ function loop() {
     rockets[i].render(context);
 
     // calculate distance with Pythagoras
-    const distance = Math.sqrt(Math.pow(mousePos.x - rockets[i].pos.x, 2) + Math.pow(mousePos.y - rockets[i].pos.y, 2));
+    const distance = Math.sqrt(
+      Math.pow(mousePos.x - rockets[i].pos.x, 2) +
+        Math.pow(mousePos.y - rockets[i].pos.y, 2)
+    );
 
     // random chance of 1% if rockets is above the middle
-    const randomChance = rockets[i].pos.y < (SCREEN_HEIGHT * 2 / 3) ? (Math.random() * 100 <= 1) : false;
+    const randomChance =
+      rockets[i].pos.y < (SCREEN_HEIGHT * 2) / 3
+        ? Math.random() * 100 <= 1
+        : false;
 
     /* Explosion rules
            - 80% of screen
@@ -64,7 +74,12 @@ function loop() {
           - close to the mouse
           - 1% chance of random explosion
       */
-    if (rockets[i].pos.y < SCREEN_HEIGHT / 5 || rockets[i].vel.y >= 0 || distance < 50 || randomChance) {
+    if (
+      rockets[i].pos.y < SCREEN_HEIGHT / 5 ||
+      rockets[i].vel.y >= 0 ||
+      distance < 50 ||
+      randomChance
+    ) {
       rockets[i].explode();
     } else {
       existingRockets.push(rockets[i]);
@@ -115,7 +130,7 @@ function Particle(pos) {
   this.color = 0;
 }
 
-Particle.prototype.update = function () {
+Particle.prototype.update = function() {
   // apply resistance
   this.vel.x *= this.resistance;
   this.vel.y *= this.resistance;
@@ -134,20 +149,18 @@ Particle.prototype.update = function () {
   this.alpha -= this.fade;
 };
 
-Particle.prototype.render = function (c) {
+Particle.prototype.render = function(c) {
   if (!this.exists()) {
     return;
   }
 
   c.save();
 
-  c.globalCompositeOperation = 'lighter';
+  c.globalCompositeOperation = "lighter";
 
   const x = this.pos.x;
 
-
   const y = this.pos.y;
-
 
   const r = this.size / 2;
 
@@ -159,22 +172,31 @@ Particle.prototype.render = function (c) {
   c.fillStyle = gradient;
 
   c.beginPath();
-  c.arc(this.pos.x, this.pos.y, this.flick ? Math.random() * this.size : this.size, 0, Math.PI * 2, true);
+  c.arc(
+    this.pos.x,
+    this.pos.y,
+    this.flick ? Math.random() * this.size : this.size,
+    0,
+    Math.PI * 2,
+    true
+  );
   c.closePath();
   c.fill();
 
   c.restore();
 };
 
-Particle.prototype.exists = function () {
+Particle.prototype.exists = function() {
   return this.alpha >= 0.1 && this.size >= 1;
 };
 
 function Rocket(x) {
-  Particle.apply(this, [{
-    x,
-    y: SCREEN_HEIGHT,
-  }]);
+  Particle.apply(this, [
+    {
+      x,
+      y: SCREEN_HEIGHT,
+    },
+  ]);
 
   this.explosionColor = 0;
 }
@@ -182,7 +204,7 @@ function Rocket(x) {
 Rocket.prototype = new Particle();
 Rocket.prototype.constructor = Rocket;
 
-Rocket.prototype.explode = function () {
+Rocket.prototype.explode = function() {
   const count = Math.random() * 10 + 80;
 
   for (let i = 0; i < count; i++) {
@@ -190,7 +212,7 @@ Rocket.prototype.explode = function () {
     const angle = Math.random() * Math.PI * 2;
 
     // emulate 3D effect by using cosine and put more particles in the middle
-    const speed = Math.cos(Math.random() * Math.PI / 2) * 15;
+    const speed = Math.cos((Math.random() * Math.PI) / 2) * 15;
 
     particle.vel.x = Math.cos(angle) * speed;
     particle.vel.y = Math.sin(angle) * speed;
@@ -208,20 +230,18 @@ Rocket.prototype.explode = function () {
   }
 };
 
-Rocket.prototype.render = function (c) {
+Rocket.prototype.render = function(c) {
   if (!this.exists()) {
     return;
   }
 
   c.save();
 
-  c.globalCompositeOperation = 'lighter';
+  c.globalCompositeOperation = "lighter";
 
   const x = this.pos.x;
 
-
   const y = this.pos.y;
-
 
   const r = this.size / 2;
 
@@ -232,7 +252,14 @@ Rocket.prototype.render = function (c) {
   c.fillStyle = gradient;
 
   c.beginPath();
-  c.arc(this.pos.x, this.pos.y, this.flick ? Math.random() * this.size / 2 + this.size / 2 : this.size, 0, Math.PI * 2, true);
+  c.arc(
+    this.pos.x,
+    this.pos.y,
+    this.flick ? (Math.random() * this.size) / 2 + this.size / 2 : this.size,
+    0,
+    Math.PI * 2,
+    true
+  );
   c.closePath();
   c.fill();
 
@@ -244,7 +271,7 @@ function launch() {
 function launchFrom(x) {
   if (rockets.length < 10) {
     const rocket = new Rocket(x);
-    rocket.explosionColor = Math.floor(Math.random() * 360 / 10) * 10;
+    rocket.explosionColor = Math.floor((Math.random() * 360) / 10) * 10;
     rocket.vel.y = Math.random() * -3 - 4;
     rocket.vel.x = Math.random() * 6 - 3;
     rocket.size = 8;
@@ -260,17 +287,19 @@ class PhaseFinalResult extends Component {
   }
 
   componentDidMount() {
-    canvas = document.getElementById('fireworkscanvas');
-    context = canvas.getContext('2d');
+    const { game } = this.props;
+
+    canvas = document.getElementById("fireworkscanvas");
+    context = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     setInterval(launch, 800);
-    setInterval(loop, 1000 / 50);
+    setInterval(() => loop(game.gametype), 1000 / 50);
   }
 
   replayGame() {
     const { gameFunc } = this.props;
-    gameFunc.update({ phase: 'starting' });
+    gameFunc.update({ phase: "starting" });
   }
 
   /*
@@ -285,25 +314,38 @@ podium
     const { gameFunc, game } = this.props;
     const cheight = canvas ? canvas.height : window.innerHeight;
     const cWidth = canvas ? canvas.width : window.innerWidth;
-
-    const winner = game.players[game.minigame.leaderboard[0].playerKey];
-    const winnerScore = game.minigame.leaderboard[0].totalScore;
+    let winners;
+    let winnerScore;
+    if (game.minigame.winners && game.minigame.winners.length > 0) {
+      let winnerKeys = game.minigame.winners[0].playerKeys;
+      winners = winnerKeys.map((key) => game.players[key]);
+      winnerScore = game.minigame.winners[0].score;
+    } else {
+      winners = [game.players[game.minigame.leaderboard[0].playerKey]];
+      winnerScore = game.minigame.leaderboard[0].totalScore;
+    }
     return (
       <div className="phase-container">
         <canvas id="fireworkscanvas" />
-        <div style={{
-          position: 'absolute', top: 0, marginTop: cheight / 2, marginLeft: cWidth / 2,
-        }}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            marginTop: cheight / 2,
+            marginLeft: cWidth / 2,
+          }}
         >
-          <Typography variant="h2" style={{ color: 'white' }}>{`${winner.name} vinner med ${winnerScore} poäng`}</Typography>
+          <Typography variant="h2" style={{ color: "white" }}>{`${winners.map(
+            (winner) => winner.name
+          )} vinner med ${winnerScore} poäng`}</Typography>
         </div>
-        <div style={{ position: 'absolute', top: 0, marginTop: cheight }}>
+        <div style={{ position: "absolute", top: 0, marginTop: cheight }}>
           <div>
             <Button onClick={this.replayGame}>Replay game</Button>
             <Button onClick={gameFunc.restart}>Re-host game</Button>
             <Button onClick={gameFunc.quit}>Quit game</Button>
-            <Button onClick={() => alert('show results')}>Show results</Button>
-            <Button onClick={() => alert('start survey')}>Start survey</Button>
+            <Button onClick={() => alert("show results")}>Show results</Button>
+            <Button onClick={() => alert("start survey")}>Start survey</Button>
             <Button>
               <Link to="/create">Create new game</Link>
             </Button>

@@ -1,11 +1,13 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { fire } from '../../../base';
-import * as minigameUtil from '../../common/utils/minigameUtil';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { fire } from "../../../base";
+import * as minigameUtil from "../../common/utils/minigameUtil";
 
 let ctx;
 let canvas;
 const gridSize = 20;
+let maxYCord;
+let maxXCord;
 
 class Snake extends Component {
   constructor(props) {
@@ -14,30 +16,40 @@ class Snake extends Component {
     // lite delay när jag ökar speeden. är det olika delay för olika snakes? optimera senare.
     const canvasHeight = Math.floor(window.innerHeight / gridSize) * gridSize;
     const canvasWidth = Math.floor(window.innerWidth / gridSize) * gridSize;
-    const nrOfFoods = props.game.minigame.snakes.length * 2;
+
+    maxYCord = Math.floor(canvasHeight / 20);
+    maxXCord = Math.floor(canvasWidth / 20);
+
+    let totalSquares = maxYCord * maxXCord;
+    let emptySquares = totalSquares - props.game.minigame.snakes.length * 4;
+    let areaFoods = Math.floor(totalSquares / 60);
+    const nrOfFoods = 2 + areaFoods;
 
     this.state = {
       gameTicker: null,
       ticks: 0,
       winners: [],
-      snakes: minigameUtil.getSnakesInStartingPosition(props.game.minigame.snakes, { height: canvasHeight, width: canvasWidth }),
+      snakes: minigameUtil.getSnakesInStartingPosition(
+        props.game.minigame.snakes,
+        { height: canvasHeight, width: canvasWidth }
+      ),
       foods: minigameUtil.getInitialFoods(nrOfFoods),
       settings: {
         snake: {
           size: gridSize,
           speed: props.game.minigame.difficulty,
-          border: '#000',
+          border: "#000",
           respawntime: 3,
         },
         food: {
-          background: '#EC5E0B',
-          border: '#73AA24',
+          background: "#EC5E0B",
+          border: "#73AA24",
         },
         canvas: {
           height: canvasHeight,
           width: canvasWidth,
-          background: '#F5F5F5',
-          border: '#000',
+          background: "#F5F5F5",
+          border: "#000",
         },
       },
     };
@@ -56,15 +68,12 @@ class Snake extends Component {
     this.nextPhase = this.nextPhase.bind(this);
   }
 
-
   componentDidMount() {
-    const {
-      snakes, settings,
-    } = this.state;
-    const app = document.querySelector('#snakeboard');
+    const { snakes, settings } = this.state;
+    const app = document.querySelector("#snakeboard");
 
-    canvas = app.querySelector('canvas');
-    ctx = canvas.getContext('2d');
+    canvas = app.querySelector("canvas");
+    ctx = canvas.getContext("2d");
     this.resetCanvas();
     this.generateSnakes();
     this.generateFoods();
@@ -103,30 +112,30 @@ class Snake extends Component {
 
   togglePausGame = () => {
     // async!!
-    this.setState(state => ({
+    this.setState((state) => ({
       isPaused: !state.isPaused,
       overlay: false,
     }));
-  }
+  };
 
   nextPhase() {
-    const {
-      gameTicker, snakes, winners, ticks,
-    } = this.state;
+    const { gameTicker, snakes, winners, ticks } = this.state;
     const { game, gameFunc } = this.props;
     clearInterval(gameTicker);
     game.minigame.snakes = snakes;
     game.minigame.winners = winners;
     game.minigame.ticks = ticks;
-    game.phase = 'final_result';
+    game.phase = "final_result";
     gameFunc.update(game);
   }
 
   initControllerListener(snake) {
     const { game } = this.props;
-    const snakeRef = fire.database().ref(`/games/${game.key}/minigame/snakes/${snake.id}`);
+    const snakeRef = fire
+      .database()
+      .ref(`/games/${game.key}/minigame/snakes/${snake.id}`);
     const that = this;
-    snakeRef.on('value', (snapshot) => {
+    snakeRef.on("value", (snapshot) => {
       const nextSnake = snapshot.val();
       if (nextSnake && !that.state.isPaused) {
         that.setState((state) => {
@@ -140,19 +149,21 @@ class Snake extends Component {
           };
         });
       } else {
-        console.log('move error');
+        console.log("move error");
       }
     });
   }
 
-
   isEndGame() {
     const { snakes } = this.state;
-    const { game: { minigame: { gamemode, racetarget } } } = this.props;
+    const { game } = this.props;
 
     // if survavalmode continue game if more than 1 snake is alive
     // kolla performance på denna filter funktion jämfört med loopen under
-    if (gamemode === 'survival' && snakes.filter(s => !s.dead).length > 1) {
+    if (
+      game.minigame.gamemode === "survival" &&
+      snakes.filter((s) => !s.dead).length > 1
+    ) {
       return;
       /*
       const l = snakes.length;
@@ -168,22 +179,27 @@ class Snake extends Component {
       */
     }
     // if race continue game if no one has reached racetarget
-    if (gamemode === 'race' && !snakes.some(s => s.body.length >= racetarget)) {
+    if (
+      game.minigame.gamemode === "race" &&
+      !snakes.some((s) => s.body.length >= game.minigame.racetarget)
+    ) {
       return;
     }
 
     // its gameover, lets find the winner/winners
     let winners = [];
-    if (gamemode === 'survival') {
-      const alive = snakes.filter(s => !s.dead);
+    if (game.minigame.gamemode === "survival") {
+      const alive = snakes.filter((s) => !s.dead);
       if (alive.length === 1) {
         winners = alive;
       } else {
-        const winner = snakes.reduce((prev, current) => ((prev.score > current.score) ? prev : current));
+        const winner = snakes.reduce((prev, current) =>
+          prev.score > current.score ? prev : current
+        );
         winners.push(winner);
       }
-    } else if (gamemode === 'race') {
-      winners = snakes.filter(s => s.body.length >= racetarget);
+    } else if (game.minigame.gamemode === "race") {
+      winners = snakes.filter((s) => s.body.length >= game.minigame.racetarget);
     }
     this.setState(() => ({
       winners,
@@ -262,30 +278,38 @@ class Snake extends Component {
         nextSnakes.push(snake);
         continue;
       } else if (snake.dead) {
-        if (game.minigame.gamemode === 'survival') {
+        if (game.minigame.gamemode === "survival") {
           snake.body = [];
           nextSnakes.push(snake);
           continue;
-        } else if (game.minigame.gamemode === 'race') {
+        } else if (game.minigame.gamemode === "race") {
           const xMax = settings.canvas.width - gridSize;
           const yMax = settings.canvas.height - gridSize;
-          const startPos = minigameUtil.getRandomCanvasPositionMargin(yMax, xMax);
-          snake.body = [{
-            x: startPos.x,
-            y: startPos.y,
-          }, {
-            x: startPos.x - gridSize,
-            y: startPos.y,
-          }, {
-            x: startPos.x - (gridSize * 2),
-            y: startPos.y,
-          }, {
-            x: startPos.x - (gridSize * 3),
-            y: startPos.y,
-          }];
-          snake.direction = 'right';
+          const startPos = minigameUtil.getRandomCanvasPositionMargin(
+            yMax,
+            xMax
+          );
+          snake.body = [
+            {
+              x: startPos.x,
+              y: startPos.y,
+            },
+            {
+              x: startPos.x - gridSize,
+              y: startPos.y,
+            },
+            {
+              x: startPos.x - gridSize * 2,
+              y: startPos.y,
+            },
+            {
+              x: startPos.x - gridSize * 3,
+              y: startPos.y,
+            },
+          ];
+          snake.direction = "right";
           snake.respawning = true;
-          snake.respawntime = Date.now() + (settings.snake.respawntime * 1000);
+          snake.respawntime = Date.now() + settings.snake.respawntime * 1000;
           nextSnakes.push(snake);
           continue;
         }
@@ -294,18 +318,30 @@ class Snake extends Component {
       const movement = {
         up: {
           x: snake.body[0].x,
-          y: teleportSnakes && (snake.body[0].y === 0) ? canvas.height - gridSize : snake.body[0].y - gridSize,
+          y:
+            teleportSnakes && snake.body[0].y === 0
+              ? canvas.height - gridSize
+              : snake.body[0].y - gridSize,
         },
         down: {
           x: snake.body[0].x,
-          y: teleportSnakes && (snake.body[0].y >= canvas.height - gridSize) ? 0 : snake.body[0].y + gridSize,
+          y:
+            teleportSnakes && snake.body[0].y >= canvas.height - gridSize
+              ? 0
+              : snake.body[0].y + gridSize,
         },
         right: {
-          x: teleportSnakes && (snake.body[0].x >= canvas.width - gridSize) ? 0 : snake.body[0].x + gridSize,
+          x:
+            teleportSnakes && snake.body[0].x >= canvas.width - gridSize
+              ? 0
+              : snake.body[0].x + gridSize,
           y: snake.body[0].y,
         },
         left: {
-          x: teleportSnakes && (snake.body[0].x === 0) ? canvas.width - gridSize : snake.body[0].x - gridSize,
+          x:
+            teleportSnakes && snake.body[0].x === 0
+              ? canvas.width - gridSize
+              : snake.body[0].x - gridSize,
           y: snake.body[0].y,
         },
       };
@@ -319,7 +355,9 @@ class Snake extends Component {
       const coordinate = movement[snake.direction];
       snake.body.unshift(coordinate);
 
-      const collidedFood = foods.find(f => f.active && snake.body[0].x === f.x && snake.body[0].y === f.y);
+      const collidedFood = foods.find(
+        (f) => f.active && snake.body[0].x === f.x && snake.body[0].y === f.y
+      );
 
       if (collidedFood) {
         snake.score += 10;
@@ -329,7 +367,7 @@ class Snake extends Component {
       }
       nextSnakes.push(snake);
     }
-    this.setState(state => ({
+    this.setState((state) => ({
       snakes: nextSnakes,
       foods,
       ticks: state.ticks + 1,
@@ -341,7 +379,7 @@ class Snake extends Component {
 
   drawSnakes(nextSnakes) {
     const { settings, ticks } = this.state;
-    ctx.globalCompositeOperation = 'multiply';
+    ctx.globalCompositeOperation = "multiply";
     ctx.strokestyle = settings.snake.border;
     for (let i = 0, len = nextSnakes.length; i < len; i++) {
       const snake = nextSnakes[i];
@@ -358,7 +396,6 @@ class Snake extends Component {
         ctx.fillRect(bodyPos.x, bodyPos.y, gridSize, gridSize);
         ctx.strokeRect(bodyPos.x, bodyPos.y, gridSize, gridSize);
       }
-
 
       // this.game.direction = this.game.nextDirection;
     }
@@ -411,7 +448,9 @@ class Snake extends Component {
     }
     */
     // fungerar denna tro?
-    const collision = snakes.some(s => s.body.some(b => b.x === x && b.y === y));
+    const collision = snakes.some((s) =>
+      s.body.some((b) => b.x === x && b.y === y)
+    );
     if (collision) {
       return this.generateFood();
     }
@@ -454,7 +493,9 @@ class Snake extends Component {
     // fundra och test som det här är den mest effektiva lösningen? eller om jag gör några checks i onödan?
     // jag vill nog bara göra en gemensam setState call efter den här loopen. så alla ändringar för t.ex. handleDeath
     let { snakes } = this.state;
-    const { game: { minigame } } = this.props;
+    const {
+      game: { minigame },
+    } = this.props;
     for (let i = 0; i < snakes.length; i++) {
       if (snakes[i].dead) {
         continue;
@@ -466,14 +507,25 @@ class Snake extends Component {
 
         // this.handleDeath(snake);
       }
-      if (minigame.wallCollision && minigameUtil.detectWallCollision(snakes[i].body[0], canvas.height, canvas.width)) {
+      if (
+        minigame.wallCollision &&
+        minigameUtil.detectWallCollision(
+          snakes[i].body[0],
+          canvas.height,
+          canvas.width
+        )
+      ) {
         snakes[i].dead = true;
       }
     }
 
     if (minigame.opponentCollision) {
       // här inne så ändrar jag om i snakes genom att döda dem som ska dödas och klyver om det ska klyvas osv. det som returneras ska vara korrekta snakes
-      snakes = minigameUtil.detectOpponentCollision(snakes, minigame.eatOpponents);
+      snakes = minigameUtil.detectOpponentCollision(
+        snakes,
+        minigame.eatOpponents,
+        minigame.absorbAll
+      );
     }
     this.setState(() => ({
       snakes,
@@ -487,19 +539,18 @@ class Snake extends Component {
       overlay: true,
     }));
     ctx.globalAlpha = 0.4;
-    ctx.textAlign = 'center';
-    ctx.font = '100px roboto';
-    ctx.fillStyle = '#000000';
+    ctx.textAlign = "center";
+    ctx.font = "100px roboto";
+    ctx.fillStyle = "#000000";
     if (ticks === 1) {
-      ctx.fillText('Click to start', canvas.width / 2, canvas.height / 2);
+      ctx.fillText("Click to start", canvas.width / 2, canvas.height / 2);
     } else if (winners.length > 0) {
-      ctx.fillText('Game over', canvas.width / 2, canvas.height / 2);
+      ctx.fillText("Game over", canvas.width / 2, canvas.height / 2);
     } else {
-      ctx.fillText('Paused', canvas.width / 2, canvas.height / 2);
+      ctx.fillText("Paused", canvas.width / 2, canvas.height / 2);
     }
     ctx.globalAlpha = 1;
-    ctx.font = '20px roboto';
-
+    ctx.font = "20px roboto";
 
     for (let i = 0; i < snakes.length; i++) {
       const snake = snakes[i];
@@ -509,19 +560,22 @@ class Snake extends Component {
       let headX = Math.max(gridSize, snake.body[0].x);
       let headY = Math.max(gridSize, snake.body[0].y);
       if (headX >= canvas.width) {
-        headX = canvas.width - (gridSize * 2);
+        headX = canvas.width - gridSize * 2;
       }
       if (headY >= canvas.height) {
-        headY = canvas.height - (gridSize * 2);
+        headY = canvas.height - gridSize * 2;
       }
-      const snakeName = snake.playerKeys.length === 1 ? game.players[snake.playerKeys[0]].name : snake.name;
+      const snakeName =
+        snake.playerKeys.length === 1
+          ? game.players[snake.playerKeys[0]].name
+          : snake.name;
       ctx.fillStyle = snake.color;
 
       const namePosition = {
-        right: { textAlign: 'center', yPos: headY - (gridSize / 5) },
-        left: { textAlign: 'start', yPos: headY - (gridSize / 5) },
-        up: { textAlign: 'start', yPos: headY - (gridSize / 5) },
-        down: { textAlign: 'start', yPos: headY + (gridSize * 2) },
+        right: { textAlign: "center", yPos: headY - gridSize / 5 },
+        left: { textAlign: "start", yPos: headY - gridSize / 5 },
+        up: { textAlign: "start", yPos: headY - gridSize / 5 },
+        down: { textAlign: "start", yPos: headY + gridSize * 2 },
       };
       ctx.textAlign = namePosition[snake.direction].textAlign;
       ctx.fillText(snakeName, headX, namePosition[snake.direction].yPos);
@@ -530,7 +584,14 @@ class Snake extends Component {
 
   render() {
     return (
-      <div className="phase-container" id="snakeboard" role="button" tabIndex={0} onClick={this.togglePausGame} onKeyDown={this.togglePausGame}>
+      <div
+        className="phase-container"
+        id="snakeboard"
+        role="button"
+        tabIndex={0}
+        onClick={this.togglePausGame}
+        onKeyDown={this.togglePausGame}
+      >
         <canvas />
       </div>
     );

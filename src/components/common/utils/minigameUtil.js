@@ -4,7 +4,10 @@ function isInvalidMove(keyPress, currentDirection) {
     return true;
   }
   const invalidMovment = {
-    left: 'right', right: 'left', up: 'down', down: 'up',
+    left: "right",
+    right: "left",
+    up: "down",
+    down: "up",
   };
   return invalidMovment[keyPress] === currentDirection;
 }
@@ -27,69 +30,89 @@ function getSnakesInStartingPosition(snakes, canvasSettings) {
     snake.moves = [];
     let pos;
     switch (snake.direction) {
-      case 'right':
+      case "right":
         pos = getRandomStartingPosLeft(snakes, canvasSettings.height);
-        snake.body = [{
-          x: pos.x,
-          y: pos.y,
-        }, {
-          x: pos.x - gridSize,
-          y: pos.y,
-        }, {
-          x: pos.x - (gridSize * 2),
-          y: pos.y,
-        }, {
-          x: pos.x - (gridSize * 3),
-          y: pos.y,
-        }];
+        snake.body = [
+          {
+            x: pos.x,
+            y: pos.y,
+          },
+          {
+            x: pos.x - gridSize,
+            y: pos.y,
+          },
+          {
+            x: pos.x - gridSize * 2,
+            y: pos.y,
+          },
+          {
+            x: pos.x - gridSize * 3,
+            y: pos.y,
+          },
+        ];
         break;
-      case 'left':
+      case "left":
         pos = getRandomStartingPosRight(snakes, canvasSettings);
-        snake.body = [{
-          x: pos.x,
-          y: pos.y,
-        }, {
-          x: pos.x + gridSize,
-          y: pos.y,
-        }, {
-          x: pos.x + (gridSize * 2),
-          y: pos.y,
-        }, {
-          x: pos.x + (gridSize * 3),
-          y: pos.y,
-        }];
+        snake.body = [
+          {
+            x: pos.x,
+            y: pos.y,
+          },
+          {
+            x: pos.x + gridSize,
+            y: pos.y,
+          },
+          {
+            x: pos.x + gridSize * 2,
+            y: pos.y,
+          },
+          {
+            x: pos.x + gridSize * 3,
+            y: pos.y,
+          },
+        ];
         break;
-      case 'up':
+      case "up":
         pos = getRandomStartingPosBottom(snakes, canvasSettings);
-        snake.body = [{
-          x: pos.x,
-          y: pos.y,
-        }, {
-          x: pos.x,
-          y: pos.y + gridSize,
-        }, {
-          x: pos.x,
-          y: pos.y + (gridSize * 2),
-        }, {
-          x: pos.x,
-          y: pos.y + (gridSize * 3),
-        }];
+        snake.body = [
+          {
+            x: pos.x,
+            y: pos.y,
+          },
+          {
+            x: pos.x,
+            y: pos.y + gridSize,
+          },
+          {
+            x: pos.x,
+            y: pos.y + gridSize * 2,
+          },
+          {
+            x: pos.x,
+            y: pos.y + gridSize * 3,
+          },
+        ];
         break;
-      case 'down':
+      case "down":
         pos = getRandomStartingPosTop(snakes, canvasSettings.width);
-        snake.body = [{
-          x: pos.x,
-          y: pos.y,
-        }, {
-          x: pos.x,
-          y: pos.y - gridSize,
-        }, {
-          x: pos.x,
-          y: pos.y - (gridSize * 2),
-        }, {
-          x: pos.x,
-          y: pos.y - (gridSize * 3),
-        }];
+        snake.body = [
+          {
+            x: pos.x,
+            y: pos.y,
+          },
+          {
+            x: pos.x,
+            y: pos.y - gridSize,
+          },
+          {
+            x: pos.x,
+            y: pos.y - gridSize * 2,
+          },
+          {
+            x: pos.x,
+            y: pos.y - gridSize * 3,
+          },
+        ];
         break;
       default:
         break;
@@ -100,52 +123,55 @@ function getSnakesInStartingPosition(snakes, canvasSettings) {
 }
 
 function getRandomStartingPosTop(snakes, canvasWidth) {
-  const snakesDown = snakes.filter(s => s.direction === 'down' && s.body);
-  const existingValues = [...new Set(snakesDown.map(s => s.body[0].x))];
+  const snakesDown = snakes.filter((s) => s.direction === "down" && s.body);
+  const existingValues = [...new Set(snakesDown.map((s) => s.body[0].x))];
 
   const margin = gridSize * 8;
-  const xMax = canvasWidth - (margin * 2);
+  const xMax = canvasWidth - margin * 2;
   const y = gridSize * 2;
   const x = getRandomStartingPos(xMax, margin, existingValues);
   return { x, y };
 }
 
 function getRandomStartingPosBottom(snakes, canvasSettings) {
-  const snakesDown = snakes.filter(s => s.direction === 'up' && s.body);
-  const existingValues = [...new Set(snakesDown.map(s => s.body[0].x))];
+  const snakesDown = snakes.filter((s) => s.direction === "up" && s.body);
+  const existingValues = [...new Set(snakesDown.map((s) => s.body[0].x))];
 
   const margin = gridSize * 8;
-  const xMax = canvasSettings.width - (margin * 2);
-  const y = canvasSettings.height - (gridSize * 3);
+  const xMax = canvasSettings.width - margin * 2;
+  const y = canvasSettings.height - gridSize * 3;
   const x = getRandomStartingPos(xMax, margin, existingValues);
   return { x, y };
 }
 
 function getRandomStartingPosRight(snakes, canvasSettings) {
-  const snakesDown = snakes.filter(s => s.direction === 'left' && s.body);
-  const existingValues = [...new Set(snakesDown.map(s => s.body[0].y))];
+  const snakesDown = snakes.filter((s) => s.direction === "left" && s.body);
+  const existingValues = [...new Set(snakesDown.map((s) => s.body[0].y))];
 
   const margin = gridSize * 8;
-  const yMax = canvasSettings.height - (margin * 2);
-  const x = canvasSettings.width - (gridSize * 3);
+  const yMax = canvasSettings.height - margin * 2;
+  const x = canvasSettings.width - gridSize * 3;
   const y = getRandomStartingPos(yMax, margin, existingValues);
   return { x, y };
 }
 
 function getRandomStartingPosLeft(snakes, canvasHeight) {
-  const snakesDown = snakes.filter(s => s.direction === 'right' && s.body);
-  const existingValues = [...new Set(snakesDown.map(s => s.body[0].y))];
+  const snakesDown = snakes.filter((s) => s.direction === "right" && s.body);
+  const existingValues = [...new Set(snakesDown.map((s) => s.body[0].y))];
 
   const margin = gridSize * 8;
-  const yMax = canvasHeight - (margin * 2);
+  const yMax = canvasHeight - margin * 2;
   const x = gridSize * 2;
   const y = getRandomStartingPos(yMax, margin, existingValues);
   return { x, y };
 }
 
 function getRandomStartingPos(max, margin, existingValues) {
-  const value = Math.round((Math.random() * max) / gridSize) * gridSize + margin;
-  const posTaken = existingValues.some(v => v === value || v === value - gridSize || v === value + gridSize);
+  const value =
+    Math.round((Math.random() * max) / gridSize) * gridSize + margin;
+  const posTaken = existingValues.some(
+    (v) => v === value || v === value - gridSize || v === value + gridSize
+  );
 
   if (posTaken) {
     return getRandomStartingPos(max, margin, existingValues, gridSize);
@@ -153,18 +179,22 @@ function getRandomStartingPos(max, margin, existingValues) {
   return value;
 }
 function getRandomCanvasPositionMargin(yMax, xMax) {
-  const x = Math.round((Math.random() * (xMax - (gridSize * 14))) / gridSize) * gridSize + (gridSize * 4);
-  const y = Math.round((Math.random() * (yMax - (gridSize * 2))) / gridSize) * gridSize + (gridSize * 2);
+  const x =
+    Math.round((Math.random() * (xMax - gridSize * 14)) / gridSize) * gridSize +
+    gridSize * 4;
+  const y =
+    Math.round((Math.random() * (yMax - gridSize * 2)) / gridSize) * gridSize +
+    gridSize * 2;
   return { x, y };
 }
 // denna function är inte så lätt, kan troligen förenklas
-function detectOpponentCollision(snakes, eatOpponents) {
+function detectOpponentCollision(snakes, eatOpponents, absorbAll) {
   for (let i = 0, len = snakes.length; i < len; i++) {
-    if (snakes[i].dead) {
+    const currentSnake = snakes[i];
+    if (currentSnake.dead) {
       // om den redan är död så fortsätt. t.ex. en headon så kör jag båda två till dead direkt.
       continue;
     }
-    const currentSnake = snakes[i];
     for (let j = 0; j < len; j++) {
       // om opponents är död så ska man inte kunna krocka med den. döda snakes har ju fortfarande coordinater. alt är att ta bort coordinaterna
       if (j === i || snakes[j].dead) {
@@ -173,7 +203,9 @@ function detectOpponentCollision(snakes, eatOpponents) {
       const opponentSnake = snakes[j];
       // lägga till en function där om man äter body[1] så där opponent?
       for (let k = 0, len2 = opponentSnake.body.length; k < len2; k++) {
-        const collision = opponentSnake.body[k].x === currentSnake.body[0].x && opponentSnake.body[k].y === currentSnake.body[0].y;
+        const collision =
+          opponentSnake.body[k].x === currentSnake.body[0].x &&
+          opponentSnake.body[k].y === currentSnake.body[0].y;
         if (collision) {
           if (k === 0) {
             currentSnake.dead = true;
@@ -184,8 +216,22 @@ function detectOpponentCollision(snakes, eatOpponents) {
             if (k === 1) {
               opponentSnake.dead = true;
             } else {
+              let growLen = absorbAll ? opponentSnake.body.length - k : 1;
               opponentSnake.body.length = k;
               len2 = k;
+
+              //TODO här borde jag kunna göra något likt.
+              // currentSnake.body.add.. men blir nog fult
+              //eller testa det blir dubbla body på den sista samma coordinat, när densen popas i snake.js så finns det redan en där som tar över så ser ut som den växer då??
+
+              for (let m = 0; m < growLen; m++) {
+                currentSnake.body.push({
+                  x: currentSnake.body[0].x,
+                  y: currentSnake.body[0].y,
+                });
+              }
+
+              //TODO^ den får alltså ett till huvud som följder med. och stannar kvar när tidigare huvudet popas?
 
               // snakes[j].body.length = k;
             }
@@ -207,7 +253,9 @@ function detectSelfCollision(snake) {
     return false;
   }
   // denna är nog inte lika snabb som for loopen?
-  const collision = body.slice(4).some(b => b.x === body[0].x && b.y === body[0].y);
+  const collision = body
+    .slice(4)
+    .some((b) => b.x === body[0].x && b.y === body[0].y);
   return collision;
   /*
     for (let i = 4, len = body.length; i < len; i++) {

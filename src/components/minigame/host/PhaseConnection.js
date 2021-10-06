@@ -27,7 +27,7 @@ class PhaseConnection extends Component {
     let playUrl =
       game.gametype === "golf"
         ? "https://mannfeldt.github.io/golf/?pin=" + game.gameId
-        : "https://mannfeldt.github.io/stagehoot/#/play/?pin=" + game.gameId;
+        : "https://mannfeldt.github.io/stagehoot/#/play?pin=" + game.gameId;
     // här ska jag skapa qr kod också över länken. med ?pin=xxxx
     return (
       <div className="phase-container">
