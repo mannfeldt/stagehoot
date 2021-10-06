@@ -12,7 +12,7 @@ import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 
 function fetchGame(gametype, gameId, callback) {
-  if (gametype === "golf") {
+  if (gametype === "golf" || gametype === "golfrace") {
     fireGolf
       .database()
       .ref("games")
@@ -91,7 +91,7 @@ class Host extends Component {
     // se till att inte updatera game.players...
     // game som kommer in här ska bara innehålla det som ska uppdateras.
     // updateras med gamesettings, phasechanges, currenquestionId etc
-    if (game.gametype === "golf") {
+    if (game.gametype === "golf" || game.gametype === "golfrace") {
       fireGolf
         .database()
         .ref(`games/${game.key}`)
@@ -172,7 +172,7 @@ class Host extends Component {
 
   initGameListiner(_game) {
     let gameRef;
-    if (_game.gametype === "golf") {
+    if (_game.gametype === "golf" || _game.gametype === "golfrace") {
       gameRef = fireGolf.database().ref(`games/${_game.key}`);
     } else {
       gameRef = fire.database().ref(`games/${_game.key}`);
@@ -292,6 +292,9 @@ class Host extends Component {
           <Minigame game={game} gameFunc={gameFunctions} />
         )}
         {game.gametype === "golf" && (
+          <Minigame game={game} gameFunc={gameFunctions} />
+        )}
+        {game.gametype === "golfrace" && (
           <Minigame game={game} gameFunc={gameFunctions} />
         )}
         {game.gametype === "spotify" && (

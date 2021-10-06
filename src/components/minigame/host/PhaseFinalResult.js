@@ -37,7 +37,7 @@ function loop(gametype) {
   } else {
     context.globalAlpha = 0.2;
   }
-  if (gametype === "golf") {
+  if (gametype === "golf" || gametype === "golfrace") {
     context.drawImage(golfimg, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
   } else {
     context.fillStyle = "#26262e";

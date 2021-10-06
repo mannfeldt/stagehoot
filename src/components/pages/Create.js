@@ -40,7 +40,7 @@ class Create extends Component {
     const that = this;
     // game push få ett id.
     let gameRef;
-    if (game.gametype === "golf") {
+    if (game.gametype === "golf" || game.gametype === "golfrace") {
       gameRef = fireGolf
         .database()
         .ref("/games")

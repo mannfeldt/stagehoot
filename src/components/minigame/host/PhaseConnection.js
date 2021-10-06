@@ -25,7 +25,7 @@ class PhaseConnection extends Component {
       players = Object.values(players);
     }
     let playUrl =
-      game.gametype === "golf"
+      game.gametype === "golf" || game.gametype === "golfrace"
         ? "https://mannfeldt.github.io/golf/?pin=" + game.gameId
         : "https://mannfeldt.github.io/stagehoot/#/play?pin=" + game.gameId;
     // här ska jag skapa qr kod också över länken. med ?pin=xxxx
@@ -36,7 +36,7 @@ class PhaseConnection extends Component {
             <span>Join game with Game PIN: </span>
             <span className="dynamic-text">{game.gameId}</span>
           </Typography>
-          {game.gametype === "golf" ? (
+          {game.gametype === "golf" || game.gametype === "golfrace" ? (
             <div style={{ marginTop: 30 }}>
               <QRCode value={playUrl} size={200} />
               <Typography variant="h4" style={{ marginTop: 30 }}>
