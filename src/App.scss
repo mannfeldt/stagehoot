@@ -10,6 +10,21 @@ $answer-color4: #C5E1A5;
     grid-template-rows: 1fr 1fr 1fr;
     grid-template-areas: ". up ." "left center right" ". down .";
 }
+.snake-controller-container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.snake-controller-button {
+    border: 1px solid white !important;
+    width: 50%;
+    height: 40vh;
+  }
+.snake-controller-button-fullwidth {
+    border: 1px solid white !important;
+width: 100%;
+height: 30vh;
+}
 
 .player-controlls-icon {
     font-size: 20vw !important;
