@@ -12,7 +12,7 @@ import SnakeStarting from "../snake/SnakeStarting";
 import Golf from "../golf/Golf";
 import GolfStarting from "../golf/GolfStarting";
 import SnakeSetup from "../snake/SnakeSetup";
-import GolfSetup from "../golfrace/GolfRaceSetup";
+import GolfSetup from "../golf/GolfSetup";
 import SpotifySetup from "../spotify/host/SpotifySetup";
 import SpotifyConnection from "../spotify/host/SpotifyConnection";
 import SpotifyStarting from "../spotify/host/SpotifyStarting";

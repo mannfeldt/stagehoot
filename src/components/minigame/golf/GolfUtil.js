@@ -27,13 +27,31 @@ function shuffle(a) {
 
 const ballMaterial = new p2.Material();
 
-const groundMaterial = new p2.Material();
+const fairwayMaterial = new p2.Material();
+const roughMaterial = new p2.Material();
+const greenMaterial = new p2.Material();
 
 const holeMaterial = new p2.Material();
 
-const ballGroundContact = new p2.ContactMaterial(ballMaterial, groundMaterial, {
-  friction: 1,
-  restitution: 0.5,
+//https://schteppe.github.io/p2.js/docs/classes/ContactMaterial.html
+//kolla upp vad relaxation etc är. finns fler andra också..
+const ballFairwayContact = new p2.ContactMaterial(
+  ballMaterial,
+  fairwayMaterial,
+  {
+    friction: 1.2,
+    restitution: 0.4,
+  }
+);
+
+const ballRoughContact = new p2.ContactMaterial(ballMaterial, fairwayMaterial, {
+  friction: 2,
+  restitution: 0.2,
+});
+
+const ballGreenContact = new p2.ContactMaterial(ballMaterial, fairwayMaterial, {
+  friction: 0.8,
+  restitution: 0.6,
 });
 
 const ballHoleContact = new p2.ContactMaterial(ballMaterial, holeMaterial, {
@@ -52,7 +70,10 @@ export function createWorld() {
 
   world.sleepMode = p2.World.BODY_SLEEPING;
 
-  world.addContactMaterial(ballGroundContact);
+  world.addContactMaterial(ballFairwayContact);
+  world.addContactMaterial(ballRoughContact);
+  world.addContactMaterial(ballGreenContact);
+
   world.addContactMaterial(ballHoleContact);
 
   return world;
@@ -258,6 +279,8 @@ export function createGround(level) {
   ]);
 
   const grounds = [vertsBeforeHole, vertsHole, vertsAfterHole].map((verts) => {
+    //TODO den sista i vertsBeforeHole och första i vertsAfterHole ska vara greenMaterial
+    //TODO hur får jag in kopplingen mellan shape och level.pointMaterials?
     const body = new p2.Body({
       mass: 0,
     });
@@ -268,7 +291,7 @@ export function createGround(level) {
       if (verts === vertsHole) {
         shape.material = holeMaterial;
       } else {
-        shape.material = groundMaterial;
+        shape.material = fairwayMaterial;
       }
 
       shape.collisionGroup = GROUND_GROUP;
@@ -421,6 +444,8 @@ export function levelGen(width, height, test) {
   const time = parSetting.time[par];
 
   const points = [];
+  const pointMaterials = [];
+
   let spawnX;
   let spawnY;
   let holeX;
@@ -446,7 +471,7 @@ export function levelGen(width, height, test) {
     }
 
     if (idx === 0) {
-      y = randInt(height - 150, height - 20);
+      y = randInt(Math.max(height - 190, 50), height - 60);
     } else {
       const prevY = points[idx - 1][1];
 
@@ -470,7 +495,22 @@ export function levelGen(width, height, test) {
         }
 
         y = randInt(boundLow, boundHigh);
+        if (y < boundLow + 30) {
+          y = randInt(boundLow, boundHigh);
+        }
+        if (y < boundLow + 30) {
+          y = randInt(boundLow, boundHigh);
+        }
       }
+    }
+    if (idx === spawnSegment) {
+      pointMaterials.push("fairway");
+    } else if (idx === holeSegment) {
+      pointMaterials.push("green");
+    } else if (idx > holeSegment) {
+      pointMaterials.push("rough");
+    } else {
+      pointMaterials.push(randInt(1, 2) === 1 ? "rough" : "fairway");
     }
 
     if (idx === spawnSegment) {
@@ -495,6 +535,7 @@ export function levelGen(width, height, test) {
 
   const level = {
     points,
+    pointMaterials,
     hole,
     spawn,
     color,

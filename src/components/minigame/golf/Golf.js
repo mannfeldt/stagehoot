@@ -466,9 +466,9 @@ class Golf extends Component {
     ctx.textAlign = "right";
     ctx.fillText(`pin: ${game.gameId}`, canvasWidth - 20, 24);
     ctx.textAlign = "left";
-
     const timeRemaining = Math.floor((nextLevelTimer - Date.now()) / 1000);
     ctx.fillText(timeRemaining, canvasWidth / 2, 24);
+
     for (let i = 0; i < leaderboard.length; i++) {
       const data = leaderboard[i];
       ctx.fillText(
@@ -941,7 +941,7 @@ class Golf extends Component {
 
   initControllerListener(player) {
     const { game } = this.props;
-    const { balls } = this.state;
+
     const swingRef = fireGolf
       .database()
       .ref(`/games/${game.key}/players/${player.key}/swing`);
@@ -957,9 +957,18 @@ class Golf extends Component {
     const that = this;
     swingRef.on("value", (snapshot) => {
       const { game: _game } = that.props;
+      const { canvasWidth, canvasHeight } = that.state;
       const currentPlayer = _game.players[player.key];
       const swingData = snapshot.val();
       if (swingData) {
+        //TODO testa detta på bigscreen..
+        let bigScreenFactor = Math.max(
+          0,
+          canvasWidth / 20000 + canvasHeight / 20000 - 0.1
+        );
+        swingData.x = Math.round(swingData.x * (1 + bigScreenFactor));
+        swingData.y = Math.round(swingData.y * (1 + bigScreenFactor));
+
         that.swing(swingData, currentPlayer.ballIndex);
       } else {
         console.log("move error");

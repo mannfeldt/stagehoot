@@ -387,6 +387,14 @@ class GolfRace extends Component {
     const level = util.levelGen(canvasWidth, canvasHeight, false);
     const world = util.createWorld();
 
+    //TODO här skapas marken från level.points det görs i init alltså.. och aldrig igen?
+    //TODO vad behöver göras för att ta bort och lägga till en bit? ha en trigger för när en bit behöver bytas.
+    //TODO då tas den bort till vänster. en ny bit genereras till höger och world.addBody körs (removeBody också?)
+    //TODO skapa en enkel variant av createGround som är "updateground" den ska inte bry sig om hole..
+    //TODO denna updateground kanske behöver göras om och om igen när marken flyttar sig? nej det är ju samma som boll flyttar sig..
+    //TODO TODO::: en metod som tar bort en piece vänster och lägger till en till höger (räkna att den pointen blir valid som andra points valideras vid initgenerering)
+    //TODO en enkel variant av createGround och world.addbody/removebody behöver köras.
+    //createground ser ut att vara reobde av ett lvel.hole..?
     const groundBodies = util.createGround(level);
 
     for (const body of groundBodies) {
