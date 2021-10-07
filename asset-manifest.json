@@ -1,10 +1,10 @@
 {
-  "main.css": "/stagehoot/static/css/main.eb71254a.chunk.css",
-  "main.js": "/stagehoot/static/js/main.a16bab11.chunk.js",
-  "main.js.map": "/stagehoot/static/js/main.a16bab11.chunk.js.map",
+  "main.css": "/stagehoot/static/css/main.b0f384ce.chunk.css",
+  "main.js": "/stagehoot/static/js/main.d899a172.chunk.js",
+  "main.js.map": "/stagehoot/static/js/main.d899a172.chunk.js.map",
   "static/css/1.b02be1d4.chunk.css": "/stagehoot/static/css/1.b02be1d4.chunk.css",
-  "static/js/1.d4f97443.chunk.js": "/stagehoot/static/js/1.d4f97443.chunk.js",
-  "static/js/1.d4f97443.chunk.js.map": "/stagehoot/static/js/1.d4f97443.chunk.js.map",
+  "static/js/1.5ddeb735.chunk.js": "/stagehoot/static/js/1.5ddeb735.chunk.js",
+  "static/js/1.5ddeb735.chunk.js.map": "/stagehoot/static/js/1.5ddeb735.chunk.js.map",
   "runtime~main.js": "/stagehoot/static/js/runtime~main.a27241d7.js",
   "runtime~main.js.map": "/stagehoot/static/js/runtime~main.a27241d7.js.map",
   "static/media/golfwood.wav": "/stagehoot/static/media/golfwood.f1bbe86f.wav",
@@ -17,9 +17,9 @@
   "static/media/golfputt.wav": "/stagehoot/static/media/golfputt.464ec7d0.wav",
   "static/media/golfscore.wav": "/stagehoot/static/media/golfscore.f6affd73.wav",
   "static/media/golfwood2.wav": "/stagehoot/static/media/golfwood2.ca14b160.wav",
+  "static/css/main.b0f384ce.chunk.css.map": "/stagehoot/static/css/main.b0f384ce.chunk.css.map",
   "static/css/1.b02be1d4.chunk.css.map": "/stagehoot/static/css/1.b02be1d4.chunk.css.map",
-  "static/css/main.eb71254a.chunk.css.map": "/stagehoot/static/css/main.eb71254a.chunk.css.map",
   "index.html": "/stagehoot/index.html",
-  "precache-manifest.ce22a58f835b475ffc57299ed4c22e9d.js": "/stagehoot/precache-manifest.ce22a58f835b475ffc57299ed4c22e9d.js",
+  "precache-manifest.27599176e3ac6b442e7b06f5e409263a.js": "/stagehoot/precache-manifest.27599176e3ac6b442e7b06f5e409263a.js",
   "service-worker.js": "/stagehoot/service-worker.js"
 }
