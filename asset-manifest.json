@@ -1,7 +1,7 @@
 {
   "main.css": "/stagehoot/static/css/main.b0f384ce.chunk.css",
-  "main.js": "/stagehoot/static/js/main.d899a172.chunk.js",
-  "main.js.map": "/stagehoot/static/js/main.d899a172.chunk.js.map",
+  "main.js": "/stagehoot/static/js/main.5af50bef.chunk.js",
+  "main.js.map": "/stagehoot/static/js/main.5af50bef.chunk.js.map",
   "static/css/1.b02be1d4.chunk.css": "/stagehoot/static/css/1.b02be1d4.chunk.css",
   "static/js/1.5ddeb735.chunk.js": "/stagehoot/static/js/1.5ddeb735.chunk.js",
   "static/js/1.5ddeb735.chunk.js.map": "/stagehoot/static/js/1.5ddeb735.chunk.js.map",
@@ -17,9 +17,9 @@
   "static/media/golfputt.wav": "/stagehoot/static/media/golfputt.464ec7d0.wav",
   "static/media/golfscore.wav": "/stagehoot/static/media/golfscore.f6affd73.wav",
   "static/media/golfwood2.wav": "/stagehoot/static/media/golfwood2.ca14b160.wav",
-  "static/css/main.b0f384ce.chunk.css.map": "/stagehoot/static/css/main.b0f384ce.chunk.css.map",
   "static/css/1.b02be1d4.chunk.css.map": "/stagehoot/static/css/1.b02be1d4.chunk.css.map",
+  "static/css/main.b0f384ce.chunk.css.map": "/stagehoot/static/css/main.b0f384ce.chunk.css.map",
   "index.html": "/stagehoot/index.html",
-  "precache-manifest.27599176e3ac6b442e7b06f5e409263a.js": "/stagehoot/precache-manifest.27599176e3ac6b442e7b06f5e409263a.js",
+  "precache-manifest.afc0ecf41b8e12fb45f80e563e8ed3a5.js": "/stagehoot/precache-manifest.afc0ecf41b8e12fb45f80e563e8ed3a5.js",
   "service-worker.js": "/stagehoot/service-worker.js"
 }
